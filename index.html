@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ruti">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Ruti — Rutineapp</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#F7F1E3;overscroll-behavior:none}
+@keyframes ruti_brush{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(10deg)}}
+@keyframes ruti_bubble{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-18px) scale(0.4)}}
+@keyframes ruti_drop{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(8px)}}
+@keyframes ruti_steam{0%,100%{transform:translateY(0);opacity:0.55}50%{transform:translateY(-9px);opacity:0.15}}
+@keyframes ruti_bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes ruti_shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
+@keyframes ruti_write{0%,100%{transform:translate(0,0)}50%{transform:translate(5px,3px)}}
+@keyframes ruti_star{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.25;transform:scale(0.6)}}
+@keyframes ruti_zzz{0%{transform:translate(0,0);opacity:1}100%{transform:translate(12px,-16px);opacity:0}}
+@keyframes ruti_sweep{0%,100%{transform:rotate(-22deg)}50%{transform:rotate(22deg)}}
+@keyframes ruti_note{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-6px) rotate(8deg)}}
+@keyframes ruti_sun{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes ruti_confetti{0%{transform:translateY(-10px) rotate(0);opacity:1}100%{transform:translateY(105vh) rotate(720deg);opacity:0}}
+@keyframes ruti_fadeIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes ruti_check{0%{stroke-dashoffset:30}100%{stroke-dashoffset:0}}
+@keyframes ruti_pop{0%{transform:scale(0.8);opacity:0}100%{transform:scale(1);opacity:1}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef,useCallback}=React;
+
+// ── Storage ──────────────────────────────────────────────────────────────────
+const STORAGE_KEY='rutine2:data';
+const stor={
+  get:()=>{try{if(window.storage&&window.storage.get){const v=window.storage.get(STORAGE_KEY);return v?(typeof v==='string'?JSON.parse(v):v):null;}const v=localStorage.getItem(STORAGE_KEY);return v?JSON.parse(v):null;}catch{return null;}},
+  set:(d)=>{try{const s=JSON.stringify(d);if(window.storage&&window.storage.set){window.storage.set(STORAGE_KEY,s);}else{localStorage.setItem(STORAGE_KEY,s);}}catch{}}
+};
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const uuid=()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
+const today=()=>new Date().toISOString().slice(0,10);
+
+const BADGES=[
+  {min:0,max:99,icon:'⭐',label:'Stjerne'},
+  {min:100,max:299,icon:'🥈',label:'Sølv'},
+  {min:300,max:599,icon:'🥇',label:'Guld'},
+  {min:600,max:999,icon:'🏆',label:'Trofæ'},
+  {min:1000,max:Infinity,icon:'💎',label:'Diamant'},
+];
+const getBadge=(pts)=>BADGES.find(b=>pts>=b.min&&pts<=b.max)||BADGES[0];
+
+const ROUTINE_LABELS={morning:'Morgen',afternoon:'Eftermiddag',evening:'Aften'};
+const ROUTINE_ICONS={morning:'🌅',afternoon:'☀️',evening:'🌙'};
+const ROUTINE_COLORS={morning:'#FFB347',afternoon:'#4ECDC4',evening:'#A29BFE'};
+const CHILD_COLORS=['#FF6B6B','#4ECDC4','#FFE66D','#A29BFE','#FD79A8','#6C5CE7','#00B894','#FDCB6E'];
+const CHILD_AVATARS=['🦁','🐼','🦊','🐨','🐸','🦋','🐬','🦄','🐙','🦖','🐠','🦝'];
+
+const defaultData=()=>({
+  children:[{
+    id:uuid(),name:'Sofie',avatar:'🦋',color:'#FF6B6B',points:0,totalPoints:0,
+    routines:{
+      morning:[
+        {id:uuid(),text:'Børst tænder',illustration:'teeth',pointValue:5,done:false},
+        {id:uuid(),text:'Vask ansigt',illustration:'face',pointValue:5,done:false},
+        {id:uuid(),text:'Spis morgenmad',illustration:'breakfast',pointValue:10,done:false},
+        {id:uuid(),text:'Tag tøj på',illustration:'clothes',pointValue:5,done:false},
+      ],
+      afternoon:[
+        {id:uuid(),text:'Lav lektier',illustration:'homework',pointValue:15,done:false},
+        {id:uuid(),text:'Ryd op',illustration:'tidy',pointValue:10,done:false},
+      ],
+      evening:[
+        {id:uuid(),text:'Tag bad',illustration:'bath',pointValue:10,done:false},
+        {id:uuid(),text:'Læs bog',illustration:'reading',pointValue:10,done:false},
+        {id:uuid(),text:'Børst tænder (aften)',illustration:'teeth',pointValue:5,done:false},
+      ],
+    },
+    history:[],
+  }],
+  rewards:[
+    {id:uuid(),text:'30 min skærmtid ekstra',cost:50,icon:'📺'},
+    {id:uuid(),text:'Vælg aftensmad',cost:80,icon:'🍕'},
+    {id:uuid(),text:'Sen sengetid (+30 min)',cost:100,icon:'🌙'},
+    {id:uuid(),text:'Udflugtsdag',cost:200,icon:'🎡'},
+  ],
+  pin:'1234',
+  lastReset:today(),
+});
+
+// ── Illustrations ─────────────────────────────────────────────────────────────
+const IL={
+  teeth:(z=60)=>(
+    <svg width={z} height={z} viewBox="0 0 60 60" fill="none">
+      <rect x="8" y="22" width="24" height="8" rx="4" fill="#4ECDC4"/>
+      <rect x="10" y="26" width="20" height="22" rx="5" fill="#fff" stroke="#e0e0e0" strokeWidth="1.5"/>
+      <g style={{animation:'ruti_brush 0.7s ease-in-out infinite',transformOrigin:'20px 27px'}}>
+        <rect x="12" y="23" width="16" height="5" rx="2.5" fill="#fff"/>
+        {[13,16,19,22].map(x=><rect key={x} x={x} y="24" width="2" height="3.5" rx="1" fill="#A29BFE"/>)}
+      </g>
+      <circle cx="40" cy="22" r="3.5" fill="#b8f0ff" style={{animation:'ruti_bubble 1.1s ease-out infinite'}}/>
+      <circle cx="46" cy="16" r="2.5" fill="#b8f0ff" style={{animation:'ruti_bubble 1.1s 0.35s ease-out infinite'}}/>
+      <circle cx="37" cy="13" r="2" fill="#b8f0ff" style={{animation:'ruti_bubble 1.1s 0.7s ease-out infinite'}}/>
+    </svg>
+  ),
+  face:(z=60)=>(
+    <svg width={z} height={z} viewBox="0 0 60 60" fill="none">
+      <circle cx="30" cy="36" r="18" fill="#FFDAB9"/>
+      <circle cx="23" cy="33" r="3" fill="#fff"/><circle cx="23" cy="33" r="1.5" fill="#333"/>
+      <circle cx="37" cy="33" r="3" fill="#fff"/><circle cx="37" cy="33" r="1.5" fill="#333"/>
+      <path d="M24 43 Q30 48 36 43" stroke="#e88" strokeWidth="2" strokeLinecap="round" fill="none"/>
+      {[22,30,38].map((x,i)=>(
+        <line key={x} x1={x} y1="10" x2={x} y2="20" stroke="#4ECDC4" strokeWidth="2.5" strokeLinecap="round"
+          style={{animation:`ruti_drop 1s ${i*0.3}s ease-in infinite`}}/>
+      ))}
+    </svg>
+  ),
+  breakfast:(z=60)=>(
+    <svg width={z} height={z} viewBox="0 0 60 60" fill="none">
+      <ellipse cx="30" cy="44" rx="21" ry="8" fill="#DEB887"/>
+      <ellipse cx="30" cy="40" rx="17" ry="6" fill="#F5DEB3"/>
+      <circle cx="25" cy="39" r="3" fill="#FF6B6B"/><circle cx="35" cy="38" r="2.5" fill="#FFB347"/><circle cx="30" cy="42" r="2" fill="#FF6B6B"/>
+      {[25,30,35].map((x,i)=>(
+        <path key={x} d={`M${x} 28 Q${x+1} 20 ${x+2} 28`} stroke="#ccc" strokeWidth="1.5" fill="none"
+          style={{animation:`ruti_steam 1.4s ${i*0.45}s ease-in-out infinite`}}/>
+      ))}
+    </svg>
+  ),
+  clothes:(z=60)=>(
+    <svg width={z} height={z} viewBox="0 0 60 60" fill="none">
+      <g style={{animation:'ruti_bounce 1.5s ease-in-out infinite'}}>
+        <path d="M14 20 L7 32 L18 29 L18 52 L42 52 L42 29 L53 32 L46 20 L38 14 Q30 20 22 14Z" fill="#4ECDC4"/>
+        <path d="M22 14 Q30 20 38 14 L38 24 Q30 30 22 24Z" fill="#3BBDB4"/>
+      </g>
+    </svg>
+  ),
+  backpack:(z=60)=>(
+    <svg width={z} height={z} viewBox="0 0 60 60" fill="none">
+      <g style={{animation:'ruti_shake 2s ease-in-out infinite'}}>
+        <rect x="12" y="20" width="36" height="34" rx="8" fill="#A29BFE"/>
+        <rect x="20" y="13" width="20" height="12" rx="6" fill="#6C5CE7"/>
+        <rect x="20" y="30" width="20" height="14" rx="4" fill="#8C7EFE" stroke="#6C5CE7" strokeWidth="1.5"/>
+        <circle cx="30" cy="37" r="2.5" fill="#A29BFE"/>
+        <rect x="7" y="24" width="6" height="18" rx="3" fill="#6C5CE7"/>
+        <rect x="47" y="24" width="6" height="18" rx="3" fill="#6C5CE7"/>
+      </g>
+    </svg>
+  ),
+  homework:(z=60)=>(
+    <svg width={z} height={z} viewBox="0 0 60 60" fill="none">
+      <rect x="10" y="8" width="38" height="48" rx="4" fill="#fff" stroke="#ddd" strokeWidth="2"/>
+      {[20,28,36].map(y=><line key={y} x1="17" y1={y} x2="43" y2={y} stroke="#eee" strokeWidth="2"/>)}
+      <line x1="17" y1="44" x2="33" y2="44" stroke="#eee" strokeWidth="2"/>
+      <g style={{animation:'ruti_write 0.8s ease-in-out infinite',transformOrigin:'38px 46px'}}>
+        <rect x="35" y="38" width="6" height="16" rx="2" fill="#FFB347" transform="rotate(-28 38 46)"/>
+        <polygon points="35,52 41,52 38,59" fill="#FFDAB9" transform="rotate(-28 38 55)"/>
+        <rect x="36" y="38" width="4" height="3" rx="1" fill="#999" transform="rotate(-28 38 39.5)"/>
+      </g>
+    </svg>
+  ),
+  reading:(z=60)=>(
+    <svg width={z} height={z} viewBox="0 0 60 60" fill="none">
+      <path d="M8 16 Q30 11 52 16 L52 50 Q30 45 8 50Z" fill="#FF6B6B"/>
+      <path d="M30 14 L30 48" stroke="#c44" strokeWidth="2"/>
+      <path d="M10 18 Q20 14 30 16 L30 47 Q20 43 10 48Z" fill="#fff" opacity="0.9"/>
+      <path d="M30 16 Q40 14 50 18 L50 48 Q40 43 30 47Z" fill="#FFE4E1"/>
+      <line x1="34" y1="23" x2="46" y2="23" stroke="#ddd" strokeWidth="1.5"/>
+      <line x1="34" y1="29" x2="46" y2="29" stroke="#ddd" strokeWidth="1.5"/>
+      <line x1="34" y1="35" x2="42" y2="35" stroke="#ddd" strokeWidth="1.5"/>
+    </svg>
+  ),
+  dinner:(z=60)=>(
+    <svg width={z} height={z} viewBox="0 0 60 60" fill="none">
+      <circle cx="30" cy="34" r="19" fill="#fff" stroke="#eee" strokeWidth="2"/>
+      <circle cx="30" cy="34" r="14" fill="#FFF0E0"/>
+      <ellipse cx="30" cy="34" rx="8" ry="5" fill="#FF6B6B"/>
+      <line x1="8" y1="15" x2="8" y2="53" stroke="#aaa" strokeWidth="2.5" strokeLinecap="round"/>
+      <line x1="5" y1="19" x2="5" y2="29" stroke="#aaa" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="11" y1="19" x2="11" y2="29" stroke="#aaa" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M52 15 Q52 26 50 29 Q53 31 53 53" stroke="#aaa" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+    </svg>
+  ),
+  bath:(z=60)=>(
+    <svg width={z} height={z} viewBox="0 0 60 60" fill="none">
+      <rect x="5" y="32" width="50" height="18" rx="5" fill="#4ECDC4"/>
+      <rect x="5" y="37" width="50" height="13" rx="4" fill="#74E0D4"/>
+      <path d="M8 41 Q15 37 22 41 Q29 45 36 41 Q43 37 52 41" stroke="#fff" strokeWidth="2" fill="none" opacity="0.7"
+        style={{animation:'ruti_bounce 1.8s ease-in-out infinite'}}/>
+      <rect x="8" y="22" width="6" height="12" rx="2" fill="#ccc"/>
+      <rect x="8" y="18" width="18" height="6" rx="2" fill="#ddd"/>
+      <circle cx="12" cy="17" r="3" fill="#FF6B6B"/>
+      <circle cx="20" cy="17" r="3" fill="#4ECDC4"/>
+    </svg>
+  ),
+  pyjamas:(z=60)=>(
+    <svg width={z} height={z} viewBox="0 0 60 60" fill="none">
+      <path d="M14 20 L8 30 L19 28 L19 54 L41 54 L41 28 L52 30 L46 20 L38 14 Q30 20 22 14Z" fill="#A29BFE"/>
+      <path d="M22 14 Q30 20 38 14 L38 22 Q30 28 22 22Z" fill="#8A7BEE"/>
+      {[0,1,2,3].map(i=>(
+        <path key={i} d={`M${20+i*6} 36 Q${22+i*6} 33 ${24+i*6} 36`} stroke="#6C5CE7" strokeWidth="1.5" fill="none"/>
+      ))}
+      <circle cx="46" cy="11" r="3" fill="#FFE66D" style={{animation:'ruti_star 1.4s ease-in-out infinite'}}/>
+      <circle cx="52" cy="19" r="2" fill="#FFE66D" style={{animation:'ruti_star 1.4s 0.5s ease-in-out infinite'}}/>
+      <circle cx="48" cy="27" r="2.5" fill="#FFE66D" style={{animation:'ruti_star 1.4s 1s ease-in-out infinite'}}/>
+    </svg>
+  ),
+  sleep:(z=60)=>(
+    <svg width={z} height={z} viewBox="0 0 60 60" fill="none">
+      <path d="M14 30 Q14 14 30 11 Q19 20 21 33 Q24 46 40 46 Q32 53 20 47 Q9 40 14 30Z" fill="#FFE66D"/>
+      {[{x:38,y:22,s:13,d:0},{x:44,y:14,s:11,d:0.7},{x:50,y:8,s:9,d:1.4}].map(({x,y,s,d},i)=>(
+        <text key={i} x={x} y={y} fontSize={s} fill="#A29BFE" fontWeight="bold"
+          style={{animation:`ruti_zzz 2s ${d}s ease-out infinite`,fontFamily:'Arial'}}>z</text>
+      ))}
+    </svg>
+  ),
+  tidy:(z=60)=>(
+    <svg width={z} height={z} viewBox="0 0 60 60" fill="none">
+      <g style={{animation:'ruti_sweep 1s ease-in-out infinite',transformOrigin:'30px 52px'}}>
+        <rect x="28" y="8" width="4" height="36" rx="2" fill="#DEB887"/>
+        <path d="M14 44 Q30 40 46 44 Q41 56 19 56Z" fill="#A29BFE"/>
+      </g>
+      <circle cx="11" cy="54" r="3" fill="#FFE66D" opacity="0.8"/>
+      <circle cx="49" cy="53" r="2" fill="#FF6B6B" opacity="0.7"/>
+      <circle cx="20" cy="56" r="2.5" fill="#4ECDC4" opacity="0.6"/>
+    </svg>
+  ),
+  exercise:(z=60)=>(
+    <svg width={z} height={z} viewBox="0 0 60 60" fill="none">
+      <g style={{animation:'ruti_shake 0.5s ease-in-out infinite'}}>
+        <circle cx="32" cy="11" r="7" fill="#FFDAB9"/>
+        <line x1="32" y1="18" x2="32" y2="34" stroke="#FF6B6B" strokeWidth="3" strokeLinecap="round"/>
+        <line x1="32" y1="24" x2="21" y2="31" stroke="#FF6B6B" strokeWidth="2.5" strokeLinecap="round"/>
+        <line x1="32" y1="24" x2="43" y2="19" stroke="#FF6B6B" strokeWidth="2.5" strokeLinecap="round"/>
+        <line x1="32" y1="34" x2="22" y2="48" stroke="#FF6B6B" strokeWidth="2.5" strokeLinecap="round"/>
+        <line x1="32" y1="34" x2="42" y2="47" stroke="#FF6B6B" strokeWidth="2.5" strokeLinecap="round"/>
+      </g>
+    </svg>
+  ),
+  music:(z=60)=>(
+    <svg width={z} height={z} viewBox="0 0 60 60" fill="none">
+      <g style={{animation:'ruti_note 1.1s ease-in-out infinite'}}>
+        <circle cx="20" cy="44" r="7" fill="#FF6B6B"/>
+        <rect x="26" y="18" width="3" height="28" fill="#FF6B6B"/>
+        <path d="M29 18 L47 14 L47 26 L29 30Z" fill="#FF6B6B"/>
+      </g>
+      <g style={{animation:'ruti_note 1.1s 0.55s ease-in-out infinite'}}>
+        <circle cx="41" cy="48" r="5" fill="#FFB347"/>
+        <rect x="46" y="29" width="2.5" height="21" fill="#FFB347"/>
+        <path d="M48.5 29 L57 26 L57 34 L48.5 38Z" fill="#FFB347"/>
+      </g>
+    </svg>
+  ),
+  outdoor:(z=60)=>(
+    <svg width={z} height={z} viewBox="0 0 60 60" fill="none">
+      <circle cx="30" cy="27" r="12" fill="#FFE66D"/>
+      <g style={{animation:'ruti_sun 7s linear infinite',transformOrigin:'30px 27px'}}>
+        {[0,45,90,135,180,225,270,315].map(a=>{
+          const r=a*Math.PI/180;
+          return <line key={a} x1={30+14*Math.cos(r)} y1={27+14*Math.sin(r)} x2={30+21*Math.cos(r)} y2={27+21*Math.sin(r)} stroke="#FFE66D" strokeWidth="3" strokeLinecap="round"/>;
+        })}
+      </g>
+      <path d="M4 50 Q11 41 19 50 Q27 41 35 50 Q43 41 56 50" stroke="#00B894" strokeWidth="4" fill="none" strokeLinecap="round"/>
+    </svg>
+  ),
+};
+
+const IL_KEYS=Object.keys(IL);
+const IL_NAMES={teeth:'Tænder',face:'Ansigt',breakfast:'Morgenmad',clothes:'Tøj',backpack:'Rygsæk',homework:'Lektier',reading:'Læsning',dinner:'Aftensmad',bath:'Bad',pyjamas:'Pyjamas',sleep:'Sove',tidy:'Rydde op',exercise:'Motion',music:'Musik',outdoor:'Udeliv'};
+
+// ── Styles ───────────────────────────────────────────────────────────────────
+const s={
+  app:{minHeight:'100vh',background:'#F7F1E3',fontFamily:"'Segoe UI',Arial,sans-serif"},
+  header:{background:'#FF6B6B',color:'#fff',padding:'14px 18px',display:'flex',alignItems:'center',justifyContent:'space-between',boxShadow:'0 2px 10px rgba(0,0,0,0.18)'},
+  btn:{border:'none',borderRadius:12,padding:'10px 18px',cursor:'pointer',fontWeight:600,fontSize:15,transition:'opacity 0.15s, transform 0.1s',touchAction:'manipulation',WebkitTapHighlightColor:'transparent'},
+  card:{background:'#fff',borderRadius:20,padding:20,boxShadow:'0 2px 14px rgba(0,0,0,0.07)'},
+  input:{border:'2px solid #eee',borderRadius:10,padding:'10px 14px',fontSize:15,outline:'none',width:'100%',fontFamily:'inherit'},
+  label:{fontSize:12,fontWeight:700,color:'#999',textTransform:'uppercase',letterSpacing:0.6,marginBottom:2},
+  h2:{fontSize:20,fontWeight:700,color:'#2c3e50'},
+  h3:{fontSize:16,fontWeight:700,color:'#2c3e50'},
+};
+
+// ── IllustrationPicker ────────────────────────────────────────────────────────
+function IllustrationPicker({selected,onSelect}){
+  return(
+    <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:8}}>
+      {IL_KEYS.map(k=>(
+        <div key={k} onClick={()=>onSelect(k)} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4,padding:8,borderRadius:12,cursor:'pointer',border:`2px solid ${selected===k?'#FF6B6B':'transparent'}`,background:selected===k?'#FFF0EE':'#f8f8f8',transition:'all 0.15s'}}>
+          {IL[k](34)}
+          <span style={{fontSize:9,color:'#777',textAlign:'center',lineHeight:1.2}}>{IL_NAMES[k]}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── PinPad ───────────────────────────────────────────────────────────────────
+function PinPad({mode='verify',storedPin,onVerify,onSet}){
+  const [digits,setDigits]=useState('');
+  const [confirm,setConfirm]=useState('');
+  const [step,setStep]=useState(1);
+  const [err,setErr]=useState('');
+
+  const press=(d)=>{
+    setErr('');
+    if(d==='del'){step===1?setDigits(p=>p.slice(0,-1)):setConfirm(p=>p.slice(0,-1));return;}
+    if(step===1&&digits.length>=4)return;
+    if(step===2&&confirm.length>=4)return;
+    if(step===1){
+      const next=digits+d;
+      setDigits(next);
+      if(next.length===4){
+        if(mode==='verify'){
+          if(next===storedPin){setTimeout(()=>onVerify(),200);}
+          else{setTimeout(()=>{setErr('Forkert PIN — prøv igen');setDigits('');},300);}
+        }else{setStep(2);}
+      }
+    }else{
+      const next=confirm+d;
+      setConfirm(next);
+      if(next.length===4){
+        if(next===digits){setTimeout(()=>onSet(next),200);}
+        else{setTimeout(()=>{setErr('PIN-koderne matcher ikke');setDigits('');setConfirm('');setStep(1);},300);}
+      }
+    }
+  };
+
+  const cur=step===1?digits:confirm;
+  const prompt=mode==='verify'?'Indtast PIN-kode':step===1?'Vælg ny PIN-kode':'Bekræft ny PIN-kode';
+  return(
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:20,padding:'10px 0'}}>
+      <p style={{fontSize:16,fontWeight:600,color:'#555'}}>{prompt}</p>
+      <div style={{display:'flex',gap:14}}>
+        {[0,1,2,3].map(i=>(
+          <div key={i} style={{width:18,height:18,borderRadius:'50%',background:cur.length>i?'#FF6B6B':'#e0e0e0',transition:'background 0.15s'}}/>
+        ))}
+      </div>
+      {err&&<p style={{color:'#e74c3c',fontSize:13,textAlign:'center'}}>{err}</p>}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(3,72px)',gap:10}}>
+        {[1,2,3,4,5,6,7,8,9].map(d=>(
+          <button key={d} onClick={()=>press(String(d))} style={{...s.btn,width:72,height:72,fontSize:26,fontWeight:700,background:'#fff',border:'2px solid #eee',borderRadius:16,color:'#2c3e50'}}>{d}</button>
+        ))}
+        <div/>
+        <button onClick={()=>press('0')} style={{...s.btn,width:72,height:72,fontSize:26,fontWeight:700,background:'#fff',border:'2px solid #eee',borderRadius:16,color:'#2c3e50'}}>0</button>
+        <button onClick={()=>press('del')} style={{...s.btn,width:72,height:72,fontSize:22,background:'#fff',border:'2px solid #eee',borderRadius:16,color:'#e74c3c'}}>⌫</button>
+      </div>
+    </div>
+  );
+}
+
+// ── Modal ────────────────────────────────────────────────────────────────────
+function Modal({children,onClose,title,narrow}){
+  return(
+    <div onClick={e=>{if(e.target===e.currentTarget)onClose();}} style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.52)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000,padding:16}}>
+      <div style={{background:'#fff',borderRadius:24,width:'100%',maxWidth:narrow?390:570,maxHeight:'90vh',overflow:'auto',padding:24,animation:'ruti_fadeIn 0.2s ease-out'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:18}}>
+          {title&&<h2 style={s.h2}>{title}</h2>}
+          <button onClick={onClose} style={{...s.btn,marginLeft:'auto',padding:'6px 14px',background:'#f0f0f0',color:'#666',fontSize:14,borderRadius:10}}>✕</button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ── Confetti ─────────────────────────────────────────────────────────────────
+function Confetti(){
+  const pieces=Array.from({length:65},(_,i)=>({
+    id:i,x:Math.random()*100,
+    color:['#FF6B6B','#4ECDC4','#FFE66D','#A29BFE','#FD79A8','#00B894','#FDCB6E'][i%7],
+    delay:Math.random()*2,dur:2+Math.random()*2.5,
+    size:5+Math.random()*9,shape:Math.random()>0.4?'rect':'circle',
+  }));
+  return(
+    <div style={{position:'fixed',inset:0,pointerEvents:'none',zIndex:999,overflow:'hidden'}}>
+      {pieces.map(p=>(
+        <div key={p.id} style={{position:'absolute',left:`${p.x}%`,top:-15,width:p.size,height:p.size,background:p.color,borderRadius:p.shape==='circle'?'50%':3,animation:`ruti_confetti ${p.dur}s ${p.delay}s ease-in both`}}/>
+      ))}
+    </div>
+  );
+}
+
+// ── ProgressBar ───────────────────────────────────────────────────────────────
+function ProgressBar({value,max,color='#FF6B6B',height=10}){
+  const pct=max>0?Math.min(100,Math.round(value/max*100)):0;
+  return(
+    <div style={{background:'#f0f0f0',borderRadius:height,height,overflow:'hidden',width:'100%'}}>
+      <div style={{width:`${pct}%`,height:'100%',background:color,borderRadius:height,transition:'width 0.5s ease'}}/>
+    </div>
+  );
+}
+
+// ── WeeklyChart ───────────────────────────────────────────────────────────────
+function WeeklyChart({child}){
+  const DAY_NAMES=['Man','Tir','Ons','Tor','Fre','Lør','Søn'];
+  const t=new Date();
+  const week=Array.from({length:7},(_,i)=>{
+    const d=new Date(t);d.setDate(t.getDate()-6+i);
+    const key=d.toISOString().slice(0,10);
+    const h=child.history.find(x=>x.date===key);
+    const dow=d.getDay();
+    return{label:DAY_NAMES[dow===0?6:dow-1],pts:h?h.points:0,isToday:key===today()};
+  });
+  const maxPts=Math.max(...week.map(w=>w.pts),1);
+  return(
+    <div style={{display:'flex',alignItems:'flex-end',gap:6,height:130,padding:'0 4px'}}>
+      {week.map((w,i)=>(
+        <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:3,height:'100%',justifyContent:'flex-end'}}>
+          <span style={{fontSize:10,color:w.isToday?child.color:'#aaa',fontWeight:w.isToday?700:400}}>{w.pts>0?w.pts:''}</span>
+          <div style={{width:'100%',background:w.isToday?child.color:'#e0e0e0',borderRadius:'6px 6px 0 0',height:`${Math.round(w.pts/maxPts*90)}px`,minHeight:w.pts>0?4:2,transition:'height 0.6s ease'}}/>
+          <span style={{fontSize:11,color:w.isToday?child.color:'#aaa',fontWeight:w.isToday?700:400}}>{w.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── RutineApp ─────────────────────────────────────────────────────────────────
+function RutineApp(){
+  const [data,setData]=useState(()=>stor.get()||defaultData());
+  const [view,setView]=useState('home');
+  const [childId,setChildId]=useState(null);
+  const [tab,setTab]=useState('morning');
+  const [confetti,setConfetti]=useState(false);
+  const [unlocked,setUnlocked]=useState(false);
+
+  // Modal states
+  const [mAddChild,setMAddChild]=useState(false);
+  const [mEditChild,setMEditChild]=useState(null);
+  const [mAddTask,setMAddTask]=useState(null);
+  const [mEditTask,setMEditTask]=useState(null);
+  const [mAddReward,setMAddReward]=useState(false);
+  const [mEditReward,setMEditReward]=useState(null);
+  const [mChangePin,setMChangePin]=useState(false);
+
+  useEffect(()=>{stor.set(data);},[data]);
+
+  // Midnight reset
+  useEffect(()=>{
+    const check=()=>{
+      const t=today();
+      if(data.lastReset!==t){
+        setData(prev=>{
+          const children=prev.children.map(child=>{
+            const earned=Object.values(child.routines).flat().filter(x=>x.done).reduce((a,x)=>a+(x.pointValue||5),0);
+            const hist=earned>0?[...child.history.slice(-29),{date:prev.lastReset,points:earned}]:child.history;
+            const routines={};
+            for(const k of Object.keys(child.routines))routines[k]=child.routines[k].map(x=>({...x,done:false}));
+            return{...child,routines,history:hist};
+          });
+          return{...prev,children,lastReset:t};
+        });
+      }
+    };
+    check();
+    const iv=setInterval(check,60000);
+    return()=>clearInterval(iv);
+  },[data.lastReset]);
+
+  const upd=(fn)=>setData(prev=>fn(prev));
+  const child=data.children.find(c=>c.id===childId)||data.children[0]||null;
+
+  const toggleTask=(cid,routine,tid)=>{
+    upd(prev=>{
+      const children=prev.children.map(c=>{
+        if(c.id!==cid)return c;
+        const tasks=c.routines[routine].map(t=>t.id===tid?{...t,done:!t.done}:t);
+        const toggled=tasks.find(t=>t.id===tid);
+        const pts=toggled.pointValue||5;
+        const newPts=Math.max(0,c.points+(toggled.done?pts:-pts));
+        const newTotal=toggled.done?c.totalPoints+pts:Math.max(0,c.totalPoints-pts);
+        const routines={...c.routines,[routine]:tasks};
+        if(Object.values(routines).flat().every(t=>t.done))setTimeout(()=>setConfetti(true),100);
+        return{...c,routines,points:newPts,totalPoints:newTotal};
+      });
+      return{...prev,children};
+    });
+  };
+
+  useEffect(()=>{if(confetti){const t=setTimeout(()=>setConfetti(false),4500);return()=>clearTimeout(t);}},[confetti]);
+
+  const buyReward=(cid,rid)=>{
+    const r=data.rewards.find(x=>x.id===rid);
+    if(!r)return;
+    upd(prev=>({...prev,children:prev.children.map(c=>c.id===cid&&c.points>=r.cost?{...c,points:c.points-r.cost}:c)}));
+  };
+
+  // ── Home ──────────────────────────────────────────────────────────────────
+  const Home=()=>(
+    <div style={{padding:20}}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(155px,1fr))',gap:16}}>
+        {data.children.map(c=>{
+          const all=Object.values(c.routines).flat();
+          const done=all.filter(t=>t.done);
+          const badge=getBadge(c.totalPoints);
+          return(
+            <div key={c.id} onClick={()=>{setChildId(c.id);setView('child');}}
+              style={{...s.card,cursor:'pointer',textAlign:'center',padding:'22px 14px',borderTop:`5px solid ${c.color}`,animation:'ruti_pop 0.3s ease-out'}}>
+              <div style={{fontSize:50,lineHeight:1,marginBottom:8}}>{c.avatar}</div>
+              <div style={{fontSize:17,fontWeight:700,color:'#2c3e50',marginBottom:2}}>{c.name}</div>
+              <div style={{fontSize:12,color:'#aaa',marginBottom:12}}>{badge.icon} {badge.label}</div>
+              <ProgressBar value={done.length} max={all.length} color={c.color} height={7}/>
+              <div style={{fontSize:11,color:'#bbb',marginTop:5}}>{done.length}/{all.length} opgaver</div>
+              <div style={{marginTop:8,fontSize:15,fontWeight:700,color:c.color}}>⭐ {c.points}</div>
+            </div>
+          );
+        })}
+        {data.children.length===0&&(
+          <div style={{gridColumn:'1/-1',textAlign:'center',padding:48,color:'#bbb'}}>
+            <div style={{fontSize:52}}>👨‍👧</div>
+            <p style={{marginTop:12,lineHeight:1.5}}>Ingen børn endnu.<br/>Åbn forældremenuen for at tilføje.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  // ── Child routine view ────────────────────────────────────────────────────
+  const ChildView=()=>{
+    if(!child)return null;
+    const tasks=child.routines[tab]||[];
+    const done=tasks.filter(t=>t.done).length;
+    const badge=getBadge(child.totalPoints);
+    return(
+      <div style={{padding:20}}>
+        <div style={{...s.card,marginBottom:14}}>
+          <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:14}}>
+            <div style={{fontSize:44}}>{child.avatar}</div>
+            <div style={{flex:1}}>
+              <div style={{fontSize:19,fontWeight:700,color:child.color}}>{child.name}</div>
+              <div style={{fontSize:13,color:'#aaa'}}>{badge.icon} {badge.label} · ⭐ {child.points} point</div>
+            </div>
+            <button onClick={()=>setView('shop')} style={{...s.btn,padding:'8px 14px',background:'#FFB347',color:'#fff',fontSize:13}}>🛍 Butik</button>
+          </div>
+          <ProgressBar value={done} max={tasks.length} color={child.color}/>
+          <div style={{fontSize:11,color:'#bbb',marginTop:5}}>{done}/{tasks.length} {ROUTINE_LABELS[tab].toLowerCase()}-opgaver</div>
+        </div>
+
+        <div style={{display:'flex',gap:8,marginBottom:14}}>
+          {Object.keys(ROUTINE_LABELS).map(k=>{
+            const t=child.routines[k]||[];
+            const d=t.filter(x=>x.done).length;
+            const active=tab===k;
+            return(
+              <button key={k} onClick={()=>setTab(k)} style={{...s.btn,flex:1,fontSize:13,lineHeight:1.3,padding:'10px 6px',background:active?ROUTINE_COLORS[k]:'#fff',color:active?'#fff':'#888',border:`2px solid ${active?ROUTINE_COLORS[k]:'#eee'}`,borderRadius:14}}>
+                {ROUTINE_ICONS[k]}<br/>{ROUTINE_LABELS[k]}<br/><span style={{fontSize:11,opacity:0.85}}>{d}/{t.length}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div style={{display:'flex',flexDirection:'column',gap:10}}>
+          {tasks.map(task=>(
+            <div key={task.id} onClick={()=>toggleTask(child.id,tab,task.id)} style={{...s.card,display:'flex',alignItems:'center',gap:14,cursor:'pointer',padding:'14px 16px',borderLeft:`5px solid ${task.done?'#4ECDC4':child.color}`,opacity:task.done?0.72:1,transition:'all 0.2s'}}>
+              <div style={{flexShrink:0}}>{IL[task.illustration]?IL[task.illustration](48):<div style={{width:48,height:48,background:'#f5f5f5',borderRadius:10}}/>}</div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:15,fontWeight:600,color:task.done?'#bbb':'#2c3e50',textDecoration:task.done?'line-through':'none'}}>{task.text}</div>
+                <div style={{fontSize:12,color:'#ccc'}}>+{task.pointValue||5} ⭐</div>
+              </div>
+              <div style={{width:34,height:34,borderRadius:'50%',border:`3px solid ${task.done?'#4ECDC4':'#ddd'}`,background:task.done?'#4ECDC4':'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,color:'#fff',flexShrink:0,transition:'all 0.2s'}}>
+                {task.done?'✓':''}
+              </div>
+            </div>
+          ))}
+          {tasks.length===0&&(
+            <div style={{textAlign:'center',padding:40,color:'#ccc'}}>
+              <div style={{fontSize:36}}>📝</div><p style={{marginTop:8}}>Ingen opgaver endnu</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // ── Shop ──────────────────────────────────────────────────────────────────
+  const Shop=()=>{
+    const [selId,setSelId]=useState(childId||(data.children[0]?.id));
+    const c=data.children.find(x=>x.id===selId)||data.children[0];
+    if(!c)return<div style={{padding:40,textAlign:'center',color:'#ccc'}}>Ingen børn</div>;
+    return(
+      <div style={{padding:20}}>
+        {data.children.length>1&&(
+          <div style={{display:'flex',gap:8,marginBottom:16,overflowX:'auto',paddingBottom:4}}>
+            {data.children.map(ch=>(
+              <button key={ch.id} onClick={()=>setSelId(ch.id)} style={{...s.btn,padding:'8px 16px',fontSize:14,background:selId===ch.id?ch.color:'#fff',color:selId===ch.id?'#fff':'#666',border:`2px solid ${selId===ch.id?ch.color:'#eee'}`,whiteSpace:'nowrap'}}>
+                {ch.avatar} {ch.name}
+              </button>
+            ))}
+          </div>
+        )}
+        <div style={{...s.card,textAlign:'center',marginBottom:16,padding:'18px 20px'}}>
+          <div style={{fontSize:42}}>{c.avatar}</div>
+          <div style={{fontSize:17,fontWeight:700,color:c.color,marginTop:4}}>{c.name}</div>
+          <div style={{fontSize:24,fontWeight:800,color:'#FFB347',marginTop:6}}>⭐ {c.points} point</div>
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:10}}>
+          {data.rewards.map(r=>{
+            const can=c.points>=r.cost;
+            return(
+              <div key={r.id} style={{...s.card,display:'flex',alignItems:'center',gap:14,padding:'14px 16px'}}>
+                <div style={{fontSize:34}}>{r.icon}</div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:15,fontWeight:600}}>{r.text}</div>
+                  <div style={{fontSize:13,color:'#FFB347',fontWeight:700}}>⭐ {r.cost} point</div>
+                </div>
+                <button onClick={()=>can&&buyReward(c.id,r.id)} style={{...s.btn,padding:'8px 16px',fontSize:13,background:can?'#FFB347':'#eee',color:can?'#fff':'#ccc',cursor:can?'pointer':'not-allowed'}}>
+                  {can?'Køb':'Mangler'}
+                </button>
+              </div>
+            );
+          })}
+          {data.rewards.length===0&&<div style={{textAlign:'center',padding:40,color:'#ccc'}}><div style={{fontSize:36}}>🛍</div><p style={{marginTop:8}}>Ingen belønninger</p></div>}
+        </div>
+      </div>
+    );
+  };
+
+  // ── Weekly ────────────────────────────────────────────────────────────────
+  const Weekly=()=>(
+    <div style={{padding:20}}>
+      <div style={{display:'flex',flexDirection:'column',gap:16}}>
+        {data.children.map(c=>(
+          <div key={c.id} style={s.card}>
+            <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:14}}>
+              <span style={{fontSize:32}}>{c.avatar}</span>
+              <div>
+                <div style={{fontWeight:700,fontSize:16,color:c.color}}>{c.name}</div>
+                <div style={{fontSize:12,color:'#aaa'}}>{getBadge(c.totalPoints).icon} {c.totalPoints} point i alt</div>
+              </div>
+            </div>
+            <WeeklyChart child={c}/>
+          </div>
+        ))}
+        {data.children.length===0&&<div style={{textAlign:'center',padding:48,color:'#ccc'}}><div style={{fontSize:42}}>📊</div><p style={{marginTop:12}}>Ingen data endnu</p></div>}
+      </div>
+    </div>
+  );
+
+  // ── Parent panel ──────────────────────────────────────────────────────────
+  const Parent=()=>{
+    if(!unlocked)return(
+      <div style={{padding:'40px 20px',display:'flex',flexDirection:'column',alignItems:'center'}}>
+        <div style={{fontSize:52,marginBottom:8}}>🔒</div>
+        <PinPad mode="verify" storedPin={data.pin} onVerify={()=>setUnlocked(true)}/>
+      </div>
+    );
+    return(
+      <div style={{padding:20}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+          <h2 style={s.h2}>Forældre-panel</h2>
+          <div style={{display:'flex',gap:8}}>
+            <button onClick={()=>setMChangePin(true)} style={{...s.btn,padding:'7px 14px',fontSize:13,background:'transparent',border:'2px solid #FF6B6B',color:'#FF6B6B',borderRadius:10}}>🔑 Skift PIN</button>
+            <button onClick={()=>setUnlocked(false)} style={{...s.btn,padding:'7px 14px',fontSize:13,background:'#f0f0f0',color:'#888',borderRadius:10}}>Lås</button>
+          </div>
+        </div>
+
+        {/* Children */}
+        <div style={{...s.card,marginBottom:14}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+            <h3 style={s.h3}>👧 Børn</h3>
+            <button onClick={()=>setMAddChild(true)} style={{...s.btn,padding:'7px 14px',fontSize:13,background:'#FF6B6B',color:'#fff',borderRadius:10}}>+ Tilføj</button>
+          </div>
+          {data.children.length===0&&<p style={{color:'#bbb',fontSize:14}}>Ingen børn endnu</p>}
+          {data.children.map(c=>(
+            <div key={c.id} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 0',borderBottom:'1px solid #f5f5f5'}}>
+              <span style={{fontSize:26}}>{c.avatar}</span>
+              <div style={{flex:1}}>
+                <div style={{fontWeight:600}}>{c.name}</div>
+                <div style={{fontSize:12,color:'#bbb'}}>⭐ {c.points} pt · Total: {c.totalPoints} pt</div>
+              </div>
+              <button onClick={()=>setMEditChild(c.id)} style={{...s.btn,padding:'5px 12px',fontSize:13,background:'#f5f5f5',color:'#555',borderRadius:8}}>✏️</button>
+              <button onClick={()=>{if(window.confirm(`Slet ${c.name}?`))upd(p=>({...p,children:p.children.filter(x=>x.id!==c.id)}));}} style={{...s.btn,padding:'5px 12px',fontSize:13,background:'#fee',color:'#e74c3c',borderRadius:8}}>🗑</button>
+            </div>
+          ))}
+        </div>
+
+        {/* Tasks per child */}
+        {data.children.map(c=>(
+          <div key={c.id} style={{...s.card,marginBottom:14}}>
+            <h3 style={{...s.h3,marginBottom:12}}>{c.avatar} {c.name} — Opgaver</h3>
+            {Object.keys(ROUTINE_LABELS).map(routine=>(
+              <div key={routine} style={{marginBottom:10}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+                  <span style={{fontSize:13,fontWeight:700,color:ROUTINE_COLORS[routine]}}>{ROUTINE_ICONS[routine]} {ROUTINE_LABELS[routine]}</span>
+                  <button onClick={()=>setMAddTask({childId:c.id,routine})} style={{...s.btn,padding:'4px 12px',fontSize:12,background:ROUTINE_COLORS[routine],color:'#fff',borderRadius:8}}>+ Tilføj</button>
+                </div>
+                {(c.routines[routine]||[]).map(task=>(
+                  <div key={task.id} style={{display:'flex',alignItems:'center',gap:8,padding:'5px 0',borderBottom:'1px solid #fafafa'}}>
+                    <div style={{flexShrink:0}}>{IL[task.illustration]?IL[task.illustration](24):<span style={{width:24,display:'inline-block'}}/>}</div>
+                    <span style={{flex:1,fontSize:13}}>{task.text}</span>
+                    <span style={{fontSize:11,color:'#bbb'}}>{task.pointValue||5}pt</span>
+                    <button onClick={()=>setMEditTask({childId:c.id,routine,task})} style={{...s.btn,padding:'3px 10px',fontSize:12,background:'#f5f5f5',color:'#555',borderRadius:7}}>✏️</button>
+                    <button onClick={()=>upd(p=>({...p,children:p.children.map(ch=>ch.id!==c.id?ch:{...ch,routines:{...ch.routines,[routine]:ch.routines[routine].filter(t=>t.id!==task.id)}})}))}
+                      style={{...s.btn,padding:'3px 10px',fontSize:12,background:'#fee',color:'#e74c3c',borderRadius:7}}>🗑</button>
+                  </div>
+                ))}
+                {(c.routines[routine]||[]).length===0&&<p style={{fontSize:12,color:'#ddd',padding:'4px 0'}}>Ingen opgaver</p>}
+              </div>
+            ))}
+          </div>
+        ))}
+
+        {/* Rewards */}
+        <div style={s.card}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+            <h3 style={s.h3}>🎁 Belønninger</h3>
+            <button onClick={()=>setMAddReward(true)} style={{...s.btn,padding:'7px 14px',fontSize:13,background:'#FF6B6B',color:'#fff',borderRadius:10}}>+ Tilføj</button>
+          </div>
+          {data.rewards.length===0&&<p style={{color:'#bbb',fontSize:14}}>Ingen belønninger endnu</p>}
+          {data.rewards.map(r=>(
+            <div key={r.id} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 0',borderBottom:'1px solid #f5f5f5'}}>
+              <span style={{fontSize:24}}>{r.icon}</span>
+              <div style={{flex:1}}>
+                <div style={{fontWeight:600,fontSize:14}}>{r.text}</div>
+                <div style={{fontSize:12,color:'#bbb'}}>⭐ {r.cost} point</div>
+              </div>
+              <button onClick={()=>setMEditReward(r.id)} style={{...s.btn,padding:'5px 12px',fontSize:13,background:'#f5f5f5',color:'#555',borderRadius:8}}>✏️</button>
+              <button onClick={()=>upd(p=>({...p,rewards:p.rewards.filter(x=>x.id!==r.id)}))} style={{...s.btn,padding:'5px 12px',fontSize:13,background:'#fee',color:'#e74c3c',borderRadius:8}}>🗑</button>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // ── Inner modals ──────────────────────────────────────────────────────────
+  function ChildModal({cid,onClose}){
+    const ex=cid?data.children.find(c=>c.id===cid):null;
+    const [name,setName]=useState(ex?.name||'');
+    const [avatar,setAvatar]=useState(ex?.avatar||'🦁');
+    const [color,setColor]=useState(ex?.color||CHILD_COLORS[0]);
+    const save=()=>{
+      if(!name.trim())return;
+      if(cid){upd(p=>({...p,children:p.children.map(c=>c.id===cid?{...c,name:name.trim(),avatar,color}:c)}));}
+      else{upd(p=>({...p,children:[...p.children,{id:uuid(),name:name.trim(),avatar,color,points:0,totalPoints:0,routines:{morning:[],afternoon:[],evening:[]},history:[]}]}));}
+      onClose();
+    };
+    return(
+      <Modal title={cid?'Rediger barn':'Tilføj barn'} onClose={onClose} narrow>
+        <div style={{display:'flex',flexDirection:'column',gap:14}}>
+          <label style={s.label}>Navn</label>
+          <input style={s.input} value={name} onChange={e=>setName(e.target.value)} placeholder="Barnets navn" autoFocus/>
+          <label style={s.label}>Avatar</label>
+          <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+            {CHILD_AVATARS.map(a=>(
+              <button key={a} onClick={()=>setAvatar(a)} style={{fontSize:26,padding:8,borderRadius:10,border:`2px solid ${avatar===a?'#FF6B6B':'#eee'}`,background:avatar===a?'#FFF0EE':'#f8f8f8',cursor:'pointer',touchAction:'manipulation'}}>{a}</button>
+            ))}
+          </div>
+          <label style={s.label}>Farve</label>
+          <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+            {CHILD_COLORS.map(c=>(
+              <div key={c} onClick={()=>setColor(c)} style={{width:30,height:30,borderRadius:'50%',background:c,cursor:'pointer',border:`3px solid ${color===c?'#333':'transparent'}`,transition:'border 0.15s'}}/>
+            ))}
+          </div>
+          <button onClick={save} style={{...s.btn,background:'#FF6B6B',color:'#fff',marginTop:6}}>{cid?'Gem ændringer':'Tilføj barn'}</button>
+        </div>
+      </Modal>
+    );
+  }
+
+  function TaskModal({childId,routine,task,onClose}){
+    const [text,setText]=useState(task?.text||'');
+    const [illus,setIllus]=useState(task?.illustration||'teeth');
+    const [pts,setPts]=useState(task?.pointValue||5);
+    const save=()=>{
+      if(!text.trim())return;
+      upd(p=>({...p,children:p.children.map(c=>{
+        if(c.id!==childId)return c;
+        const tasks=task?c.routines[routine].map(t=>t.id===task.id?{...t,text:text.trim(),illustration:illus,pointValue:Number(pts)}:t):[...c.routines[routine],{id:uuid(),text:text.trim(),illustration:illus,pointValue:Number(pts),done:false}];
+        return{...c,routines:{...c.routines,[routine]:tasks}};
+      })}));
+      onClose();
+    };
+    return(
+      <Modal title={task?'Rediger opgave':'Tilføj opgave'} onClose={onClose}>
+        <div style={{display:'flex',flexDirection:'column',gap:14}}>
+          <label style={s.label}>Opgavenavn</label>
+          <input style={s.input} value={text} onChange={e=>setText(e.target.value)} placeholder="f.eks. Børst tænder" autoFocus/>
+          <label style={s.label}>Point-værdi</label>
+          <div style={{display:'flex',gap:8}}>
+            {[5,10,15,20].map(v=>(
+              <button key={v} onClick={()=>setPts(v)} style={{...s.btn,flex:1,padding:'8px 0',fontSize:14,background:pts===v?'#FFB347':'#f5f5f5',color:pts===v?'#fff':'#888',border:`2px solid ${pts===v?'#FFB347':'#eee'}`,borderRadius:10}}>{v} ⭐</button>
+            ))}
+          </div>
+          <label style={s.label}>Illustration</label>
+          <IllustrationPicker selected={illus} onSelect={setIllus}/>
+          <button onClick={save} style={{...s.btn,background:'#FF6B6B',color:'#fff',marginTop:4}}>{task?'Gem ændringer':'Tilføj opgave'}</button>
+        </div>
+      </Modal>
+    );
+  }
+
+  function RewardModal({rid,onClose}){
+    const ICONS=['📺','🎮','🍕','🍦','🎡','🌙','📚','🎨','🏊','🎠','🍿','🎁','🎪','🚴','⚽'];
+    const ex=rid?data.rewards.find(r=>r.id===rid):null;
+    const [text,setText]=useState(ex?.text||'');
+    const [cost,setCost]=useState(ex?.cost||50);
+    const [icon,setIcon]=useState(ex?.icon||'🎁');
+    const save=()=>{
+      if(!text.trim())return;
+      if(rid){upd(p=>({...p,rewards:p.rewards.map(r=>r.id===rid?{...r,text:text.trim(),cost:Number(cost),icon}:r)}));}
+      else{upd(p=>({...p,rewards:[...p.rewards,{id:uuid(),text:text.trim(),cost:Number(cost),icon}]}));}
+      onClose();
+    };
+    return(
+      <Modal title={rid?'Rediger belønning':'Tilføj belønning'} onClose={onClose} narrow>
+        <div style={{display:'flex',flexDirection:'column',gap:14}}>
+          <label style={s.label}>Belønning</label>
+          <input style={s.input} value={text} onChange={e=>setText(e.target.value)} placeholder="f.eks. 30 min skærmtid" autoFocus/>
+          <label style={s.label}>Point-pris</label>
+          <input type="number" style={s.input} value={cost} onChange={e=>setCost(e.target.value)} min="1"/>
+          <label style={s.label}>Ikon</label>
+          <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+            {ICONS.map(ic=>(
+              <button key={ic} onClick={()=>setIcon(ic)} style={{fontSize:24,padding:8,borderRadius:10,border:`2px solid ${icon===ic?'#FF6B6B':'#eee'}`,background:icon===ic?'#FFF0EE':'#f8f8f8',cursor:'pointer',touchAction:'manipulation'}}>{ic}</button>
+            ))}
+          </div>
+          <button onClick={save} style={{...s.btn,background:'#FF6B6B',color:'#fff',marginTop:4}}>{rid?'Gem ændringer':'Tilføj belønning'}</button>
+        </div>
+      </Modal>
+    );
+  }
+
+  // ── Navigation + render ───────────────────────────────────────────────────
+  const NAV=[
+    {id:'home',icon:'🏠',label:'Hjem'},
+    {id:'shop',icon:'🛍',label:'Butik'},
+    {id:'weekly',icon:'📊',label:'Uge'},
+    {id:'parent',icon:'🔒',label:'Forældre'},
+  ];
+
+  const headerTitle={
+    home:'🌟 Ruti',
+    child:child?`${child.avatar} ${child.name}`:'Rutiner',
+    shop:'🛍 Butik',
+    weekly:'📊 Ugentlig oversigt',
+    parent:unlocked?'⚙️ Forældre-panel':'🔒 Forældre',
+  }[view]||'Ruti';
+
+  return(
+    <div style={s.app}>
+      {confetti&&<Confetti/>}
+
+      {/* Header */}
+      <div style={s.header}>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          {(view==='child'||view==='shop')&&(
+            <button onClick={()=>setView('home')} style={{...s.btn,padding:'6px 12px',background:'rgba(255,255,255,0.22)',color:'#fff',fontSize:18,borderRadius:10}}>←</button>
+          )}
+          <span style={{fontSize:20,fontWeight:700,letterSpacing:0.5}}>{headerTitle}</span>
+        </div>
+        {view==='child'&&child&&(
+          <span style={{fontSize:15,fontWeight:700,color:'rgba(255,255,255,0.92)'}}>⭐ {child.points}</span>
+        )}
+      </div>
+
+      {/* Content */}
+      <div style={{paddingBottom:76}}>
+        {view==='home'&&<Home/>}
+        {view==='child'&&<ChildView/>}
+        {view==='shop'&&<Shop/>}
+        {view==='weekly'&&<Weekly/>}
+        {view==='parent'&&<Parent/>}
+      </div>
+
+      {/* Bottom nav */}
+      <div style={{position:'fixed',bottom:0,left:0,right:0,background:'#fff',borderTop:'1px solid #eee',display:'flex',boxShadow:'0 -2px 14px rgba(0,0,0,0.06)',zIndex:100,paddingBottom:'env(safe-area-inset-bottom)'}}>
+        {NAV.map(n=>{
+          const active=view===n.id||(n.id==='home'&&view==='child');
+          return(
+            <button key={n.id} onClick={()=>{if(n.id==='shop'&&!childId&&data.children[0])setChildId(data.children[0].id);setView(n.id);}} style={{flex:1,border:'none',background:'transparent',padding:'10px 4px 8px',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:2,touchAction:'manipulation',WebkitTapHighlightColor:'transparent'}}>
+              <span style={{fontSize:22}}>{n.icon}</span>
+              <span style={{fontSize:10,fontWeight:700,color:active?'#FF6B6B':'#bbb',textTransform:'uppercase',letterSpacing:0.4}}>{n.label}</span>
+              {active&&<div style={{width:5,height:5,borderRadius:'50%',background:'#FF6B6B'}}/>}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Modals */}
+      {mAddChild&&<ChildModal onClose={()=>setMAddChild(false)}/>}
+      {mEditChild&&<ChildModal cid={mEditChild} onClose={()=>setMEditChild(null)}/>}
+      {mAddTask&&<TaskModal childId={mAddTask.childId} routine={mAddTask.routine} onClose={()=>setMAddTask(null)}/>}
+      {mEditTask&&<TaskModal childId={mEditTask.childId} routine={mEditTask.routine} task={mEditTask.task} onClose={()=>setMEditTask(null)}/>}
+      {mAddReward&&<RewardModal onClose={()=>setMAddReward(false)}/>}
+      {mEditReward&&<RewardModal rid={mEditReward} onClose={()=>setMEditReward(null)}/>}
+      {mChangePin&&(
+        <Modal title="Skift PIN-kode" onClose={()=>setMChangePin(false)} narrow>
+          <PinPad mode="set" onSet={pin=>{upd(p=>({...p,pin}));setMChangePin(false);}}/>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<RutineApp/>);
+</script>
+</body>
+</html>
