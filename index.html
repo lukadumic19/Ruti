@@ -13,7 +13,20 @@
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',Arial,sans-serif;background:#F7F1E3;overscroll-behavior:none}
+:root{
+  --rt-bg:#F7F1E3;--rt-card:#fff;--rt-card-shadow:0 2px 14px rgba(0,0,0,0.07);--rt-card-radius:20px;
+  --rt-header:#FF6B6B;--rt-header-text:#fff;
+  --rt-primary:#FF6B6B;--rt-primary-text:#fff;
+  --rt-text:#2c3e50;--rt-muted:#aaa;--rt-faint:#ccc;
+  --rt-nav-bg:#fff;--rt-nav-border:#eee;--rt-nav-active:#FF6B6B;--rt-nav-inactive:#bbb;
+  --rt-progress-bg:#f0f0f0;--rt-task-done:#4ECDC4;
+  --rt-input-bg:#fff;--rt-input-border:#eee;
+  --rt-sep:#f5f5f5;
+  --rt-pin-dot:#e0e0e0;--rt-pin-dot-fill:#FF6B6B;--rt-pin-btn:#fff;--rt-pin-btn-border:#eee;
+  --rt-del-bg:#fee;--rt-del-text:#e74c3c;
+  --rt-overlay:rgba(0,0,0,0.52);
+}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--rt-bg);overscroll-behavior:none;transition:background 0.4s ease}
 @keyframes ruti_brush{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(10deg)}}
 @keyframes ruti_bubble{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-18px) scale(0.4)}}
 @keyframes ruti_drop{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(8px)}}
@@ -28,16 +41,16 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#F7F1E3;overscroll-behav
 @keyframes ruti_sun{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes ruti_confetti{0%{transform:translateY(-10px) rotate(0);opacity:1}100%{transform:translateY(105vh) rotate(720deg);opacity:0}}
 @keyframes ruti_fadeIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
-@keyframes ruti_check{0%{stroke-dashoffset:30}100%{stroke-dashoffset:0}}
 @keyframes ruti_pop{0%{transform:scale(0.8);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes ruti_themeIn{0%{opacity:0;transform:scale(0.97)}100%{opacity:1;transform:scale(1)}}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const {useState,useEffect,useRef,useCallback}=React;
+const {useState,useEffect}=React;
 
-// ── Storage ──────────────────────────────────────────────────────────────────
+// ── Storage ───────────────────────────────────────────────────────────────────
 const STORAGE_KEY='rutine2:data';
 const stor={
   get:()=>{try{if(window.storage&&window.storage.get){const v=window.storage.get(STORAGE_KEY);return v?(typeof v==='string'?JSON.parse(v):v):null;}const v=localStorage.getItem(STORAGE_KEY);return v?JSON.parse(v):null;}catch{return null;}},
@@ -63,9 +76,88 @@ const ROUTINE_COLORS={morning:'#FFB347',afternoon:'#4ECDC4',evening:'#A29BFE'};
 const CHILD_COLORS=['#FF6B6B','#4ECDC4','#FFE66D','#A29BFE','#FD79A8','#6C5CE7','#00B894','#FDCB6E'];
 const CHILD_AVATARS=['🦁','🐼','🦊','🐨','🐸','🦋','🐬','🦄','🐙','🦖','🐠','🦝'];
 
+// ── Themes ────────────────────────────────────────────────────────────────────
+const THEMES={
+  natur:{
+    id:'natur',name:'Natur',emoji:'🌿',desc:'Roligt og minimalistisk',
+    bg:'#F7F1E3',card:'#fff',cardShadow:'0 2px 14px rgba(0,0,0,0.07)',cardRadius:'20px',
+    header:'#FF6B6B',headerText:'#fff',
+    primary:'#FF6B6B',primaryText:'#fff',
+    text:'#2c3e50',muted:'#aaa',faint:'#ccc',
+    navBg:'#fff',navBorder:'#eee',navActive:'#FF6B6B',navInactive:'#bbb',
+    progressBg:'#f0f0f0',taskDone:'#4ECDC4',
+    inputBg:'#fff',inputBorder:'#eee',
+    sep:'#f5f5f5',
+    pinDot:'#e0e0e0',pinDotFill:'#FF6B6B',pinBtn:'#fff',pinBtnBorder:'#eee',
+    delBg:'#fee',delText:'#e74c3c',
+    overlay:'rgba(0,0,0,0.52)',
+  },
+  farverig:{
+    id:'farverig',name:'Farverig',emoji:'🌈',desc:'Sjov og livlig',
+    bg:'#FFF5E6',card:'#fff',cardShadow:'0 4px 20px rgba(255,71,87,0.12)',cardRadius:'24px',
+    header:'#FF4757',headerText:'#fff',
+    primary:'#FF4757',primaryText:'#fff',
+    text:'#2c2c54',muted:'#999',faint:'#bbb',
+    navBg:'#fff',navBorder:'#FFD6D6',navActive:'#FF4757',navInactive:'#bbb',
+    progressBg:'#FFE4E4',taskDone:'#2ED573',
+    inputBg:'#fff',inputBorder:'#FFD6D6',
+    sep:'#FFF0F0',
+    pinDot:'#FFD6D6',pinDotFill:'#FF4757',pinBtn:'#fff',pinBtnBorder:'#FFD6D6',
+    delBg:'#FFE4E4',delText:'#FF4757',
+    overlay:'rgba(44,44,84,0.55)',
+  },
+  mork:{
+    id:'mork',name:'Mørk',emoji:'🌙',desc:'Cool og moderne',
+    bg:'#1a1a2e',card:'#16213e',cardShadow:'0 2px 16px rgba(0,0,0,0.4)',cardRadius:'20px',
+    header:'#0f0f23',headerText:'#e0e0e0',
+    primary:'#7B68EE',primaryText:'#fff',
+    text:'#e0e0e0',muted:'#777',faint:'#444',
+    navBg:'#16213e',navBorder:'#0d0d1f',navActive:'#7B68EE',navInactive:'#444',
+    progressBg:'#0d0d1f',taskDone:'#2ED573',
+    inputBg:'#0d0d1f',inputBorder:'#333',
+    sep:'#0d0d1f',
+    pinDot:'#333',pinDotFill:'#7B68EE',pinBtn:'#0d0d1f',pinBtnBorder:'#333',
+    delBg:'#3d1515',delText:'#ff8080',
+    overlay:'rgba(0,0,0,0.72)',
+  },
+  soed:{
+    id:'soed',name:'Sød',emoji:'🩷',desc:'Blød og venlig',
+    bg:'#FFF0F8',card:'#fff',cardShadow:'0 3px 18px rgba(255,133,179,0.18)',cardRadius:'28px',
+    header:'#FF85B3',headerText:'#fff',
+    primary:'#FF85B3',primaryText:'#fff',
+    text:'#4a2c4a',muted:'#b088b0',faint:'#d4b8d4',
+    navBg:'#fff',navBorder:'#FFD6EC',navActive:'#FF85B3',navInactive:'#d4b8d4',
+    progressBg:'#FFE8F5',taskDone:'#C77DFF',
+    inputBg:'#fff',inputBorder:'#FFD6EC',
+    sep:'#FFF0F8',
+    pinDot:'#FFD6EC',pinDotFill:'#FF85B3',pinBtn:'#fff',pinBtnBorder:'#FFD6EC',
+    delBg:'#FFE8F5',delText:'#e75480',
+    overlay:'rgba(74,44,74,0.5)',
+  },
+};
+const THEME_LIST=Object.values(THEMES);
+
+const applyTheme=(th)=>{
+  const el=document.documentElement;
+  const vars={
+    '--rt-bg':th.bg,'--rt-card':th.card,'--rt-card-shadow':th.cardShadow,'--rt-card-radius':th.cardRadius,
+    '--rt-header':th.header,'--rt-header-text':th.headerText,
+    '--rt-primary':th.primary,'--rt-primary-text':th.primaryText,
+    '--rt-text':th.text,'--rt-muted':th.muted,'--rt-faint':th.faint,
+    '--rt-nav-bg':th.navBg,'--rt-nav-border':th.navBorder,'--rt-nav-active':th.navActive,'--rt-nav-inactive':th.navInactive,
+    '--rt-progress-bg':th.progressBg,'--rt-task-done':th.taskDone,
+    '--rt-input-bg':th.inputBg,'--rt-input-border':th.inputBorder,
+    '--rt-sep':th.sep,
+    '--rt-pin-dot':th.pinDot,'--rt-pin-dot-fill':th.pinDotFill,'--rt-pin-btn':th.pinBtn,'--rt-pin-btn-border':th.pinBtnBorder,
+    '--rt-del-bg':th.delBg,'--rt-del-text':th.delText,
+    '--rt-overlay':th.overlay,
+  };
+  Object.entries(vars).forEach(([k,v])=>el.style.setProperty(k,v));
+};
+
 const defaultData=()=>({
   children:[{
-    id:uuid(),name:'Sofie',avatar:'🦋',color:'#FF6B6B',points:0,totalPoints:0,
+    id:uuid(),name:'Sofie',avatar:'🦋',color:'#FF6B6B',points:0,totalPoints:0,theme:'natur',
     routines:{
       morning:[
         {id:uuid(),text:'Børst tænder',illustration:'teeth',pointValue:5,done:false},
@@ -270,20 +362,19 @@ const IL={
     </svg>
   ),
 };
-
 const IL_KEYS=Object.keys(IL);
 const IL_NAMES={teeth:'Tænder',face:'Ansigt',breakfast:'Morgenmad',clothes:'Tøj',backpack:'Rygsæk',homework:'Lektier',reading:'Læsning',dinner:'Aftensmad',bath:'Bad',pyjamas:'Pyjamas',sleep:'Sove',tidy:'Rydde op',exercise:'Motion',music:'Musik',outdoor:'Udeliv'};
 
-// ── Styles ───────────────────────────────────────────────────────────────────
+// ── Base styles (theme-sensitive via CSS vars) ─────────────────────────────────
 const s={
-  app:{minHeight:'100vh',background:'#F7F1E3',fontFamily:"'Segoe UI',Arial,sans-serif"},
-  header:{background:'#FF6B6B',color:'#fff',padding:'14px 18px',display:'flex',alignItems:'center',justifyContent:'space-between',boxShadow:'0 2px 10px rgba(0,0,0,0.18)'},
-  btn:{border:'none',borderRadius:12,padding:'10px 18px',cursor:'pointer',fontWeight:600,fontSize:15,transition:'opacity 0.15s, transform 0.1s',touchAction:'manipulation',WebkitTapHighlightColor:'transparent'},
-  card:{background:'#fff',borderRadius:20,padding:20,boxShadow:'0 2px 14px rgba(0,0,0,0.07)'},
-  input:{border:'2px solid #eee',borderRadius:10,padding:'10px 14px',fontSize:15,outline:'none',width:'100%',fontFamily:'inherit'},
-  label:{fontSize:12,fontWeight:700,color:'#999',textTransform:'uppercase',letterSpacing:0.6,marginBottom:2},
-  h2:{fontSize:20,fontWeight:700,color:'#2c3e50'},
-  h3:{fontSize:16,fontWeight:700,color:'#2c3e50'},
+  app:{minHeight:'100vh',background:'var(--rt-bg)',fontFamily:"'Segoe UI',Arial,sans-serif",transition:'background 0.4s ease'},
+  header:{background:'var(--rt-header)',color:'var(--rt-header-text)',padding:'14px 18px',display:'flex',alignItems:'center',justifyContent:'space-between',boxShadow:'0 2px 10px rgba(0,0,0,0.18)',transition:'background 0.4s ease'},
+  btn:{border:'none',borderRadius:12,padding:'10px 18px',cursor:'pointer',fontWeight:600,fontSize:15,transition:'opacity 0.15s,transform 0.1s',touchAction:'manipulation',WebkitTapHighlightColor:'transparent'},
+  card:{background:'var(--rt-card)',borderRadius:'var(--rt-card-radius)',padding:20,boxShadow:'var(--rt-card-shadow)',transition:'background 0.4s ease,border-radius 0.4s ease'},
+  input:{border:'2px solid var(--rt-input-border)',borderRadius:10,padding:'10px 14px',fontSize:15,outline:'none',width:'100%',fontFamily:'inherit',background:'var(--rt-input-bg)',color:'var(--rt-text)'},
+  label:{fontSize:12,fontWeight:700,color:'var(--rt-muted)',textTransform:'uppercase',letterSpacing:0.6,marginBottom:2},
+  h2:{fontSize:20,fontWeight:700,color:'var(--rt-text)'},
+  h3:{fontSize:16,fontWeight:700,color:'var(--rt-text)'},
 };
 
 // ── IllustrationPicker ────────────────────────────────────────────────────────
@@ -291,77 +382,94 @@ function IllustrationPicker({selected,onSelect}){
   return(
     <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:8}}>
       {IL_KEYS.map(k=>(
-        <div key={k} onClick={()=>onSelect(k)} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4,padding:8,borderRadius:12,cursor:'pointer',border:`2px solid ${selected===k?'#FF6B6B':'transparent'}`,background:selected===k?'#FFF0EE':'#f8f8f8',transition:'all 0.15s'}}>
+        <div key={k} onClick={()=>onSelect(k)} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4,padding:8,borderRadius:12,cursor:'pointer',border:`2px solid ${selected===k?'var(--rt-primary)':'transparent'}`,background:selected===k?'var(--rt-sep)':'var(--rt-sep)',outline:selected===k?'2px solid var(--rt-primary)':'2px solid transparent',transition:'all 0.15s'}}>
           {IL[k](34)}
-          <span style={{fontSize:9,color:'#777',textAlign:'center',lineHeight:1.2}}>{IL_NAMES[k]}</span>
+          <span style={{fontSize:9,color:'var(--rt-muted)',textAlign:'center',lineHeight:1.2}}>{IL_NAMES[k]}</span>
         </div>
       ))}
     </div>
   );
 }
 
-// ── PinPad ───────────────────────────────────────────────────────────────────
+// ── ThemePicker ───────────────────────────────────────────────────────────────
+function ThemePicker({currentTheme,onSelect}){
+  return(
+    <div style={{display:'flex',flexDirection:'column',gap:10}}>
+      {THEME_LIST.map(t=>{
+        const sel=currentTheme===t.id;
+        return(
+          <div key={t.id} onClick={()=>onSelect(t.id)} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 16px',borderRadius:16,cursor:'pointer',background:t.bg,border:`3px solid ${sel?t.primary:'transparent'}`,boxShadow:sel?`0 0 0 1px ${t.primary}55`:'none',transition:'all 0.2s',animation:'ruti_fadeIn 0.2s ease-out'}}>
+            <span style={{fontSize:30,lineHeight:1}}>{t.emoji}</span>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:700,color:t.text,fontSize:15}}>{t.name}</div>
+              <div style={{fontSize:12,color:t.muted,marginTop:2}}>{t.desc}</div>
+            </div>
+            <div style={{display:'flex',gap:5,alignItems:'center'}}>
+              {[t.header,t.primary,t.taskDone,t.bg].map((c,i)=>(
+                <div key={i} style={{width:14,height:14,borderRadius:'50%',background:c,border:'1.5px solid rgba(0,0,0,0.1)'}}/>
+              ))}
+            </div>
+            <span style={{fontSize:18,marginLeft:4,color:t.primary,opacity:sel?1:0}}>✓</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── PinPad ────────────────────────────────────────────────────────────────────
 function PinPad({mode='verify',storedPin,onVerify,onSet}){
   const [digits,setDigits]=useState('');
   const [confirm,setConfirm]=useState('');
   const [step,setStep]=useState(1);
   const [err,setErr]=useState('');
-
   const press=(d)=>{
     setErr('');
     if(d==='del'){step===1?setDigits(p=>p.slice(0,-1)):setConfirm(p=>p.slice(0,-1));return;}
     if(step===1&&digits.length>=4)return;
     if(step===2&&confirm.length>=4)return;
     if(step===1){
-      const next=digits+d;
-      setDigits(next);
+      const next=digits+d;setDigits(next);
       if(next.length===4){
-        if(mode==='verify'){
-          if(next===storedPin){setTimeout(()=>onVerify(),200);}
-          else{setTimeout(()=>{setErr('Forkert PIN — prøv igen');setDigits('');},300);}
-        }else{setStep(2);}
+        if(mode==='verify'){if(next===storedPin){setTimeout(()=>onVerify(),200);}else{setTimeout(()=>{setErr('Forkert PIN — prøv igen');setDigits('');},300);}}
+        else{setStep(2);}
       }
     }else{
-      const next=confirm+d;
-      setConfirm(next);
-      if(next.length===4){
-        if(next===digits){setTimeout(()=>onSet(next),200);}
-        else{setTimeout(()=>{setErr('PIN-koderne matcher ikke');setDigits('');setConfirm('');setStep(1);},300);}
-      }
+      const next=confirm+d;setConfirm(next);
+      if(next.length===4){if(next===digits){setTimeout(()=>onSet(next),200);}else{setTimeout(()=>{setErr('PIN-koderne matcher ikke');setDigits('');setConfirm('');setStep(1);},300);}}
     }
   };
-
   const cur=step===1?digits:confirm;
   const prompt=mode==='verify'?'Indtast PIN-kode':step===1?'Vælg ny PIN-kode':'Bekræft ny PIN-kode';
   return(
     <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:20,padding:'10px 0'}}>
-      <p style={{fontSize:16,fontWeight:600,color:'#555'}}>{prompt}</p>
+      <p style={{fontSize:16,fontWeight:600,color:'var(--rt-text)'}}>{prompt}</p>
       <div style={{display:'flex',gap:14}}>
         {[0,1,2,3].map(i=>(
-          <div key={i} style={{width:18,height:18,borderRadius:'50%',background:cur.length>i?'#FF6B6B':'#e0e0e0',transition:'background 0.15s'}}/>
+          <div key={i} style={{width:18,height:18,borderRadius:'50%',background:cur.length>i?'var(--rt-pin-dot-fill)':'var(--rt-pin-dot)',transition:'background 0.15s'}}/>
         ))}
       </div>
-      {err&&<p style={{color:'#e74c3c',fontSize:13,textAlign:'center'}}>{err}</p>}
+      {err&&<p style={{color:'var(--rt-del-text)',fontSize:13,textAlign:'center'}}>{err}</p>}
       <div style={{display:'grid',gridTemplateColumns:'repeat(3,72px)',gap:10}}>
         {[1,2,3,4,5,6,7,8,9].map(d=>(
-          <button key={d} onClick={()=>press(String(d))} style={{...s.btn,width:72,height:72,fontSize:26,fontWeight:700,background:'#fff',border:'2px solid #eee',borderRadius:16,color:'#2c3e50'}}>{d}</button>
+          <button key={d} onClick={()=>press(String(d))} style={{...s.btn,width:72,height:72,fontSize:26,fontWeight:700,background:'var(--rt-pin-btn)',border:'2px solid var(--rt-pin-btn-border)',borderRadius:16,color:'var(--rt-text)'}}>{d}</button>
         ))}
         <div/>
-        <button onClick={()=>press('0')} style={{...s.btn,width:72,height:72,fontSize:26,fontWeight:700,background:'#fff',border:'2px solid #eee',borderRadius:16,color:'#2c3e50'}}>0</button>
-        <button onClick={()=>press('del')} style={{...s.btn,width:72,height:72,fontSize:22,background:'#fff',border:'2px solid #eee',borderRadius:16,color:'#e74c3c'}}>⌫</button>
+        <button onClick={()=>press('0')} style={{...s.btn,width:72,height:72,fontSize:26,fontWeight:700,background:'var(--rt-pin-btn)',border:'2px solid var(--rt-pin-btn-border)',borderRadius:16,color:'var(--rt-text)'}}>0</button>
+        <button onClick={()=>press('del')} style={{...s.btn,width:72,height:72,fontSize:22,background:'var(--rt-pin-btn)',border:'2px solid var(--rt-pin-btn-border)',borderRadius:16,color:'var(--rt-del-text)'}}>⌫</button>
       </div>
     </div>
   );
 }
 
-// ── Modal ────────────────────────────────────────────────────────────────────
+// ── Modal ─────────────────────────────────────────────────────────────────────
 function Modal({children,onClose,title,narrow}){
   return(
-    <div onClick={e=>{if(e.target===e.currentTarget)onClose();}} style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.52)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000,padding:16}}>
-      <div style={{background:'#fff',borderRadius:24,width:'100%',maxWidth:narrow?390:570,maxHeight:'90vh',overflow:'auto',padding:24,animation:'ruti_fadeIn 0.2s ease-out'}}>
+    <div onClick={e=>{if(e.target===e.currentTarget)onClose();}} style={{position:'fixed',inset:0,background:'var(--rt-overlay)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000,padding:16}}>
+      <div style={{background:'var(--rt-card)',borderRadius:'var(--rt-card-radius)',width:'100%',maxWidth:narrow?390:570,maxHeight:'90vh',overflow:'auto',padding:24,animation:'ruti_fadeIn 0.2s ease-out'}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:18}}>
           {title&&<h2 style={s.h2}>{title}</h2>}
-          <button onClick={onClose} style={{...s.btn,marginLeft:'auto',padding:'6px 14px',background:'#f0f0f0',color:'#666',fontSize:14,borderRadius:10}}>✕</button>
+          <button onClick={onClose} style={{...s.btn,marginLeft:'auto',padding:'6px 14px',background:'var(--rt-sep)',color:'var(--rt-muted)',fontSize:14,borderRadius:10}}>✕</button>
         </div>
         {children}
       </div>
@@ -369,13 +477,12 @@ function Modal({children,onClose,title,narrow}){
   );
 }
 
-// ── Confetti ─────────────────────────────────────────────────────────────────
+// ── Confetti ──────────────────────────────────────────────────────────────────
 function Confetti(){
   const pieces=Array.from({length:65},(_,i)=>({
     id:i,x:Math.random()*100,
     color:['#FF6B6B','#4ECDC4','#FFE66D','#A29BFE','#FD79A8','#00B894','#FDCB6E'][i%7],
-    delay:Math.random()*2,dur:2+Math.random()*2.5,
-    size:5+Math.random()*9,shape:Math.random()>0.4?'rect':'circle',
+    delay:Math.random()*2,dur:2+Math.random()*2.5,size:5+Math.random()*9,shape:Math.random()>0.4?'rect':'circle',
   }));
   return(
     <div style={{position:'fixed',inset:0,pointerEvents:'none',zIndex:999,overflow:'hidden'}}>
@@ -387,10 +494,10 @@ function Confetti(){
 }
 
 // ── ProgressBar ───────────────────────────────────────────────────────────────
-function ProgressBar({value,max,color='#FF6B6B',height=10}){
+function ProgressBar({value,max,color='var(--rt-primary)',height=10}){
   const pct=max>0?Math.min(100,Math.round(value/max*100)):0;
   return(
-    <div style={{background:'#f0f0f0',borderRadius:height,height,overflow:'hidden',width:'100%'}}>
+    <div style={{background:'var(--rt-progress-bg)',borderRadius:height,height,overflow:'hidden',width:'100%'}}>
       <div style={{width:`${pct}%`,height:'100%',background:color,borderRadius:height,transition:'width 0.5s ease'}}/>
     </div>
   );
@@ -398,23 +505,23 @@ function ProgressBar({value,max,color='#FF6B6B',height=10}){
 
 // ── WeeklyChart ───────────────────────────────────────────────────────────────
 function WeeklyChart({child}){
-  const DAY_NAMES=['Man','Tir','Ons','Tor','Fre','Lør','Søn'];
+  const DAY=['Man','Tir','Ons','Tor','Fre','Lør','Søn'];
   const t=new Date();
   const week=Array.from({length:7},(_,i)=>{
     const d=new Date(t);d.setDate(t.getDate()-6+i);
     const key=d.toISOString().slice(0,10);
     const h=child.history.find(x=>x.date===key);
     const dow=d.getDay();
-    return{label:DAY_NAMES[dow===0?6:dow-1],pts:h?h.points:0,isToday:key===today()};
+    return{label:DAY[dow===0?6:dow-1],pts:h?h.points:0,isToday:key===today()};
   });
   const maxPts=Math.max(...week.map(w=>w.pts),1);
   return(
     <div style={{display:'flex',alignItems:'flex-end',gap:6,height:130,padding:'0 4px'}}>
       {week.map((w,i)=>(
         <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:3,height:'100%',justifyContent:'flex-end'}}>
-          <span style={{fontSize:10,color:w.isToday?child.color:'#aaa',fontWeight:w.isToday?700:400}}>{w.pts>0?w.pts:''}</span>
-          <div style={{width:'100%',background:w.isToday?child.color:'#e0e0e0',borderRadius:'6px 6px 0 0',height:`${Math.round(w.pts/maxPts*90)}px`,minHeight:w.pts>0?4:2,transition:'height 0.6s ease'}}/>
-          <span style={{fontSize:11,color:w.isToday?child.color:'#aaa',fontWeight:w.isToday?700:400}}>{w.label}</span>
+          <span style={{fontSize:10,color:w.isToday?child.color:'var(--rt-faint)',fontWeight:w.isToday?700:400}}>{w.pts>0?w.pts:''}</span>
+          <div style={{width:'100%',background:w.isToday?child.color:'var(--rt-progress-bg)',borderRadius:'6px 6px 0 0',height:`${Math.round(w.pts/maxPts*90)}px`,minHeight:w.pts>0?4:2,transition:'height 0.6s ease'}}/>
+          <span style={{fontSize:11,color:w.isToday?child.color:'var(--rt-muted)',fontWeight:w.isToday?700:400}}>{w.label}</span>
         </div>
       ))}
     </div>
@@ -429,8 +536,6 @@ function RutineApp(){
   const [tab,setTab]=useState('morning');
   const [confetti,setConfetti]=useState(false);
   const [unlocked,setUnlocked]=useState(false);
-
-  // Modal states
   const [mAddChild,setMAddChild]=useState(false);
   const [mEditChild,setMEditChild]=useState(null);
   const [mAddTask,setMAddTask]=useState(null);
@@ -438,8 +543,14 @@ function RutineApp(){
   const [mAddReward,setMAddReward]=useState(false);
   const [mEditReward,setMEditReward]=useState(null);
   const [mChangePin,setMChangePin]=useState(false);
+  const [mTheme,setMTheme]=useState(false);
 
   useEffect(()=>{stor.set(data);},[data]);
+
+  // Apply theme whenever active child changes or view changes
+  const child=data.children.find(c=>c.id===childId)||null;
+  const activeThemeId=(['child','shop'].includes(view)&&child)?( child.theme||'natur'):'natur';
+  useEffect(()=>{ applyTheme(THEMES[activeThemeId]||THEMES.natur); },[activeThemeId]);
 
   // Midnight reset
   useEffect(()=>{
@@ -447,12 +558,12 @@ function RutineApp(){
       const t=today();
       if(data.lastReset!==t){
         setData(prev=>{
-          const children=prev.children.map(child=>{
-            const earned=Object.values(child.routines).flat().filter(x=>x.done).reduce((a,x)=>a+(x.pointValue||5),0);
-            const hist=earned>0?[...child.history.slice(-29),{date:prev.lastReset,points:earned}]:child.history;
+          const children=prev.children.map(c=>{
+            const earned=Object.values(c.routines).flat().filter(x=>x.done).reduce((a,x)=>a+(x.pointValue||5),0);
+            const hist=earned>0?[...c.history.slice(-29),{date:prev.lastReset,points:earned}]:c.history;
             const routines={};
-            for(const k of Object.keys(child.routines))routines[k]=child.routines[k].map(x=>({...x,done:false}));
-            return{...child,routines,history:hist};
+            for(const k of Object.keys(c.routines))routines[k]=c.routines[k].map(x=>({...x,done:false}));
+            return{...c,routines,history:hist};
           });
           return{...prev,children,lastReset:t};
         });
@@ -464,7 +575,6 @@ function RutineApp(){
   },[data.lastReset]);
 
   const upd=(fn)=>setData(prev=>fn(prev));
-  const child=data.children.find(c=>c.id===childId)||data.children[0]||null;
 
   const toggleTask=(cid,routine,tid)=>{
     upd(prev=>{
@@ -491,7 +601,11 @@ function RutineApp(){
     upd(prev=>({...prev,children:prev.children.map(c=>c.id===cid&&c.points>=r.cost?{...c,points:c.points-r.cost}:c)}));
   };
 
-  // ── Home ──────────────────────────────────────────────────────────────────
+  const setChildTheme=(cid,themeId)=>{
+    upd(p=>({...p,children:p.children.map(c=>c.id===cid?{...c,theme:themeId}:c)}));
+  };
+
+  // ── Home ────────────────────────────────────────────────────────────────────
   const Home=()=>(
     <div style={{padding:20}}>
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(155px,1fr))',gap:16}}>
@@ -499,20 +613,22 @@ function RutineApp(){
           const all=Object.values(c.routines).flat();
           const done=all.filter(t=>t.done);
           const badge=getBadge(c.totalPoints);
+          const th=THEMES[c.theme||'natur']||THEMES.natur;
           return(
             <div key={c.id} onClick={()=>{setChildId(c.id);setView('child');}}
-              style={{...s.card,cursor:'pointer',textAlign:'center',padding:'22px 14px',borderTop:`5px solid ${c.color}`,animation:'ruti_pop 0.3s ease-out'}}>
+              style={{...s.card,cursor:'pointer',textAlign:'center',padding:'22px 14px',borderTop:`5px solid ${c.color}`,animation:'ruti_pop 0.3s ease-out',background:th.card,boxShadow:th.cardShadow}}>
               <div style={{fontSize:50,lineHeight:1,marginBottom:8}}>{c.avatar}</div>
-              <div style={{fontSize:17,fontWeight:700,color:'#2c3e50',marginBottom:2}}>{c.name}</div>
-              <div style={{fontSize:12,color:'#aaa',marginBottom:12}}>{badge.icon} {badge.label}</div>
+              <div style={{fontSize:17,fontWeight:700,color:th.text,marginBottom:2}}>{c.name}</div>
+              <div style={{fontSize:12,color:th.muted,marginBottom:12}}>{badge.icon} {badge.label}</div>
               <ProgressBar value={done.length} max={all.length} color={c.color} height={7}/>
-              <div style={{fontSize:11,color:'#bbb',marginTop:5}}>{done.length}/{all.length} opgaver</div>
+              <div style={{fontSize:11,color:th.faint,marginTop:5}}>{done.length}/{all.length} opgaver</div>
               <div style={{marginTop:8,fontSize:15,fontWeight:700,color:c.color}}>⭐ {c.points}</div>
+              <div style={{marginTop:6,fontSize:11,color:th.muted}}>{THEMES[c.theme||'natur'].emoji} {THEMES[c.theme||'natur'].name}</div>
             </div>
           );
         })}
         {data.children.length===0&&(
-          <div style={{gridColumn:'1/-1',textAlign:'center',padding:48,color:'#bbb'}}>
+          <div style={{gridColumn:'1/-1',textAlign:'center',padding:48,color:'var(--rt-muted)'}}>
             <div style={{fontSize:52}}>👨‍👧</div>
             <p style={{marginTop:12,lineHeight:1.5}}>Ingen børn endnu.<br/>Åbn forældremenuen for at tilføje.</p>
           </div>
@@ -521,25 +637,28 @@ function RutineApp(){
     </div>
   );
 
-  // ── Child routine view ────────────────────────────────────────────────────
+  // ── ChildView ───────────────────────────────────────────────────────────────
   const ChildView=()=>{
     if(!child)return null;
     const tasks=child.routines[tab]||[];
     const done=tasks.filter(t=>t.done).length;
     const badge=getBadge(child.totalPoints);
     return(
-      <div style={{padding:20}}>
+      <div style={{padding:20,animation:'ruti_themeIn 0.35s ease-out'}}>
         <div style={{...s.card,marginBottom:14}}>
           <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:14}}>
             <div style={{fontSize:44}}>{child.avatar}</div>
             <div style={{flex:1}}>
               <div style={{fontSize:19,fontWeight:700,color:child.color}}>{child.name}</div>
-              <div style={{fontSize:13,color:'#aaa'}}>{badge.icon} {badge.label} · ⭐ {child.points} point</div>
+              <div style={{fontSize:13,color:'var(--rt-muted)'}}>{badge.icon} {badge.label} · ⭐ {child.points} point</div>
             </div>
-            <button onClick={()=>setView('shop')} style={{...s.btn,padding:'8px 14px',background:'#FFB347',color:'#fff',fontSize:13}}>🛍 Butik</button>
+            <div style={{display:'flex',gap:8}}>
+              <button onClick={()=>setMTheme(true)} style={{...s.btn,padding:'8px 12px',background:'var(--rt-sep)',color:'var(--rt-text)',fontSize:18,borderRadius:12}} title="Skift tema">🎨</button>
+              <button onClick={()=>setView('shop')} style={{...s.btn,padding:'8px 14px',background:'#FFB347',color:'#fff',fontSize:13}}>🛍 Butik</button>
+            </div>
           </div>
           <ProgressBar value={done} max={tasks.length} color={child.color}/>
-          <div style={{fontSize:11,color:'#bbb',marginTop:5}}>{done}/{tasks.length} {ROUTINE_LABELS[tab].toLowerCase()}-opgaver</div>
+          <div style={{fontSize:11,color:'var(--rt-muted)',marginTop:5}}>{done}/{tasks.length} {ROUTINE_LABELS[tab].toLowerCase()}-opgaver</div>
         </div>
 
         <div style={{display:'flex',gap:8,marginBottom:14}}>
@@ -548,7 +667,7 @@ function RutineApp(){
             const d=t.filter(x=>x.done).length;
             const active=tab===k;
             return(
-              <button key={k} onClick={()=>setTab(k)} style={{...s.btn,flex:1,fontSize:13,lineHeight:1.3,padding:'10px 6px',background:active?ROUTINE_COLORS[k]:'#fff',color:active?'#fff':'#888',border:`2px solid ${active?ROUTINE_COLORS[k]:'#eee'}`,borderRadius:14}}>
+              <button key={k} onClick={()=>setTab(k)} style={{...s.btn,flex:1,fontSize:13,lineHeight:1.3,padding:'10px 6px',background:active?ROUTINE_COLORS[k]:'var(--rt-card)',color:active?'#fff':'var(--rt-muted)',border:`2px solid ${active?ROUTINE_COLORS[k]:'var(--rt-input-border)'}`,borderRadius:14}}>
                 {ROUTINE_ICONS[k]}<br/>{ROUTINE_LABELS[k]}<br/><span style={{fontSize:11,opacity:0.85}}>{d}/{t.length}</span>
               </button>
             );
@@ -557,19 +676,20 @@ function RutineApp(){
 
         <div style={{display:'flex',flexDirection:'column',gap:10}}>
           {tasks.map(task=>(
-            <div key={task.id} onClick={()=>toggleTask(child.id,tab,task.id)} style={{...s.card,display:'flex',alignItems:'center',gap:14,cursor:'pointer',padding:'14px 16px',borderLeft:`5px solid ${task.done?'#4ECDC4':child.color}`,opacity:task.done?0.72:1,transition:'all 0.2s'}}>
-              <div style={{flexShrink:0}}>{IL[task.illustration]?IL[task.illustration](48):<div style={{width:48,height:48,background:'#f5f5f5',borderRadius:10}}/>}</div>
+            <div key={task.id} onClick={()=>toggleTask(child.id,tab,task.id)}
+              style={{...s.card,display:'flex',alignItems:'center',gap:14,cursor:'pointer',padding:'14px 16px',borderLeft:`5px solid ${task.done?'var(--rt-task-done)':child.color}`,opacity:task.done?0.72:1,transition:'all 0.2s'}}>
+              <div style={{flexShrink:0}}>{IL[task.illustration]?IL[task.illustration](48):<div style={{width:48,height:48,background:'var(--rt-sep)',borderRadius:10}}/>}</div>
               <div style={{flex:1,minWidth:0}}>
-                <div style={{fontSize:15,fontWeight:600,color:task.done?'#bbb':'#2c3e50',textDecoration:task.done?'line-through':'none'}}>{task.text}</div>
-                <div style={{fontSize:12,color:'#ccc'}}>+{task.pointValue||5} ⭐</div>
+                <div style={{fontSize:15,fontWeight:600,color:task.done?'var(--rt-muted)':'var(--rt-text)',textDecoration:task.done?'line-through':'none'}}>{task.text}</div>
+                <div style={{fontSize:12,color:'var(--rt-faint)'}}>+{task.pointValue||5} ⭐</div>
               </div>
-              <div style={{width:34,height:34,borderRadius:'50%',border:`3px solid ${task.done?'#4ECDC4':'#ddd'}`,background:task.done?'#4ECDC4':'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,color:'#fff',flexShrink:0,transition:'all 0.2s'}}>
+              <div style={{width:34,height:34,borderRadius:'50%',border:`3px solid ${task.done?'var(--rt-task-done)':'var(--rt-input-border)'}`,background:task.done?'var(--rt-task-done)':'transparent',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,color:'#fff',flexShrink:0,transition:'all 0.2s'}}>
                 {task.done?'✓':''}
               </div>
             </div>
           ))}
           {tasks.length===0&&(
-            <div style={{textAlign:'center',padding:40,color:'#ccc'}}>
+            <div style={{textAlign:'center',padding:40,color:'var(--rt-muted)'}}>
               <div style={{fontSize:36}}>📝</div><p style={{marginTop:8}}>Ingen opgaver endnu</p>
             </div>
           )}
@@ -578,17 +698,17 @@ function RutineApp(){
     );
   };
 
-  // ── Shop ──────────────────────────────────────────────────────────────────
+  // ── Shop ────────────────────────────────────────────────────────────────────
   const Shop=()=>{
     const [selId,setSelId]=useState(childId||(data.children[0]?.id));
     const c=data.children.find(x=>x.id===selId)||data.children[0];
-    if(!c)return<div style={{padding:40,textAlign:'center',color:'#ccc'}}>Ingen børn</div>;
+    if(!c)return<div style={{padding:40,textAlign:'center',color:'var(--rt-muted)'}}>Ingen børn</div>;
     return(
       <div style={{padding:20}}>
         {data.children.length>1&&(
           <div style={{display:'flex',gap:8,marginBottom:16,overflowX:'auto',paddingBottom:4}}>
             {data.children.map(ch=>(
-              <button key={ch.id} onClick={()=>setSelId(ch.id)} style={{...s.btn,padding:'8px 16px',fontSize:14,background:selId===ch.id?ch.color:'#fff',color:selId===ch.id?'#fff':'#666',border:`2px solid ${selId===ch.id?ch.color:'#eee'}`,whiteSpace:'nowrap'}}>
+              <button key={ch.id} onClick={()=>setSelId(ch.id)} style={{...s.btn,padding:'8px 16px',fontSize:14,background:selId===ch.id?ch.color:'var(--rt-card)',color:selId===ch.id?'#fff':'var(--rt-muted)',border:`2px solid ${selId===ch.id?ch.color:'var(--rt-input-border)'}`,whiteSpace:'nowrap'}}>
                 {ch.avatar} {ch.name}
               </button>
             ))}
@@ -606,22 +726,22 @@ function RutineApp(){
               <div key={r.id} style={{...s.card,display:'flex',alignItems:'center',gap:14,padding:'14px 16px'}}>
                 <div style={{fontSize:34}}>{r.icon}</div>
                 <div style={{flex:1}}>
-                  <div style={{fontSize:15,fontWeight:600}}>{r.text}</div>
+                  <div style={{fontSize:15,fontWeight:600,color:'var(--rt-text)'}}>{r.text}</div>
                   <div style={{fontSize:13,color:'#FFB347',fontWeight:700}}>⭐ {r.cost} point</div>
                 </div>
-                <button onClick={()=>can&&buyReward(c.id,r.id)} style={{...s.btn,padding:'8px 16px',fontSize:13,background:can?'#FFB347':'#eee',color:can?'#fff':'#ccc',cursor:can?'pointer':'not-allowed'}}>
+                <button onClick={()=>can&&buyReward(c.id,r.id)} style={{...s.btn,padding:'8px 16px',fontSize:13,background:can?'#FFB347':'var(--rt-sep)',color:can?'#fff':'var(--rt-faint)',cursor:can?'pointer':'not-allowed'}}>
                   {can?'Køb':'Mangler'}
                 </button>
               </div>
             );
           })}
-          {data.rewards.length===0&&<div style={{textAlign:'center',padding:40,color:'#ccc'}}><div style={{fontSize:36}}>🛍</div><p style={{marginTop:8}}>Ingen belønninger</p></div>}
+          {data.rewards.length===0&&<div style={{textAlign:'center',padding:40,color:'var(--rt-muted)'}}><div style={{fontSize:36}}>🛍</div><p style={{marginTop:8}}>Ingen belønninger</p></div>}
         </div>
       </div>
     );
   };
 
-  // ── Weekly ────────────────────────────────────────────────────────────────
+  // ── Weekly ──────────────────────────────────────────────────────────────────
   const Weekly=()=>(
     <div style={{padding:20}}>
       <div style={{display:'flex',flexDirection:'column',gap:16}}>
@@ -631,18 +751,18 @@ function RutineApp(){
               <span style={{fontSize:32}}>{c.avatar}</span>
               <div>
                 <div style={{fontWeight:700,fontSize:16,color:c.color}}>{c.name}</div>
-                <div style={{fontSize:12,color:'#aaa'}}>{getBadge(c.totalPoints).icon} {c.totalPoints} point i alt</div>
+                <div style={{fontSize:12,color:'var(--rt-muted)'}}>{getBadge(c.totalPoints).icon} {c.totalPoints} point i alt</div>
               </div>
             </div>
             <WeeklyChart child={c}/>
           </div>
         ))}
-        {data.children.length===0&&<div style={{textAlign:'center',padding:48,color:'#ccc'}}><div style={{fontSize:42}}>📊</div><p style={{marginTop:12}}>Ingen data endnu</p></div>}
+        {data.children.length===0&&<div style={{textAlign:'center',padding:48,color:'var(--rt-muted)'}}><div style={{fontSize:42}}>📊</div><p style={{marginTop:12}}>Ingen data endnu</p></div>}
       </div>
     </div>
   );
 
-  // ── Parent panel ──────────────────────────────────────────────────────────
+  // ── Parent panel ────────────────────────────────────────────────────────────
   const Parent=()=>{
     if(!unlocked)return(
       <div style={{padding:'40px 20px',display:'flex',flexDirection:'column',alignItems:'center'}}>
@@ -655,32 +775,33 @@ function RutineApp(){
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
           <h2 style={s.h2}>Forældre-panel</h2>
           <div style={{display:'flex',gap:8}}>
-            <button onClick={()=>setMChangePin(true)} style={{...s.btn,padding:'7px 14px',fontSize:13,background:'transparent',border:'2px solid #FF6B6B',color:'#FF6B6B',borderRadius:10}}>🔑 Skift PIN</button>
-            <button onClick={()=>setUnlocked(false)} style={{...s.btn,padding:'7px 14px',fontSize:13,background:'#f0f0f0',color:'#888',borderRadius:10}}>Lås</button>
+            <button onClick={()=>setMChangePin(true)} style={{...s.btn,padding:'7px 14px',fontSize:13,background:'transparent',border:'2px solid var(--rt-primary)',color:'var(--rt-primary)',borderRadius:10}}>🔑 Skift PIN</button>
+            <button onClick={()=>setUnlocked(false)} style={{...s.btn,padding:'7px 14px',fontSize:13,background:'var(--rt-sep)',color:'var(--rt-muted)',borderRadius:10}}>Lås</button>
           </div>
         </div>
 
-        {/* Children */}
         <div style={{...s.card,marginBottom:14}}>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
             <h3 style={s.h3}>👧 Børn</h3>
-            <button onClick={()=>setMAddChild(true)} style={{...s.btn,padding:'7px 14px',fontSize:13,background:'#FF6B6B',color:'#fff',borderRadius:10}}>+ Tilføj</button>
+            <button onClick={()=>setMAddChild(true)} style={{...s.btn,padding:'7px 14px',fontSize:13,background:'var(--rt-primary)',color:'var(--rt-primary-text)',borderRadius:10}}>+ Tilføj</button>
           </div>
-          {data.children.length===0&&<p style={{color:'#bbb',fontSize:14}}>Ingen børn endnu</p>}
-          {data.children.map(c=>(
-            <div key={c.id} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 0',borderBottom:'1px solid #f5f5f5'}}>
-              <span style={{fontSize:26}}>{c.avatar}</span>
-              <div style={{flex:1}}>
-                <div style={{fontWeight:600}}>{c.name}</div>
-                <div style={{fontSize:12,color:'#bbb'}}>⭐ {c.points} pt · Total: {c.totalPoints} pt</div>
+          {data.children.length===0&&<p style={{color:'var(--rt-muted)',fontSize:14}}>Ingen børn endnu</p>}
+          {data.children.map(c=>{
+            const th=THEMES[c.theme||'natur']||THEMES.natur;
+            return(
+              <div key={c.id} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 0',borderBottom:`1px solid var(--rt-sep)`}}>
+                <span style={{fontSize:26}}>{c.avatar}</span>
+                <div style={{flex:1}}>
+                  <div style={{fontWeight:600,color:'var(--rt-text)'}}>{c.name}</div>
+                  <div style={{fontSize:12,color:'var(--rt-muted)'}}>⭐ {c.points} pt · Total: {c.totalPoints} pt · {th.emoji} {th.name}</div>
+                </div>
+                <button onClick={()=>setMEditChild(c.id)} style={{...s.btn,padding:'5px 12px',fontSize:13,background:'var(--rt-sep)',color:'var(--rt-muted)',borderRadius:8}}>✏️</button>
+                <button onClick={()=>{if(window.confirm(`Slet ${c.name}?`))upd(p=>({...p,children:p.children.filter(x=>x.id!==c.id)}));}} style={{...s.btn,padding:'5px 12px',fontSize:13,background:'var(--rt-del-bg)',color:'var(--rt-del-text)',borderRadius:8}}>🗑</button>
               </div>
-              <button onClick={()=>setMEditChild(c.id)} style={{...s.btn,padding:'5px 12px',fontSize:13,background:'#f5f5f5',color:'#555',borderRadius:8}}>✏️</button>
-              <button onClick={()=>{if(window.confirm(`Slet ${c.name}?`))upd(p=>({...p,children:p.children.filter(x=>x.id!==c.id)}));}} style={{...s.btn,padding:'5px 12px',fontSize:13,background:'#fee',color:'#e74c3c',borderRadius:8}}>🗑</button>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        {/* Tasks per child */}
         {data.children.map(c=>(
           <div key={c.id} style={{...s.card,marginBottom:14}}>
             <h3 style={{...s.h3,marginBottom:12}}>{c.avatar} {c.name} — Opgaver</h3>
@@ -691,37 +812,35 @@ function RutineApp(){
                   <button onClick={()=>setMAddTask({childId:c.id,routine})} style={{...s.btn,padding:'4px 12px',fontSize:12,background:ROUTINE_COLORS[routine],color:'#fff',borderRadius:8}}>+ Tilføj</button>
                 </div>
                 {(c.routines[routine]||[]).map(task=>(
-                  <div key={task.id} style={{display:'flex',alignItems:'center',gap:8,padding:'5px 0',borderBottom:'1px solid #fafafa'}}>
+                  <div key={task.id} style={{display:'flex',alignItems:'center',gap:8,padding:'5px 0',borderBottom:`1px solid var(--rt-sep)`}}>
                     <div style={{flexShrink:0}}>{IL[task.illustration]?IL[task.illustration](24):<span style={{width:24,display:'inline-block'}}/>}</div>
-                    <span style={{flex:1,fontSize:13}}>{task.text}</span>
-                    <span style={{fontSize:11,color:'#bbb'}}>{task.pointValue||5}pt</span>
-                    <button onClick={()=>setMEditTask({childId:c.id,routine,task})} style={{...s.btn,padding:'3px 10px',fontSize:12,background:'#f5f5f5',color:'#555',borderRadius:7}}>✏️</button>
-                    <button onClick={()=>upd(p=>({...p,children:p.children.map(ch=>ch.id!==c.id?ch:{...ch,routines:{...ch.routines,[routine]:ch.routines[routine].filter(t=>t.id!==task.id)}})}))}
-                      style={{...s.btn,padding:'3px 10px',fontSize:12,background:'#fee',color:'#e74c3c',borderRadius:7}}>🗑</button>
+                    <span style={{flex:1,fontSize:13,color:'var(--rt-text)'}}>{task.text}</span>
+                    <span style={{fontSize:11,color:'var(--rt-faint)'}}>{task.pointValue||5}pt</span>
+                    <button onClick={()=>setMEditTask({childId:c.id,routine,task})} style={{...s.btn,padding:'3px 10px',fontSize:12,background:'var(--rt-sep)',color:'var(--rt-muted)',borderRadius:7}}>✏️</button>
+                    <button onClick={()=>upd(p=>({...p,children:p.children.map(ch=>ch.id!==c.id?ch:{...ch,routines:{...ch.routines,[routine]:ch.routines[routine].filter(t=>t.id!==task.id)}})}))} style={{...s.btn,padding:'3px 10px',fontSize:12,background:'var(--rt-del-bg)',color:'var(--rt-del-text)',borderRadius:7}}>🗑</button>
                   </div>
                 ))}
-                {(c.routines[routine]||[]).length===0&&<p style={{fontSize:12,color:'#ddd',padding:'4px 0'}}>Ingen opgaver</p>}
+                {(c.routines[routine]||[]).length===0&&<p style={{fontSize:12,color:'var(--rt-faint)',padding:'4px 0'}}>Ingen opgaver</p>}
               </div>
             ))}
           </div>
         ))}
 
-        {/* Rewards */}
         <div style={s.card}>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
             <h3 style={s.h3}>🎁 Belønninger</h3>
-            <button onClick={()=>setMAddReward(true)} style={{...s.btn,padding:'7px 14px',fontSize:13,background:'#FF6B6B',color:'#fff',borderRadius:10}}>+ Tilføj</button>
+            <button onClick={()=>setMAddReward(true)} style={{...s.btn,padding:'7px 14px',fontSize:13,background:'var(--rt-primary)',color:'var(--rt-primary-text)',borderRadius:10}}>+ Tilføj</button>
           </div>
-          {data.rewards.length===0&&<p style={{color:'#bbb',fontSize:14}}>Ingen belønninger endnu</p>}
+          {data.rewards.length===0&&<p style={{color:'var(--rt-muted)',fontSize:14}}>Ingen belønninger endnu</p>}
           {data.rewards.map(r=>(
-            <div key={r.id} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 0',borderBottom:'1px solid #f5f5f5'}}>
+            <div key={r.id} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 0',borderBottom:`1px solid var(--rt-sep)`}}>
               <span style={{fontSize:24}}>{r.icon}</span>
               <div style={{flex:1}}>
-                <div style={{fontWeight:600,fontSize:14}}>{r.text}</div>
-                <div style={{fontSize:12,color:'#bbb'}}>⭐ {r.cost} point</div>
+                <div style={{fontWeight:600,fontSize:14,color:'var(--rt-text)'}}>{r.text}</div>
+                <div style={{fontSize:12,color:'var(--rt-muted)'}}>⭐ {r.cost} point</div>
               </div>
-              <button onClick={()=>setMEditReward(r.id)} style={{...s.btn,padding:'5px 12px',fontSize:13,background:'#f5f5f5',color:'#555',borderRadius:8}}>✏️</button>
-              <button onClick={()=>upd(p=>({...p,rewards:p.rewards.filter(x=>x.id!==r.id)}))} style={{...s.btn,padding:'5px 12px',fontSize:13,background:'#fee',color:'#e74c3c',borderRadius:8}}>🗑</button>
+              <button onClick={()=>setMEditReward(r.id)} style={{...s.btn,padding:'5px 12px',fontSize:13,background:'var(--rt-sep)',color:'var(--rt-muted)',borderRadius:8}}>✏️</button>
+              <button onClick={()=>upd(p=>({...p,rewards:p.rewards.filter(x=>x.id!==r.id)}))} style={{...s.btn,padding:'5px 12px',fontSize:13,background:'var(--rt-del-bg)',color:'var(--rt-del-text)',borderRadius:8}}>🗑</button>
             </div>
           ))}
         </div>
@@ -729,16 +848,17 @@ function RutineApp(){
     );
   };
 
-  // ── Inner modals ──────────────────────────────────────────────────────────
+  // ── Modals ───────────────────────────────────────────────────────────────────
   function ChildModal({cid,onClose}){
     const ex=cid?data.children.find(c=>c.id===cid):null;
     const [name,setName]=useState(ex?.name||'');
     const [avatar,setAvatar]=useState(ex?.avatar||'🦁');
     const [color,setColor]=useState(ex?.color||CHILD_COLORS[0]);
+    const [theme,setTheme]=useState(ex?.theme||'natur');
     const save=()=>{
       if(!name.trim())return;
-      if(cid){upd(p=>({...p,children:p.children.map(c=>c.id===cid?{...c,name:name.trim(),avatar,color}:c)}));}
-      else{upd(p=>({...p,children:[...p.children,{id:uuid(),name:name.trim(),avatar,color,points:0,totalPoints:0,routines:{morning:[],afternoon:[],evening:[]},history:[]}]}));}
+      if(cid){upd(p=>({...p,children:p.children.map(c=>c.id===cid?{...c,name:name.trim(),avatar,color,theme}:c)}));}
+      else{upd(p=>({...p,children:[...p.children,{id:uuid(),name:name.trim(),avatar,color,theme,points:0,totalPoints:0,routines:{morning:[],afternoon:[],evening:[]},history:[]}]}));}
       onClose();
     };
     return(
@@ -749,16 +869,18 @@ function RutineApp(){
           <label style={s.label}>Avatar</label>
           <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
             {CHILD_AVATARS.map(a=>(
-              <button key={a} onClick={()=>setAvatar(a)} style={{fontSize:26,padding:8,borderRadius:10,border:`2px solid ${avatar===a?'#FF6B6B':'#eee'}`,background:avatar===a?'#FFF0EE':'#f8f8f8',cursor:'pointer',touchAction:'manipulation'}}>{a}</button>
+              <button key={a} onClick={()=>setAvatar(a)} style={{fontSize:26,padding:8,borderRadius:10,border:`2px solid ${avatar===a?'var(--rt-primary)':'var(--rt-input-border)'}`,background:avatar===a?'var(--rt-sep)':'var(--rt-card)',cursor:'pointer',touchAction:'manipulation',color:'inherit'}}>{a}</button>
             ))}
           </div>
           <label style={s.label}>Farve</label>
           <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
             {CHILD_COLORS.map(c=>(
-              <div key={c} onClick={()=>setColor(c)} style={{width:30,height:30,borderRadius:'50%',background:c,cursor:'pointer',border:`3px solid ${color===c?'#333':'transparent'}`,transition:'border 0.15s'}}/>
+              <div key={c} onClick={()=>setColor(c)} style={{width:30,height:30,borderRadius:'50%',background:c,cursor:'pointer',border:`3px solid ${color===c?'var(--rt-text)':'transparent'}`,transition:'border 0.15s'}}/>
             ))}
           </div>
-          <button onClick={save} style={{...s.btn,background:'#FF6B6B',color:'#fff',marginTop:6}}>{cid?'Gem ændringer':'Tilføj barn'}</button>
+          <label style={s.label}>Tema</label>
+          <ThemePicker currentTheme={theme} onSelect={setTheme}/>
+          <button onClick={save} style={{...s.btn,background:'var(--rt-primary)',color:'var(--rt-primary-text)',marginTop:6}}>{cid?'Gem ændringer':'Tilføj barn'}</button>
         </div>
       </Modal>
     );
@@ -785,12 +907,12 @@ function RutineApp(){
           <label style={s.label}>Point-værdi</label>
           <div style={{display:'flex',gap:8}}>
             {[5,10,15,20].map(v=>(
-              <button key={v} onClick={()=>setPts(v)} style={{...s.btn,flex:1,padding:'8px 0',fontSize:14,background:pts===v?'#FFB347':'#f5f5f5',color:pts===v?'#fff':'#888',border:`2px solid ${pts===v?'#FFB347':'#eee'}`,borderRadius:10}}>{v} ⭐</button>
+              <button key={v} onClick={()=>setPts(v)} style={{...s.btn,flex:1,padding:'8px 0',fontSize:14,background:pts===v?'#FFB347':'var(--rt-sep)',color:pts===v?'#fff':'var(--rt-muted)',border:`2px solid ${pts===v?'#FFB347':'var(--rt-input-border)'}`,borderRadius:10}}>{v} ⭐</button>
             ))}
           </div>
           <label style={s.label}>Illustration</label>
           <IllustrationPicker selected={illus} onSelect={setIllus}/>
-          <button onClick={save} style={{...s.btn,background:'#FF6B6B',color:'#fff',marginTop:4}}>{task?'Gem ændringer':'Tilføj opgave'}</button>
+          <button onClick={save} style={{...s.btn,background:'var(--rt-primary)',color:'var(--rt-primary-text)',marginTop:4}}>{task?'Gem ændringer':'Tilføj opgave'}</button>
         </div>
       </Modal>
     );
@@ -818,16 +940,16 @@ function RutineApp(){
           <label style={s.label}>Ikon</label>
           <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
             {ICONS.map(ic=>(
-              <button key={ic} onClick={()=>setIcon(ic)} style={{fontSize:24,padding:8,borderRadius:10,border:`2px solid ${icon===ic?'#FF6B6B':'#eee'}`,background:icon===ic?'#FFF0EE':'#f8f8f8',cursor:'pointer',touchAction:'manipulation'}}>{ic}</button>
+              <button key={ic} onClick={()=>setIcon(ic)} style={{fontSize:24,padding:8,borderRadius:10,border:`2px solid ${icon===ic?'var(--rt-primary)':'var(--rt-input-border)'}`,background:icon===ic?'var(--rt-sep)':'var(--rt-card)',cursor:'pointer',touchAction:'manipulation',color:'inherit'}}>{ic}</button>
             ))}
           </div>
-          <button onClick={save} style={{...s.btn,background:'#FF6B6B',color:'#fff',marginTop:4}}>{rid?'Gem ændringer':'Tilføj belønning'}</button>
+          <button onClick={save} style={{...s.btn,background:'var(--rt-primary)',color:'var(--rt-primary-text)',marginTop:4}}>{rid?'Gem ændringer':'Tilføj belønning'}</button>
         </div>
       </Modal>
     );
   }
 
-  // ── Navigation + render ───────────────────────────────────────────────────
+  // ── Navigation + render ──────────────────────────────────────────────────────
   const NAV=[
     {id:'home',icon:'🏠',label:'Hjem'},
     {id:'shop',icon:'🛍',label:'Butik'},
@@ -847,20 +969,20 @@ function RutineApp(){
     <div style={s.app}>
       {confetti&&<Confetti/>}
 
-      {/* Header */}
       <div style={s.header}>
         <div style={{display:'flex',alignItems:'center',gap:10}}>
           {(view==='child'||view==='shop')&&(
-            <button onClick={()=>setView('home')} style={{...s.btn,padding:'6px 12px',background:'rgba(255,255,255,0.22)',color:'#fff',fontSize:18,borderRadius:10}}>←</button>
+            <button onClick={()=>{setView('home');}} style={{...s.btn,padding:'6px 12px',background:'rgba(255,255,255,0.22)',color:'var(--rt-header-text)',fontSize:18,borderRadius:10}}>←</button>
           )}
-          <span style={{fontSize:20,fontWeight:700,letterSpacing:0.5}}>{headerTitle}</span>
+          <span style={{fontSize:20,fontWeight:700,letterSpacing:0.5,color:'var(--rt-header-text)'}}>{headerTitle}</span>
         </div>
-        {view==='child'&&child&&(
-          <span style={{fontSize:15,fontWeight:700,color:'rgba(255,255,255,0.92)'}}>⭐ {child.points}</span>
-        )}
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          {view==='child'&&child&&(
+            <span style={{fontSize:15,fontWeight:700,color:'var(--rt-header-text)',opacity:0.9}}>⭐ {child.points}</span>
+          )}
+        </div>
       </div>
 
-      {/* Content */}
       <div style={{paddingBottom:76}}>
         {view==='home'&&<Home/>}
         {view==='child'&&<ChildView/>}
@@ -869,21 +991,19 @@ function RutineApp(){
         {view==='parent'&&<Parent/>}
       </div>
 
-      {/* Bottom nav */}
-      <div style={{position:'fixed',bottom:0,left:0,right:0,background:'#fff',borderTop:'1px solid #eee',display:'flex',boxShadow:'0 -2px 14px rgba(0,0,0,0.06)',zIndex:100,paddingBottom:'env(safe-area-inset-bottom)'}}>
+      <div style={{position:'fixed',bottom:0,left:0,right:0,background:'var(--rt-nav-bg)',borderTop:`1px solid var(--rt-nav-border)`,display:'flex',boxShadow:'0 -2px 14px rgba(0,0,0,0.06)',zIndex:100,paddingBottom:'env(safe-area-inset-bottom)',transition:'background 0.4s ease'}}>
         {NAV.map(n=>{
           const active=view===n.id||(n.id==='home'&&view==='child');
           return(
             <button key={n.id} onClick={()=>{if(n.id==='shop'&&!childId&&data.children[0])setChildId(data.children[0].id);setView(n.id);}} style={{flex:1,border:'none',background:'transparent',padding:'10px 4px 8px',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:2,touchAction:'manipulation',WebkitTapHighlightColor:'transparent'}}>
               <span style={{fontSize:22}}>{n.icon}</span>
-              <span style={{fontSize:10,fontWeight:700,color:active?'#FF6B6B':'#bbb',textTransform:'uppercase',letterSpacing:0.4}}>{n.label}</span>
-              {active&&<div style={{width:5,height:5,borderRadius:'50%',background:'#FF6B6B'}}/>}
+              <span style={{fontSize:10,fontWeight:700,color:active?'var(--rt-nav-active)':'var(--rt-nav-inactive)',textTransform:'uppercase',letterSpacing:0.4}}>{n.label}</span>
+              {active&&<div style={{width:5,height:5,borderRadius:'50%',background:'var(--rt-nav-active)'}}/>}
             </button>
           );
         })}
       </div>
 
-      {/* Modals */}
       {mAddChild&&<ChildModal onClose={()=>setMAddChild(false)}/>}
       {mEditChild&&<ChildModal cid={mEditChild} onClose={()=>setMEditChild(null)}/>}
       {mAddTask&&<TaskModal childId={mAddTask.childId} routine={mAddTask.routine} onClose={()=>setMAddTask(null)}/>}
@@ -893,6 +1013,11 @@ function RutineApp(){
       {mChangePin&&(
         <Modal title="Skift PIN-kode" onClose={()=>setMChangePin(false)} narrow>
           <PinPad mode="set" onSet={pin=>{upd(p=>({...p,pin}));setMChangePin(false);}}/>
+        </Modal>
+      )}
+      {mTheme&&child&&(
+        <Modal title={`🎨 Vælg tema — ${child.name}`} onClose={()=>setMTheme(false)} narrow>
+          <ThemePicker currentTheme={child.theme||'natur'} onSelect={tid=>{setChildTheme(child.id,tid);setMTheme(false);}}/>
         </Modal>
       )}
     </div>
