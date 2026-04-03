@@ -219,7 +219,6 @@ function RutineApp(){
   const [mAddReward,setMAddReward]=useState(false);
   const [mEditReward,setMEditReward]=useState(null);
   const [mChangePin,setMChangePin]=useState(false);
-  const [mTheme,setMTheme]=useState(false);
 
   useEffect(()=>{stor.set(data);},[data]);
 
@@ -291,7 +290,6 @@ function RutineApp(){
               <div style={{fontSize:18,fontWeight:700,color:child.color}}>{child.name}</div>
               <div style={{fontSize:12,color:'var(--rt-muted)'}}>{badge.icon} {badge.label} · ⭐ {child.points} point</div>
             </div>
-            <button onClick={()=>setMTheme(true)} style={{...s.btn,padding:'8px 11px',background:'var(--rt-sep)',color:'var(--rt-text)',fontSize:18,borderRadius:12}}>🎨</button>
           </div>
           <ProgressBar value={doneCount} max={schedule.length} color={child.color}/>
           <div style={{fontSize:12,color:'var(--rt-muted)',marginTop:5}}>{doneCount} af {schedule.length} aktiviteter gennemført</div>
@@ -663,9 +661,6 @@ function RutineApp(){
             <span style={{color:'#fff',fontWeight:800,fontSize:16}}>{child.points||0}</span>
           </div>
         )}
-        {view==='home'&&(
-          <button onClick={()=>setMAddChild(true)} style={{...s.btn,background:'rgba(255,255,255,0.25)',color:'#fff',padding:'6px 12px',fontSize:14,borderRadius:10}}>+ Barn</button>
-        )}
       </div>
 
       {/* ── Scrollable content ── */}
@@ -701,13 +696,6 @@ function RutineApp(){
       {mChangePin&&(
         <Modal title="Skift PIN" onClose={()=>setMChangePin(false)} narrow>
           <PinPad mode="set" onSet={pin=>{upd(p=>({...p,pin}));setMChangePin(false);}}/>
-        </Modal>
-      )}
-      {mTheme&&child&&(
-        <Modal title={`${child.avatar} ${child.name} — Tema`} onClose={()=>setMTheme(false)} narrow>
-          <div style={{display:'flex',flexDirection:'column',gap:14}}>
-            <ThemePicker currentTheme={child.theme||'natur'} onSelect={tid=>{upd(p=>({...p,children:p.children.map(c=>c.id===child.id?{...c,theme:tid}:c)}));setMTheme(false);}}/>
-          </div>
         </Modal>
       )}
     </div>
