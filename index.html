@@ -572,18 +572,21 @@ function FlowApp(){
     return(
       <div style={{background:'#FFF8F0',minHeight:'100%',padding:'18px 16px 40px',animation:'fl_childIn 0.35s ease-out'}}>
 
-        {/* Reward progress */}
+        {/* Reward progress — circle per activity */}
         {child.reward?.enabled&&(
           <div style={{background:'#FFFFFF',borderRadius:20,padding:'16px 18px',marginBottom:18,boxShadow:'0 2px 12px rgba(0,0,0,0.06)'}}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
-              <span style={{fontSize:14,fontWeight:700,color:'#2D3142'}}>Belønning</span>
-              <span style={{fontSize:14,fontWeight:700,color:allDone?'#38A169':cc}}>{doneCount}/{schedule.length}</span>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+              <span style={{fontSize:14,fontWeight:700,color:'#2D3142'}}>Fremgang mod belønning</span>
+              <span style={{fontSize:13,fontWeight:700,color:allDone?'#38A169':cc}}>{doneCount}/{schedule.length}</span>
             </div>
-            <div style={{background:'#F0F4F8',borderRadius:12,height:12,overflow:'hidden'}}>
-              <div style={{width:`${schedule.length>0?Math.round((doneCount/schedule.length)*100):0}%`,height:'100%',background:allDone?'#38A169':cc,borderRadius:12,transition:'width 0.5s ease'}}/>
+            <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+              {schedule.map((_,i)=>{
+                const filled=i<doneCount;
+                return <div key={i} style={{width:28,height:28,borderRadius:'50%',background:filled?(allDone?'#38A169':cc):'#F0F4F8',border:`2px solid ${filled?(allDone?'#38A169':cc):'#E2E8F0'}`,display:'flex',alignItems:'center',justifyContent:'center',transition:'background 0.3s,border 0.3s',fontSize:14,color:'#fff',fontWeight:700}}>{filled?'★':''}</div>;
+              })}
             </div>
             {allDone&&child.reward.text&&(
-              <div style={{marginTop:12,padding:'12px 16px',background:'#F0FAF4',borderRadius:14,fontSize:15,fontWeight:700,color:'#38A169',textAlign:'center'}}>
+              <div style={{marginTop:14,padding:'12px 16px',background:'#F0FAF4',borderRadius:14,fontSize:15,fontWeight:700,color:'#38A169',textAlign:'center'}}>
                 🎉 {child.reward.text}
               </div>
             )}
@@ -620,10 +623,8 @@ function FlowApp(){
             /* Current — large, colorful, inviting */
             if(isCurrent)return(
               <div key={task.id} style={{background:bg,borderRadius:28,padding:'28px 22px',textAlign:'center',boxShadow:`0 6px 32px ${cc}28`}}>
-                <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:6,marginBottom:16}}>
-                  <div style={{width:9,height:9,borderRadius:'50%',background:cc,animation:'fl_glow 1.4s ease-in-out infinite'}}/>
-                  <span style={{fontSize:13,fontWeight:800,color:cc,letterSpacing:2,textTransform:'uppercase'}}>Nu</span>
-                  <div style={{width:9,height:9,borderRadius:'50%',background:cc,animation:'fl_glow 1.4s 0.7s ease-in-out infinite'}}/>
+                <div style={{display:'flex',justifyContent:'center',marginBottom:16}}>
+                  <span style={{background:'#F97316',color:'#fff',fontSize:14,fontWeight:800,letterSpacing:2,textTransform:'uppercase',padding:'6px 18px',borderRadius:30}}>NU</span>
                 </div>
                 <div style={{display:'flex',justifyContent:'center',marginBottom:20}}>{ilGet(task.illustration,120)}</div>
                 <div style={{fontSize:28,fontWeight:800,color:'#2D3142',marginBottom:task.time&&child.showTimes?6:24,lineHeight:1.2}}>{task.text}</div>
@@ -665,12 +666,9 @@ function FlowApp(){
     );
     return(
       <div style={{padding:20}}>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}}>
-          <h2 style={s.h2}>Pædagogens panel</h2>
-          <div style={{display:'flex',gap:8}}>
-            <button onClick={()=>setMChangePin(true)} style={{...s.btn,padding:'8px 14px',fontSize:13,background:'var(--fl-sep)',color:'var(--fl-muted)',borderRadius:10}}>Skift PIN</button>
-            <button onClick={()=>setUnlocked(false)} style={{...s.btn,padding:'8px 14px',fontSize:13,background:'var(--fl-sep)',color:'var(--fl-muted)',borderRadius:10}}>Lås</button>
-          </div>
+        <div style={{display:'flex',justifyContent:'flex-end',gap:8,marginBottom:20}}>
+          <button onClick={()=>setMChangePin(true)} style={{...s.btn,padding:'8px 14px',fontSize:13,background:'var(--fl-sep)',color:'var(--fl-muted)',borderRadius:10}}>Skift PIN</button>
+          <button onClick={()=>setUnlocked(false)} style={{...s.btn,padding:'8px 14px',fontSize:13,background:'var(--fl-sep)',color:'var(--fl-muted)',borderRadius:10}}>Lås</button>
         </div>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
           <h3 style={s.h3}>Børn</h3>
@@ -691,7 +689,10 @@ function FlowApp(){
                       {done}/{sched.length} aktiviteter{c.reward?.enabled?` · Belønning: ${c.reward.text||'aktiv'}`:''}
                     </div>
                   </div>
-                  <div style={{width:4,height:32,borderRadius:2,background:c.color,flexShrink:0}}/>
+                  <div style={{flexShrink:0,display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
+                    <div style={{width:10,height:10,borderRadius:'50%',background:done===sched.length&&sched.length>0?'#38A169':done>0?'#F97316':'#CBD5E0'}}/>
+                    <div style={{fontSize:9,fontWeight:700,color:done===sched.length&&sched.length>0?'#38A169':done>0?'#F97316':'#9AA3AF',letterSpacing:0.2,textAlign:'center',lineHeight:1.2}}>{done===sched.length&&sched.length>0?'Færdig':done>0?'I gang':'Ikke\nstartet'}</div>
+                  </div>
                 </div>
                 <div style={{display:'flex',gap:8}}>
                   <button onClick={()=>setMSchedule(c.id)} style={{...s.btn,flex:2,padding:'9px 0',fontSize:13,background:'var(--fl-primary)',color:'var(--fl-primary-text)',borderRadius:10}}>Dagsplan</button>
