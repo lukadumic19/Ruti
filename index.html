@@ -69,6 +69,12 @@ const ACTIVITY_BANK=[
   {text:'Computer',illustration:'tablet',defaultTime:null},
   {text:'Hvile',illustration:'sleep',defaultTime:null},
   {text:'Terapi',illustration:'terapi',defaultTime:null},
+  {text:'Mellemmåltid',illustration:'mellemmåltid',defaultTime:'10:00'},
+  {text:'Matematik',illustration:'matematik',defaultTime:null},
+  {text:'Sprogøvelse',illustration:'sprog',defaultTime:null},
+  {text:'Toiletbesøg',illustration:'toilet',defaultTime:null},
+  {text:'Håndvask',illustration:'haandvask',defaultTime:null},
+  {text:'Påklædning',illustration:'paaklædning',defaultTime:null},
 ];
 
 const CHILD_COLORS=['#4A6FA5','#E07A5F','#52B788','#F0A500','#9B89B4','#E8A87C','#5C8A7A','#C97B84'];
@@ -335,6 +341,53 @@ terapi:(sz)=>(
     <path d="M46 82 L60 88" stroke="#4A6FA5" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
     <path d="M50 72 L36 66" stroke="#4A6FA5" strokeWidth="3" strokeLinecap="round" fill="none"/>
     <path d="M50 72 L64 67" stroke="#4A6FA5" strokeWidth="3" strokeLinecap="round" fill="none"/>
+  </svg>
+),
+'mellemmåltid':(sz)=>(
+  <svg width={sz} height={sz} viewBox="0 0 100 100" style={{display:'block'}}>
+    <path d="M32 62 Q28 44 38 36 Q46 30 50 38 Q54 30 62 36 Q72 44 68 62 Z" fill="#FFD166" opacity="0.85"/>
+    <path d="M50 38 Q50 28 52 22" stroke="#52B788" strokeWidth="3" fill="none" strokeLinecap="round"/>
+    <ellipse cx="56" cy="20" rx="8" ry="5" fill="#52B788" opacity="0.75" transform="rotate(-15 56 20)"/>
+    <ellipse cx="50" cy="72" rx="22" ry="8" fill="#FFD166" opacity="0.3"/>
+    <line x1="28" y1="68" x2="72" y2="68" stroke="#DDE2EA" strokeWidth="2"/>
+  </svg>
+),
+matematik:(sz)=>(
+  <svg width={sz} height={sz} viewBox="0 0 100 100" style={{display:'block'}}>
+    <rect x="16" y="22" width="68" height="58" rx="8" fill="#F4F6F9" stroke="#DDE2EA" strokeWidth="2"/>
+    <text x="50" y="54" textAnchor="middle" fontSize="28" fontWeight="700" fill="#4A6FA5" fontFamily="sans-serif">1+2</text>
+    <line x1="24" y1="64" x2="76" y2="64" stroke="#DDE2EA" strokeWidth="1.5"/>
+    <text x="50" y="76" textAnchor="middle" fontSize="16" fontWeight="700" fill="#52B788" fontFamily="sans-serif">=3</text>
+  </svg>
+),
+sprog:(sz)=>(
+  <svg width={sz} height={sz} viewBox="0 0 100 100" style={{display:'block'}}>
+    <path d="M18 28 Q18 18 28 18 L72 18 Q82 18 82 28 L82 58 Q82 68 72 68 L56 68 L48 82 L44 68 L28 68 Q18 68 18 58 Z" fill="#98C1D9" opacity="0.3" stroke="#4A6FA5" strokeWidth="2"/>
+    <text x="50" y="50" textAnchor="middle" fontSize="30" fontWeight="700" fill="#4A6FA5" fontFamily="sans-serif">A</text>
+  </svg>
+),
+toilet:(sz)=>(
+  <svg width={sz} height={sz} viewBox="0 0 100 100" style={{display:'block'}}>
+    <rect x="30" y="14" width="40" height="72" rx="6" fill="#F4F6F9" stroke="#DDE2EA" strokeWidth="2"/>
+    <rect x="34" y="20" width="32" height="20" rx="4" fill="#DDE2EA" opacity="0.6"/>
+    <circle cx="50" cy="64" r="12" fill="#FFFFFF" stroke="#DDE2EA" strokeWidth="2"/>
+    <circle cx="50" cy="64" r="6" fill="#EEF1F5"/>
+    <rect x="38" y="44" width="24" height="6" rx="3" fill="#DDE2EA" opacity="0.7"/>
+  </svg>
+),
+haandvask:(sz)=>(
+  <svg width={sz} height={sz} viewBox="0 0 100 100" style={{display:'block'}}>
+    <path d="M32 55 Q28 48 32 42 L36 38 Q40 34 44 38 L44 44 L56 44 L56 38 Q60 34 64 38 L68 42 Q72 48 68 55 Z" fill="#98C1D9" opacity="0.4" stroke="#4A6FA5" strokeWidth="1.5"/>
+    <path d="M32 55 L68 55 Q72 65 66 72 L34 72 Q28 65 32 55Z" fill="#F4F6F9" stroke="#DDE2EA" strokeWidth="2"/>
+    <line x1="40" y1="20" x2="38" y2="30" stroke="#98C1D9" strokeWidth="2.5" strokeLinecap="round"/>
+    <line x1="50" y1="16" x2="50" y2="28" stroke="#4A6FA5" strokeWidth="2.5" strokeLinecap="round"/>
+    <line x1="60" y1="20" x2="62" y2="30" stroke="#98C1D9" strokeWidth="2.5" strokeLinecap="round"/>
+  </svg>
+),
+'paaklædning':(sz)=>(
+  <svg width={sz} height={sz} viewBox="0 0 100 100" style={{display:'block'}}>
+    <path d="M36 22 L22 38 L34 44 L34 82 L66 82 L66 44 L78 38 L64 22 Q58 30 50 30 Q42 30 36 22Z" fill="#98C1D9" opacity="0.35" stroke="#4A6FA5" strokeWidth="2" strokeLinejoin="round"/>
+    <path d="M36 22 Q42 18 50 18 Q58 18 64 22" stroke="#4A6FA5" strokeWidth="2" fill="none" strokeLinecap="round"/>
   </svg>
 ),
 };
@@ -686,13 +739,13 @@ function FlowApp(){
             {schedule.some(t=>t.done)&&<button onClick={()=>{if(window.confirm('Nulstil dagens afkrydsninger?'))updSched(schedule.map(t=>({...t,done:false})));}} style={{...s.btn,padding:'11px 14px',fontSize:13,background:'var(--fl-del-bg)',color:'var(--fl-del-text)',borderRadius:12}}>Nulstil</button>}
           </div>
           {showBank&&(
-            <div style={{display:'flex',flexDirection:'column',gap:8}}>
-              <p style={{fontSize:12,color:'var(--fl-muted)'}}>Tryk for at tilføje til dagsplanen</p>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:8}}>
+            <div style={{display:'flex',flexDirection:'column',gap:10}}>
+              <p style={{fontSize:12,color:'var(--fl-muted)',paddingLeft:2}}>Tryk på en aktivitet for at tilføje den</p>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
                 {ACTIVITY_BANK.map((a,i)=>(
-                  <button key={i} onClick={()=>addFromBank(a)} style={{...s.btn,padding:'10px 12px',gap:10,justifyContent:'flex-start',background:'var(--fl-sep)',color:'var(--fl-text)',borderRadius:12,fontSize:13,fontWeight:500}}>
-                    {ilGet(a.illustration,26)}
-                    {a.text}
+                  <button key={i} onClick={()=>addFromBank(a)} style={{...s.btn,flexDirection:'column',gap:8,padding:'14px 8px',background:'var(--fl-sep)',color:'var(--fl-text)',borderRadius:14,fontSize:12,fontWeight:600,lineHeight:1.3,textAlign:'center',minHeight:90}}>
+                    {ilGet(a.illustration,52)}
+                    <span style={{wordBreak:'break-word',maxWidth:'100%'}}>{a.text}</span>
                   </button>
                 ))}
               </div>
