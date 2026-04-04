@@ -104,7 +104,7 @@ const migrateData=(raw)=>{
         .map(t=>({id:t.id||uuid(),text:t.text,illustration:t.illustration||'morgensamling',time:t.time||null,done:t.done||false}));
     }
     return{
-      id:c.id,name:c.name,avatar:c.avatar||'🦁',
+      id:c.id,name:c.name,avatar:c.avatar||'🦁',photo:c.photo||null,
       color:c.color||CHILD_COLORS[0],showTimes:c.showTimes||false,
       reward:c.reward||{enabled:false,text:''},
       schedule:(schedule||[]).map(t=>({id:t.id,text:t.text,illustration:t.illustration||'morgensamling',time:t.time||null,done:t.done||false}))
@@ -406,6 +406,37 @@ haandvask:(sz)=>(
 };
 const ilFallback=(sz)=><div style={{width:sz,height:sz,borderRadius:sz*0.18,background:'var(--fl-sep)',flexShrink:0}}/>;
 const ilGet=(key,sz)=>IL[key]?IL[key](sz):ilFallback(sz);
+// Compress + crop image to max 200×200 JPEG, returns base64 data-URL
+function compressImage(file,cb){
+  const img=new Image();
+  const url=URL.createObjectURL(file);
+  img.onload=()=>{
+    const MAX=200;
+    const scale=Math.min(MAX/img.width,MAX/img.height,1);
+    const w=Math.round(img.width*scale);
+    const h=Math.round(img.height*scale);
+    const cv=document.createElement('canvas');
+    cv.width=w;cv.height=h;
+    const ctx=cv.getContext('2d');
+    // crop to square from center
+    const side=Math.min(img.width,img.height);
+    const sx=(img.width-side)/2;
+    const sy=(img.height-side)/2;
+    ctx.drawImage(img,sx,sy,side,side,0,0,w,h);
+    URL.revokeObjectURL(url);
+    cb(cv.toDataURL('image/jpeg',0.82));
+  };
+  img.src=url;
+}
+
+// Renders a child's avatar: photo (round) if available, else emoji
+function Avatar({child,size=46,style={}}){
+  if(child?.photo){
+    return <img src={child.photo} alt={child.name} style={{width:size,height:size,borderRadius:'50%',objectFit:'cover',flexShrink:0,display:'block',...style}}/>;
+  }
+  return <span style={{fontSize:size*0.9,lineHeight:1,flexShrink:0,...style}}>{child?.avatar||'🦁'}</span>;
+}
+
 function IllustrationPicker({selected,onSelect}){
   const keys=Object.keys(IL);
   return(
@@ -549,7 +580,7 @@ function FlowApp(){
             const done=sched.filter(t=>t.done).length;
             return(
               <div key={c.id} onClick={()=>{setChildId(c.id);setView('child');}} style={{...s.card,cursor:'pointer',textAlign:'center',padding:'26px 16px',borderRadius:18,animation:'fl_pop 0.3s ease-out',touchAction:'manipulation',userSelect:'none',borderTop:`3px solid ${c.color}`}}>
-                <div style={{fontSize:46,lineHeight:1,marginBottom:12}}>{c.avatar}</div>
+                <div style={{display:'flex',justifyContent:'center',marginBottom:12}}><Avatar child={c} size={56}/></div>
                 <div style={{fontSize:16,fontWeight:700,color:'var(--fl-text)',marginBottom:14}}>{c.name}</div>
                 <ProgressBar value={done} max={sched.length} color={c.color} height={6}/>
                 <div style={{fontSize:12,color:'var(--fl-muted)',marginTop:7}}>{done} / {sched.length} aktiviteter</div>
@@ -682,7 +713,7 @@ function FlowApp(){
             return(
               <div key={c.id} style={{...s.card,padding:'16px'}}>
                 <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:12}}>
-                  <span style={{fontSize:30}}>{c.avatar}</span>
+                  <Avatar child={c} size={42}/>
                   <div style={{flex:1}}>
                     <div style={{fontWeight:700,color:'var(--fl-text)',fontSize:15}}>{c.name}</div>
                     <div style={{fontSize:12,color:'var(--fl-muted)',marginTop:2}}>
@@ -723,7 +754,7 @@ function FlowApp(){
       return<ActivityForm task={task} cid={cid} schedule={schedule} updSched={updSched} showTime={c.showTimes} onDone={()=>setEditing(null)} onClose={onClose}/>;
     }
     return(
-      <Modal title={`${c.avatar} ${c.name} — Dagsplan`} onClose={onClose}>
+      <Modal title={`${c.name} — Dagsplan`} onClose={onClose}>
         <div style={{display:'flex',flexDirection:'column',gap:14}}>
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 16px',background:'var(--fl-sep)',borderRadius:12}}>
             <div>
@@ -814,14 +845,21 @@ function FlowApp(){
     const ex=cid?data.children.find(c=>c.id===cid):null;
     const [name,setName]=useState(ex?.name||'');
     const [avatar,setAvatar]=useState(ex?.avatar||'🦁');
+    const [photo,setPhoto]=useState(ex?.photo||null);
     const [color,setColor]=useState(ex?.color||CHILD_COLORS[0]);
     const [rewardEnabled,setRewardEnabled]=useState(ex?.reward?.enabled||false);
     const [rewardText,setRewardText]=useState(ex?.reward?.text||'');
+    const fileRef=React.useRef();
+    const onFile=e=>{
+      const f=e.target.files?.[0];
+      if(f)compressImage(f,dataUrl=>setPhoto(dataUrl));
+      e.target.value='';
+    };
     const save=()=>{
       if(!name.trim())return;
       const reward={enabled:rewardEnabled,text:rewardText.trim()};
-      if(cid){upd(p=>({...p,children:p.children.map(c=>c.id===cid?{...c,name:name.trim(),avatar,color,reward}:c)}));}
-      else{upd(p=>({...p,children:[...p.children,{id:uuid(),name:name.trim(),avatar,color,showTimes:false,reward,schedule:[]}]}));}
+      if(cid){upd(p=>({...p,children:p.children.map(c=>c.id===cid?{...c,name:name.trim(),avatar,photo,color,reward}:c)}));}
+      else{upd(p=>({...p,children:[...p.children,{id:uuid(),name:name.trim(),avatar,photo,color,showTimes:false,reward,schedule:[]}]}));}
       onClose();
     };
     return(
@@ -829,7 +867,27 @@ function FlowApp(){
         <div style={{display:'flex',flexDirection:'column',gap:14}}>
           <label style={s.label}>Navn</label>
           <input style={s.input} value={name} onChange={e=>setName(e.target.value)} placeholder="Barnets navn" autoFocus/>
-          <label style={s.label}>Avatar</label>
+          <label style={s.label}>Profilbillede / avatar</label>
+          {/* Photo preview + upload trigger */}
+          <div style={{display:'flex',alignItems:'center',gap:16}}>
+            <div onClick={()=>fileRef.current.click()} style={{width:72,height:72,borderRadius:'50%',overflow:'hidden',background:'var(--fl-sep)',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',flexShrink:0,border:'2px dashed var(--fl-input-border)',position:'relative'}}>
+              {photo
+                ?<img src={photo} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+                :<span style={{fontSize:36}}>{avatar}</span>}
+              <div style={{position:'absolute',bottom:0,right:0,width:22,height:22,borderRadius:'50%',background:'var(--fl-primary)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              </div>
+            </div>
+            <div style={{display:'flex',flexDirection:'column',gap:8,flex:1}}>
+              <button type="button" onClick={()=>fileRef.current.click()} style={{...s.btn,padding:'9px 14px',fontSize:13,background:'var(--fl-primary)',color:'#fff',borderRadius:10}}>
+                Vælg foto / kamera
+              </button>
+              {photo&&<button type="button" onClick={()=>setPhoto(null)} style={{...s.btn,padding:'7px 14px',fontSize:12,background:'var(--fl-del-bg)',color:'var(--fl-del-text)',borderRadius:10}}>Fjern foto</button>}
+            </div>
+          </div>
+          <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{display:'none'}} onChange={onFile}/>
+          {/* Emoji fallback picker (shown always so you can still pick emoji) */}
+          <label style={{...s.label,marginTop:2}}>Emoji (bruges hvis intet foto)</label>
           <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
             {CHILD_AVATARS.map(a=>(
               <button key={a} onClick={()=>setAvatar(a)} style={{fontSize:24,padding:8,borderRadius:10,border:`2px solid ${avatar===a?'var(--fl-primary)':'var(--fl-input-border)'}`,background:avatar===a?'var(--fl-sep)':'var(--fl-card)',cursor:'pointer',touchAction:'manipulation',color:'inherit'}}>{a}</button>
@@ -880,7 +938,7 @@ function FlowApp(){
       {isChild?(
         <div style={{background:child?.color||'#4A8FE7',paddingTop:'calc(16px + env(safe-area-inset-top))',paddingBottom:16,paddingLeft:18,paddingRight:18,display:'flex',alignItems:'center',gap:12,flexShrink:0}}>
           <button onClick={()=>setView('home')} style={{...s.btn,background:'rgba(255,255,255,0.22)',color:'#fff',padding:'8px 14px',fontSize:15,borderRadius:24,fontWeight:700}}>←</button>
-          <span style={{fontSize:20}}>{child?.avatar}</span>
+          <Avatar child={child} size={32} style={{border:'2px solid rgba(255,255,255,0.5)',borderRadius:'50%'}}/>
           <span style={{flex:1,fontSize:19,fontWeight:800,color:'#fff',letterSpacing:-0.3}}>{child?.name}</span>
         </div>
       ):(
