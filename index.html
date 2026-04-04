@@ -6,26 +6,27 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Flow"/>
-<meta name="theme-color" content="#4A6FA5"/>
+<meta name="theme-color" content="#3B6FD4"/>
 <title>Flow</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body,#root{height:100%;overflow:hidden;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F4F6F9;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Roboto,sans-serif;background:#F8FAFC;}
 button{font-family:inherit;cursor:pointer;border:none;outline:none;}
 input,textarea{font-family:inherit;outline:none;}
 @keyframes fl_pop{from{opacity:0;transform:scale(0.96) translateY(6px)}to{opacity:1;transform:none}}
 @keyframes fl_glow{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.3)}}
+@keyframes fl_childIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 :root{
-  --fl-bg:#F4F6F9;--fl-card:#FFFFFF;--fl-header:#4A6FA5;--fl-primary:#4A6FA5;
-  --fl-primary-text:#FFFFFF;--fl-text:#2C3550;--fl-muted:#7A869A;--fl-faint:#B8C2D0;
-  --fl-sep:#EAECF2;--fl-done:#52B788;
-  --fl-del-bg:#FEF0F0;--fl-del-text:#D95F5F;
-  --fl-input-bg:#F4F6F9;--fl-input-border:#DDE2EA;
-  --fl-overlay:rgba(44,53,80,0.5);
-  --fl-card-radius:16px;--fl-card-shadow:0 2px 12px rgba(44,53,80,0.07);
-  --fl-prog-bg:#EAECF2;
-  --fl-pin-btn:#F4F6F9;--fl-pin-border:#DDE2EA;--fl-pin-dot:#DDE2EA;--fl-pin-fill:#4A6FA5;
+  --fl-bg:#F8FAFC;--fl-card:#FFFFFF;--fl-header:#FFFFFF;--fl-primary:#3B6FD4;
+  --fl-primary-text:#FFFFFF;--fl-text:#1E2A3B;--fl-muted:#6B7A8D;--fl-faint:#C4CDD8;
+  --fl-sep:#EEF1F6;--fl-done:#38A169;
+  --fl-del-bg:#FEF2F2;--fl-del-text:#DC2626;
+  --fl-input-bg:#F8FAFC;--fl-input-border:#DDE3EC;
+  --fl-overlay:rgba(30,42,59,0.45);
+  --fl-card-radius:14px;--fl-card-shadow:0 1px 6px rgba(30,42,59,0.07),0 4px 16px rgba(30,42,59,0.04);
+  --fl-prog-bg:#EEF1F6;
+  --fl-pin-btn:#F8FAFC;--fl-pin-border:#DDE3EC;--fl-pin-dot:#DDE3EC;--fl-pin-fill:#3B6FD4;
 }
 </style>
 </head>
@@ -77,8 +78,20 @@ const ACTIVITY_BANK=[
   {text:'Påklædning',illustration:'paaklædning',defaultTime:null},
 ];
 
-const CHILD_COLORS=['#4A6FA5','#E07A5F','#52B788','#F0A500','#9B89B4','#E8A87C','#5C8A7A','#C97B84'];
+const CHILD_COLORS=['#4A8FE7','#E0724E','#38A169','#D97706','#7C60B8','#D97340','#2F8A72','#C45C78'];
 const CHILD_AVATARS=['🦁','🐻','🐼','🦊','🐨','🐸','🦋','🐬','🦄','🐧','🦉','🐺'];
+
+const CARD_PALETTE={
+  morgensamling:'#FEF9C3',breakfast:'#FFEDD5',meal:'#FFEDD5','mellemmåltid':'#FFF3E4',
+  snack:'#FFEDD5',frileg:'#DBEAFE',outdoor:'#DCFCE7',kreativ:'#F3E8FF',
+  calm:'#E0F2FE',pause:'#E0F2FE',reading:'#EDE9FE',music:'#FFF3E0',
+  sports:'#DCFCE7',swimming:'#DBEAFE',walking:'#DCFCE7',film:'#EDE9FE',
+  blocks:'#FEF3C7',cooking:'#FEF9C3',cleaning:'#E0F2FE',hjem:'#FFEDD5',
+  sang:'#FFF3E0',tablet:'#EDE9FE',sleep:'#EEF2FF',terapi:'#FCE7F3',
+  toilet:'#E0F2FE',haandvask:'#DBEAFE','paaklædning':'#FEF9C3',
+  matematik:'#EDE9FE',sprog:'#DCFCE7',
+};
+const cardColor=(key)=>CARD_PALETTE[key]||'#F0F4FF';
 
 const defaultData=()=>({pin:'1234',lastReset:today(),children:[]});
 
@@ -535,7 +548,7 @@ function FlowApp(){
             const sched=c.schedule||[];
             const done=sched.filter(t=>t.done).length;
             return(
-              <div key={c.id} onClick={()=>{setChildId(c.id);setView('child');}} style={{...s.card,cursor:'pointer',textAlign:'center',padding:'26px 16px',borderTop:`4px solid ${c.color}`,animation:'fl_pop 0.3s ease-out',touchAction:'manipulation',userSelect:'none'}}>
+              <div key={c.id} onClick={()=>{setChildId(c.id);setView('child');}} style={{...s.card,cursor:'pointer',textAlign:'center',padding:'26px 16px',borderRadius:18,animation:'fl_pop 0.3s ease-out',touchAction:'manipulation',userSelect:'none',borderTop:`3px solid ${c.color}`}}>
                 <div style={{fontSize:46,lineHeight:1,marginBottom:12}}>{c.avatar}</div>
                 <div style={{fontSize:16,fontWeight:700,color:'var(--fl-text)',marginBottom:14}}>{c.name}</div>
                 <ProgressBar value={done} max={sched.length} color={c.color} height={6}/>
@@ -548,82 +561,92 @@ function FlowApp(){
     </div>
   );
 
-  // ── Child day view ────────────────────────────────────────────────────────
+  // ── Child day view — barnets verden ──────────────────────────────────────
   const ChildView=()=>{
     if(!child)return null;
     const schedule=child.schedule||[];
     const currentIdx=schedule.findIndex(t=>!t.done);
     const doneCount=schedule.filter(t=>t.done).length;
     const allDone=currentIdx===-1&&schedule.length>0;
+    const cc=child.color||'#4A8FE7';
     return(
-      <div style={{padding:'16px 16px 36px'}}>
+      <div style={{background:'#FFF8F0',minHeight:'100%',padding:'18px 16px 40px',animation:'fl_childIn 0.35s ease-out'}}>
+
+        {/* Reward progress */}
         {child.reward?.enabled&&(
-          <div style={{...s.card,marginBottom:16,padding:'14px 18px'}}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
-              <span style={{fontSize:13,fontWeight:600,color:'var(--fl-muted)'}}>Fremgang mod belønning</span>
-              <span style={{fontSize:13,fontWeight:700,color:allDone?'var(--fl-done)':'var(--fl-text)'}}>{doneCount}/{schedule.length}</span>
+          <div style={{background:'#FFFFFF',borderRadius:20,padding:'16px 18px',marginBottom:18,boxShadow:'0 2px 12px rgba(0,0,0,0.06)'}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+              <span style={{fontSize:14,fontWeight:700,color:'#2D3142'}}>Belønning</span>
+              <span style={{fontSize:14,fontWeight:700,color:allDone?'#38A169':cc}}>{doneCount}/{schedule.length}</span>
             </div>
-            <ProgressBar value={doneCount} max={schedule.length} color={allDone?'var(--fl-done)':child.color}/>
+            <div style={{background:'#F0F4F8',borderRadius:12,height:12,overflow:'hidden'}}>
+              <div style={{width:`${schedule.length>0?Math.round((doneCount/schedule.length)*100):0}%`,height:'100%',background:allDone?'#38A169':cc,borderRadius:12,transition:'width 0.5s ease'}}/>
+            </div>
             {allDone&&child.reward.text&&(
-              <div style={{marginTop:10,padding:'10px 14px',background:'#F0FAF4',borderRadius:10,fontSize:14,fontWeight:600,color:'var(--fl-done)',textAlign:'center'}}>
-                {child.reward.text}
+              <div style={{marginTop:12,padding:'12px 16px',background:'#F0FAF4',borderRadius:14,fontSize:15,fontWeight:700,color:'#38A169',textAlign:'center'}}>
+                🎉 {child.reward.text}
               </div>
             )}
           </div>
         )}
+
+        {/* All done celebration */}
         {allDone&&(
-          <div style={{...s.card,textAlign:'center',padding:'40px 24px',border:`2px solid var(--fl-done)`,marginBottom:16}}>
-            <div style={{width:64,height:64,borderRadius:'50%',background:'#F0FAF4',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 16px'}}>
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--fl-done)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-            <div style={{fontSize:20,fontWeight:700,color:'var(--fl-done)'}}>Alle aktiviteter klaret!</div>
-            {child.reward?.enabled&&child.reward.text&&<div style={{marginTop:8,fontSize:15,color:'var(--fl-muted)'}}>{child.reward.text}</div>}
+          <div style={{background:'#FFFFFF',borderRadius:24,textAlign:'center',padding:'40px 24px',marginBottom:18,boxShadow:'0 2px 20px rgba(56,161,105,0.15)'}}>
+            <div style={{fontSize:56,marginBottom:12}}>🎉</div>
+            <div style={{fontSize:22,fontWeight:800,color:'#38A169',marginBottom:6}}>Alle aktiviteter klaret!</div>
+            {child.reward?.enabled&&child.reward.text&&<div style={{fontSize:16,color:'#6B7A8D',marginTop:4}}>{child.reward.text}</div>}
           </div>
         )}
-        <div style={{display:'flex',flexDirection:'column',gap:12}}>
+
+        {/* Activity list */}
+        <div style={{display:'flex',flexDirection:'column',gap:14}}>
           {schedule.map((task,idx)=>{
             const isDone=task.done;
             const isCurrent=idx===currentIdx;
+            const bg=cardColor(task.illustration);
+
+            /* Done — compact with big checkmark */
             if(isDone)return(
-              <div key={task.id} style={{display:'flex',alignItems:'center',gap:14,padding:'12px 16px',background:'var(--fl-card)',borderRadius:'var(--fl-card-radius)',opacity:0.5}}>
-                <div style={{position:'relative',flexShrink:0,width:44,height:44}}>
-                  {ilGet(task.illustration,44)}
-                  <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(82,183,136,0.88)',borderRadius:'50%',fontSize:18,color:'#fff',fontWeight:700}}>✓</div>
-                </div>
+              <div key={task.id} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 16px',background:'#FFFFFF',borderRadius:20,opacity:0.6,boxShadow:'0 1px 4px rgba(0,0,0,0.04)'}}>
+                <div style={{width:52,height:52,borderRadius:16,background:'#DCFCE7',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,fontSize:26,color:'#38A169',fontWeight:700}}>✓</div>
                 <div style={{flex:1}}>
-                  <div style={{fontSize:15,fontWeight:600,color:'var(--fl-muted)',textDecoration:'line-through'}}>{task.text}</div>
-                  {child.showTimes&&task.time&&<div style={{fontSize:11,color:'var(--fl-faint)',marginTop:2}}>⏰ {task.time}</div>}
+                  <div style={{fontSize:16,fontWeight:700,color:'#9AA3AF',textDecoration:'line-through'}}>{task.text}</div>
+                  {child.showTimes&&task.time&&<div style={{fontSize:12,color:'#B8C2D0',marginTop:2}}>{task.time}</div>}
                 </div>
               </div>
             );
+
+            /* Current — large, colorful, inviting */
             if(isCurrent)return(
-              <div key={task.id} style={{...s.card,border:`3px solid ${child.color}`,padding:'30px 22px',textAlign:'center',boxShadow:`0 4px 24px ${child.color}2e`}}>
-                <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8,marginBottom:18}}>
-                  <div style={{width:10,height:10,borderRadius:'50%',background:child.color,animation:'fl_glow 1.4s ease-in-out infinite'}}/>
-                  <span style={{fontSize:13,fontWeight:700,color:child.color,letterSpacing:1.5,textTransform:'uppercase'}}>Nu</span>
-                  <div style={{width:10,height:10,borderRadius:'50%',background:child.color,animation:'fl_glow 1.4s 0.7s ease-in-out infinite'}}/>
+              <div key={task.id} style={{background:bg,borderRadius:28,padding:'28px 22px',textAlign:'center',boxShadow:`0 6px 32px ${cc}28`}}>
+                <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:6,marginBottom:16}}>
+                  <div style={{width:9,height:9,borderRadius:'50%',background:cc,animation:'fl_glow 1.4s ease-in-out infinite'}}/>
+                  <span style={{fontSize:13,fontWeight:800,color:cc,letterSpacing:2,textTransform:'uppercase'}}>Nu</span>
+                  <div style={{width:9,height:9,borderRadius:'50%',background:cc,animation:'fl_glow 1.4s 0.7s ease-in-out infinite'}}/>
                 </div>
-                <div style={{display:'flex',justifyContent:'center',marginBottom:22}}>{ilGet(task.illustration,116)}</div>
-                <div style={{fontSize:26,fontWeight:700,color:'var(--fl-text)',marginBottom:6}}>{task.text}</div>
-                {child.showTimes&&task.time&&<div style={{fontSize:16,color:'var(--fl-muted)',marginBottom:22}}>⏰ {task.time}</div>}
-                <div style={{height:task.showTimes&&task.time?0:22}}/>
-                <button onClick={()=>toggleTask(child.id,task.id)} style={{...s.btn,width:'100%',padding:'20px',fontSize:20,fontWeight:700,background:child.color,color:'#fff',borderRadius:16,marginTop:4}}>
-                  Færdig
+                <div style={{display:'flex',justifyContent:'center',marginBottom:20}}>{ilGet(task.illustration,120)}</div>
+                <div style={{fontSize:28,fontWeight:800,color:'#2D3142',marginBottom:task.time&&child.showTimes?6:24,lineHeight:1.2}}>{task.text}</div>
+                {child.showTimes&&task.time&&<div style={{fontSize:17,color:'#6B7A8D',fontWeight:600,marginBottom:24}}>⏰ {task.time}</div>}
+                <button onClick={()=>toggleTask(child.id,task.id)} style={{...s.btn,width:'100%',padding:'22px',fontSize:22,fontWeight:800,background:'#38A169',color:'#fff',borderRadius:30,boxShadow:'0 4px 18px rgba(56,161,105,0.35)',gap:10}}>
+                  <span style={{fontSize:20}}>✓</span> Færdig
                 </button>
               </div>
             );
+
+            /* Future — soft, numbered */
             return(
-              <div key={task.id} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 16px',background:'var(--fl-card)',borderRadius:'var(--fl-card-radius)',boxShadow:'var(--fl-card-shadow)',opacity:0.72}}>
-                <div style={{width:26,height:26,borderRadius:'50%',background:'var(--fl-prog-bg)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:'var(--fl-muted)',flexShrink:0}}>{idx-currentIdx}</div>
-                <div style={{flexShrink:0}}>{ilGet(task.illustration,56)}</div>
+              <div key={task.id} style={{display:'flex',alignItems:'center',gap:16,padding:'16px 18px',background:'#FFFFFF',borderRadius:20,boxShadow:'0 1px 6px rgba(0,0,0,0.05)',opacity:0.75}}>
+                <div style={{width:32,height:32,borderRadius:'50%',background:'#F0F4F8',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:800,color:'#9AA3AF',flexShrink:0}}>{idx-currentIdx}</div>
+                <div style={{width:60,height:60,borderRadius:18,background:bg,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>{ilGet(task.illustration,44)}</div>
                 <div style={{flex:1}}>
-                  <div style={{fontSize:16,fontWeight:600,color:'var(--fl-text)'}}>{task.text}</div>
-                  {child.showTimes&&task.time&&<div style={{fontSize:12,color:'var(--fl-muted)',marginTop:3}}>⏰ {task.time}</div>}
+                  <div style={{fontSize:17,fontWeight:700,color:'#2D3142'}}>{task.text}</div>
+                  {child.showTimes&&task.time&&<div style={{fontSize:13,color:'#9AA3AF',marginTop:2}}>⏰ {task.time}</div>}
                 </div>
               </div>
             );
           })}
-          {schedule.length===0&&<div style={{textAlign:'center',padding:'52px 24px',color:'var(--fl-muted)'}}><p style={{lineHeight:1.7}}>Ingen aktiviteter planlagt endnu.</p></div>}
+          {schedule.length===0&&<div style={{textAlign:'center',padding:'60px 24px',color:'#9AA3AF'}}><p style={{fontSize:16,lineHeight:1.7}}>Ingen aktiviteter planlagt endnu.</p></div>}
         </div>
       </div>
     );
@@ -852,15 +875,20 @@ function FlowApp(){
 
   return(
     <div style={s.app}>
-      <div style={{background:'var(--fl-header)',padding:'13px 18px',paddingTop:'calc(13px + env(safe-area-inset-top))',display:'flex',alignItems:'center',gap:10,boxShadow:'0 2px 10px rgba(44,53,80,0.18)',flexShrink:0,minHeight:54}}>
-        {isChild&&(
-          <button onClick={()=>setView('home')} style={{...s.btn,background:'rgba(255,255,255,0.18)',color:'#fff',padding:'6px 14px',fontSize:14,borderRadius:10}}>←</button>
-        )}
-        {isChild&&child&&<span style={{fontSize:20,marginRight:2}}>{child.avatar}</span>}
-        <span style={{flex:1,fontSize:isChild?17:20,fontWeight:700,color:'#fff',letterSpacing:isChild?-0.2:-0.5}}>
-          {isChild&&child?child.name:view==='parent'?(unlocked?'Pædagogens panel':'Pædagog'):'Flow'}
-        </span>
-      </div>
+      {/* ── Header ── educator: white; child: child color */}
+      {isChild?(
+        <div style={{background:child?.color||'#4A8FE7',paddingTop:'calc(16px + env(safe-area-inset-top))',paddingBottom:16,paddingLeft:18,paddingRight:18,display:'flex',alignItems:'center',gap:12,flexShrink:0}}>
+          <button onClick={()=>setView('home')} style={{...s.btn,background:'rgba(255,255,255,0.22)',color:'#fff',padding:'8px 14px',fontSize:15,borderRadius:24,fontWeight:700}}>←</button>
+          <span style={{fontSize:20}}>{child?.avatar}</span>
+          <span style={{flex:1,fontSize:19,fontWeight:800,color:'#fff',letterSpacing:-0.3}}>{child?.name}</span>
+        </div>
+      ):(
+        <div style={{background:'#FFFFFF',paddingTop:'calc(14px + env(safe-area-inset-top))',paddingBottom:14,paddingLeft:20,paddingRight:20,display:'flex',alignItems:'center',gap:10,borderBottom:'1px solid var(--fl-sep)',flexShrink:0}}>
+          <span style={{flex:1,fontSize:21,fontWeight:800,color:'var(--fl-primary)',letterSpacing:-0.5}}>Flow</span>
+          {view==='parent'&&unlocked&&<span style={{fontSize:13,color:'var(--fl-muted)',fontWeight:500}}>Pædagogens panel</span>}
+          {view==='parent'&&!unlocked&&<span style={{fontSize:13,color:'var(--fl-muted)',fontWeight:500}}>Pædagog</span>}
+        </div>
+      )}
       <div style={{flex:1,overflowY:'auto',WebkitOverflowScrolling:'touch'}}>
         {view==='home'&&<HomeView/>}
         {view==='child'&&child&&<ChildView/>}
