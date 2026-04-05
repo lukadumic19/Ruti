@@ -658,8 +658,11 @@ function FlowApp(){
                   <span style={{background:'#F97316',color:'#fff',fontSize:14,fontWeight:800,letterSpacing:2,textTransform:'uppercase',padding:'6px 18px',borderRadius:30}}>NU</span>
                 </div>
                 <div style={{display:'flex',justifyContent:'center',marginBottom:20}}>{ilGet(task.illustration,120)}</div>
-                <div style={{fontSize:28,fontWeight:800,color:'#2D3142',marginBottom:task.time&&child.showTimes?6:24,lineHeight:1.2}}>{task.text}</div>
-                {child.showTimes&&task.time&&<div style={{fontSize:17,color:'#6B7A8D',fontWeight:600,marginBottom:24}}>⏰ {task.time}</div>}
+                <div style={{fontSize:28,fontWeight:800,color:'#2D3142',marginBottom:6,lineHeight:1.2}}>{task.text}</div>
+                <div style={{display:'flex',justifyContent:'center',gap:14,marginBottom:24,flexWrap:'wrap'}}>
+                  {child.showTimes&&task.time&&<span style={{fontSize:16,color:'#6B7A8D',fontWeight:600}}>⏰ {task.time}</span>}
+                  {task.duration&&<span style={{fontSize:16,color:'#6B7A8D',fontWeight:600}}>🕐 {task.duration} min</span>}
+                </div>
                 <button onClick={()=>toggleTask(child.id,task.id)} style={{...s.btn,width:'100%',padding:'22px',fontSize:22,fontWeight:800,background:'#38A169',color:'#fff',borderRadius:30,boxShadow:'0 4px 18px rgba(56,161,105,0.35)',gap:10}}>
                   <span style={{fontSize:20}}>✓</span> Færdig
                 </button>
@@ -673,7 +676,10 @@ function FlowApp(){
                 <div style={{width:60,height:60,borderRadius:18,background:bg,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>{ilGet(task.illustration,44)}</div>
                 <div style={{flex:1}}>
                   <div style={{fontSize:17,fontWeight:700,color:'#2D3142'}}>{task.text}</div>
-                  {child.showTimes&&task.time&&<div style={{fontSize:13,color:'#9AA3AF',marginTop:2}}>⏰ {task.time}</div>}
+                  <div style={{display:'flex',gap:10,marginTop:3,flexWrap:'wrap'}}>
+                    {child.showTimes&&task.time&&<span style={{fontSize:13,color:'#9AA3AF'}}>⏰ {task.time}</span>}
+                    {task.duration&&<span style={{fontSize:13,color:'#9AA3AF'}}>🕐 {task.duration} min</span>}
+                  </div>
                 </div>
               </div>
             );
@@ -816,9 +822,10 @@ function FlowApp(){
     const [text,setText]=useState(task?.text||'');
     const [illus,setIllus]=useState(task?.illustration||'morgensamling');
     const [time,setTime]=useState(task?.time||'');
+    const [duration,setDuration]=useState(task?.duration||'');
     const save=()=>{
       if(!text.trim())return;
-      const item={id:task?.id||uuid(),text:text.trim(),illustration:illus,time:time||null,done:task?.done||false};
+      const item={id:task?.id||uuid(),text:text.trim(),illustration:illus,time:time||null,duration:duration?Number(duration):null,done:task?.done||false};
       if(task){updSched(schedule.map(t=>t.id===task.id?item:t));}else{updSched([...schedule,item]);}
       onDone();
     };
@@ -832,6 +839,15 @@ function FlowApp(){
             <label style={s.label}>Klokkeslæt (valgfrit)</label>
             <input type="time" style={s.input} value={time} onChange={e=>setTime(e.target.value)}/>
           </>)}
+          <label style={s.label}>Varighed i minutter (valgfrit)</label>
+          <div style={{display:'flex',alignItems:'center',gap:10}}>
+            <input type="number" min="1" max="240" style={{...s.input,width:100}} value={duration} onChange={e=>setDuration(e.target.value)} placeholder="–"/>
+            <div style={{display:'flex',gap:6}}>
+              {[5,10,15,20,30,45,60].map(v=>(
+                <button key={v} onClick={()=>setDuration(String(v))} style={{...s.btn,padding:'8px 10px',fontSize:13,background:Number(duration)===v?'var(--fl-primary)':'var(--fl-sep)',color:Number(duration)===v?'#fff':'var(--fl-muted)',borderRadius:8}}>{v}</button>
+              ))}
+            </div>
+          </div>
           <label style={s.label}>Illustration</label>
           <IllustrationPicker selected={illus} onSelect={setIllus}/>
           <button onClick={save} style={{...s.btn,background:'var(--fl-primary)',color:'var(--fl-primary-text)',padding:'13px',marginTop:4,fontSize:16,borderRadius:12}}>{task?'Gem ændringer':'Tilføj aktivitet'}</button>
