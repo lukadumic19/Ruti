@@ -406,7 +406,7 @@ haandvask:(sz)=>(
 };
 const ilFallback=(sz)=><div style={{width:sz,height:sz,borderRadius:sz*0.18,background:'var(--fl-sep)',flexShrink:0}}/>;
 const ilGet=(key,sz)=>IL[key]?IL[key](sz):ilFallback(sz);
-const taskIl=(task,sz)=>task?.photo?<img src={task.photo} alt="" style={{width:sz,height:sz,borderRadius:sz*0.18,objectFit:'cover',display:'block'}}/>:ilGet(task?.illustration,sz);
+const taskIl=(task,sz)=>(task?.customImage||task?.photo)?<img src={task.customImage||task.photo} alt="" style={{width:sz,height:sz,borderRadius:sz*0.18,objectFit:'cover',display:'block'}}/>:ilGet(task?.illustration,sz);
 // Compress + crop image to max 200×200 JPEG, returns base64 data-URL
 function compressImage(file,cb){
   const img=new Image();
@@ -833,14 +833,14 @@ function FlowApp(){
   function ActivityForm({task,cid,schedule,updSched,showTime,onDone,onClose}){
     const [text,setText]=useState(task?.text||'');
     const [illus,setIllus]=useState(task?.illustration||'morgensamling');
-    const [photo,setPhoto]=useState(task?.photo||null);
+    const [customImg,setCustomImg]=useState(task?.customImage||task?.photo||null);
     const [time,setTime]=useState(task?.time||'');
     const [duration,setDuration]=useState(task?.duration||'');
     const fileRef=React.useRef();
-    const onFile=e=>{const f=e.target.files?.[0];if(f)compressImage(f,d=>setPhoto(d));e.target.value='';};
+    const onFile=e=>{const f=e.target.files?.[0];if(f)compressImage(f,d=>setCustomImg(d));e.target.value='';};
     const save=()=>{
       if(!text.trim())return;
-      const item={id:task?.id||uuid(),text:text.trim(),illustration:illus,photo:photo||null,time:time||null,duration:duration?Number(duration):null,done:task?.done||false};
+      const item={id:task?.id||uuid(),text:text.trim(),illustration:illus,customImage:customImg||null,time:time||null,duration:duration?Number(duration):null,done:task?.done||false};
       if(task){updSched(schedule.map(t=>t.id===task.id?item:t));}else{updSched([...schedule,item]);}
       onDone();
     };
@@ -863,19 +863,19 @@ function FlowApp(){
               ))}
             </div>
           </div>
-          <label style={s.label}>Eget billede (valgfrit)</label>
+          <label style={s.label}>Eget billede</label>
           <div style={{display:'flex',alignItems:'center',gap:14}}>
             <div onClick={()=>fileRef.current.click()} style={{width:64,height:64,borderRadius:16,overflow:'hidden',background:'var(--fl-sep)',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',flexShrink:0,border:'2px dashed var(--fl-input-border)',position:'relative'}}>
-              {photo
-                ?<img src={photo} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+              {customImg
+                ?<img src={customImg} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
                 :ilGet(illus,44)}
               <div style={{position:'absolute',bottom:0,right:0,width:20,height:20,borderRadius:'50%',background:'var(--fl-primary)',display:'flex',alignItems:'center',justifyContent:'center'}}>
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
               </div>
             </div>
             <div style={{display:'flex',flexDirection:'column',gap:8,flex:1}}>
-              <button type="button" onClick={()=>fileRef.current.click()} style={{...s.btn,padding:'9px 14px',fontSize:13,background:'var(--fl-primary)',color:'#fff',borderRadius:10}}>Vælg foto / kamera</button>
-              {photo&&<button type="button" onClick={()=>setPhoto(null)} style={{...s.btn,padding:'7px 14px',fontSize:12,background:'var(--fl-del-bg)',color:'var(--fl-del-text)',borderRadius:10}}>Fjern billede</button>}
+              <button type="button" onClick={()=>fileRef.current.click()} style={{...s.btn,padding:'9px 14px',fontSize:13,background:'var(--fl-primary)',color:'#fff',borderRadius:10}}>Vælg billede / kamera</button>
+              {customImg&&<button type="button" onClick={()=>setCustomImg(null)} style={{...s.btn,padding:'7px 14px',fontSize:12,background:'var(--fl-del-bg)',color:'var(--fl-del-text)',borderRadius:10}}>Fjern billede</button>}
             </div>
           </div>
           <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{display:'none'}} onChange={onFile}/>
