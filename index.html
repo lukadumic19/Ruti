@@ -674,7 +674,7 @@ function FlowApp(){
                   {child.showTimes&&task.time&&<span style={{fontSize:16,color:'#6B7A8D',fontWeight:600}}>⏰ {task.time}</span>}
                   {task.duration&&<span style={{fontSize:16,color:'#6B7A8D',fontWeight:600}}>🕐 {task.duration} min</span>}
                 </div>
-                <button onClick={()=>toggleTask(child.id,task.id)} style={{...s.btn,width:'100%',padding:'22px',fontSize:22,fontWeight:800,background:'#38A169',color:'#fff',borderRadius:30,boxShadow:'0 4px 18px rgba(56,161,105,0.35)',gap:10}}>
+                <button onClick={()=>{if(navigator.vibrate)navigator.vibrate(50);toggleTask(child.id,task.id);}} style={{...s.btn,width:'100%',padding:'22px',fontSize:22,fontWeight:800,background:'#38A169',color:'#fff',borderRadius:30,boxShadow:'0 4px 18px rgba(56,161,105,0.35)',gap:10}}>
                   <span style={{fontSize:20}}>✓</span> Færdig
                 </button>
               </div>
