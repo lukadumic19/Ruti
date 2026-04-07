@@ -24,8 +24,8 @@ input,textarea{font-family:inherit;outline:none;}
   --fl-del-bg:#FEF2F2;--fl-del-text:#DC2626;
   --fl-input-bg:#F8FAFC;--fl-input-border:#DDE3EC;
   --fl-overlay:rgba(30,42,59,0.45);
-  --fl-card-radius:14px;--fl-card-shadow:0 1px 6px rgba(30,42,59,0.07),0 4px 16px rgba(30,42,59,0.04);
-  --fl-prog-bg:#EEF1F6;
+  --fl-card-radius:14px;--fl-card-shadow:0 2px 8px rgba(30,42,59,0.09),0 6px 24px rgba(30,42,59,0.07);
+  --fl-prog-bg:#D4DCE8;
   --fl-pin-btn:#F8FAFC;--fl-pin-border:#DDE3EC;--fl-pin-dot:#DDE3EC;--fl-pin-fill:#3B6FD4;
 }
 </style>
@@ -580,7 +580,7 @@ function FlowApp(){
             const sched=c.schedule||[];
             const done=sched.filter(t=>t.done).length;
             return(
-              <div key={c.id} onClick={()=>{setChildId(c.id);setView('child');}} style={{...s.card,cursor:'pointer',textAlign:'center',padding:'26px 16px',borderRadius:18,animation:'fl_pop 0.3s ease-out',touchAction:'manipulation',userSelect:'none',borderTop:`3px solid ${c.color}`}}>
+              <div key={c.id} onClick={()=>{setChildId(c.id);setView('child');}} style={{...s.card,cursor:'pointer',textAlign:'center',padding:'28px 20px',borderRadius:18,animation:'fl_pop 0.3s ease-out',touchAction:'manipulation',userSelect:'none',borderTop:`3px solid ${c.color}`}}>
                 <div style={{display:'flex',justifyContent:'center',marginBottom:12}}><Avatar child={c} size={56}/></div>
                 <div style={{fontSize:16,fontWeight:700,color:'var(--fl-text)',marginBottom:14}}>{c.name}</div>
                 <ProgressBar value={done} max={sched.length} color={c.color} height={6}/>
@@ -648,7 +648,7 @@ function FlowApp(){
               <div key={task.id} style={{display:'flex',alignItems:'center',gap:16,padding:'16px 18px',background:'#FFFFFF',borderRadius:20,boxShadow:'0 1px 6px rgba(0,0,0,0.05)',opacity:isLastDone?0.75:0.5}}>
                 <div style={{position:'relative',flexShrink:0,width:60,height:60,borderRadius:18,background:bg,display:'flex',alignItems:'center',justifyContent:'center'}}>
                   {taskIl(task,44)}
-                  <div style={{position:'absolute',bottom:-4,right:-4,width:20,height:20,borderRadius:'50%',background:'#38A169',border:'2px solid #fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,color:'#fff',fontWeight:800,lineHeight:1}}>✓</div>
+                  <div style={{position:'absolute',bottom:3,right:3,width:18,height:18,borderRadius:'50%',background:'#38A169',border:'2px solid #fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,color:'#fff',fontWeight:800,lineHeight:1}}>✓</div>
                 </div>
                 <div style={{flex:1}}>
                   <div style={{fontSize:17,fontWeight:700,color:'#9AA3AF',textDecoration:'line-through'}}>{task.text}</div>
@@ -658,14 +658,22 @@ function FlowApp(){
                   </div>
                 </div>
                 {isLastDone&&(
-                  <button onClick={()=>toggleTask(child.id,task.id)} style={{flexShrink:0,padding:'6px 11px',fontSize:12,fontWeight:700,background:'#FEE2E2',color:'#DC2626',border:'none',borderRadius:10,cursor:'pointer',touchAction:'manipulation',lineHeight:1.3}}>↩ Tilbage</button>
+                  <button onClick={()=>toggleTask(child.id,task.id)} style={{flexShrink:0,padding:'4px 9px',fontSize:11,fontWeight:600,background:'#F1F3F5',color:'#9AA3AF',border:'none',borderRadius:8,cursor:'pointer',touchAction:'manipulation',lineHeight:1.4}}>↩</button>
                 )}
               </div>
             );
 
             /* Current — large, colorful, inviting */
             if(isCurrent)return(
-              <div key={task.id} style={{background:bg,borderRadius:28,padding:'28px 22px',textAlign:'center',boxShadow:`0 6px 32px ${cc}28`}}>
+              <React.Fragment key={task.id}>
+                {currentIdx>0&&(
+                  <div style={{display:'flex',alignItems:'center',gap:10,margin:'4px 0'}}>
+                    <div style={{flex:1,borderTop:'1.5px dashed #E2C9B8'}}/>
+                    <span style={{fontSize:11,fontWeight:700,color:'#C4A882',letterSpacing:1,textTransform:'uppercase'}}>Næste</span>
+                    <div style={{flex:1,borderTop:'1.5px dashed #E2C9B8'}}/>
+                  </div>
+                )}
+              <div style={{background:bg,borderRadius:28,padding:'28px 22px',textAlign:'center',boxShadow:`0 6px 32px ${cc}28`}}>
                 <div style={{display:'flex',justifyContent:'center',marginBottom:16}}>
                   <span style={{background:'#F97316',color:'#fff',fontSize:14,fontWeight:800,letterSpacing:2,textTransform:'uppercase',padding:'6px 18px',borderRadius:30}}>NU</span>
                 </div>
@@ -679,6 +687,7 @@ function FlowApp(){
                   <span style={{fontSize:20}}>✓</span> Færdig
                 </button>
               </div>
+              </React.Fragment>
             );
 
             /* Future — soft, numbered */
@@ -730,7 +739,7 @@ function FlowApp(){
             const done=sched.filter(t=>t.done).length;
             return(
               <div key={c.id} style={{...s.card,padding:'16px'}}>
-                <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:12}}>
+                <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:10}}>
                   <Avatar child={c} size={42}/>
                   <div style={{flex:1}}>
                     <div style={{fontWeight:700,color:'var(--fl-text)',fontSize:15}}>{c.name}</div>
@@ -743,10 +752,13 @@ function FlowApp(){
                     <div style={{fontSize:9,fontWeight:700,color:done===sched.length&&sched.length>0?'#38A169':done>0?'#F97316':'#9AA3AF',letterSpacing:0.2,textAlign:'center',lineHeight:1.2}}>{done===sched.length&&sched.length>0?'Færdig':done>0?'I gang':'Ikke\nstartet'}</div>
                   </div>
                 </div>
-                <div style={{display:'flex',gap:8}}>
-                  <button onClick={()=>setMSchedule(c.id)} style={{...s.btn,flex:2,padding:'9px 0',fontSize:13,background:'var(--fl-primary)',color:'var(--fl-primary-text)',borderRadius:10}}>Dagsplan</button>
-                  <button onClick={()=>setMEditChild(c.id)} style={{...s.btn,flex:1,padding:'9px 0',fontSize:13,background:'var(--fl-sep)',color:'var(--fl-muted)',borderRadius:10}}>Rediger</button>
-                  <button onClick={()=>{if(window.confirm(`Slet ${c.name}?`))upd(p=>({...p,children:p.children.filter(x=>x.id!==c.id)}));}} style={{...s.btn,padding:'9px 14px',fontSize:13,background:'var(--fl-del-bg)',color:'var(--fl-del-text)',borderRadius:10}}>Slet</button>
+                {sched.length>0&&<div style={{marginBottom:10}}><ProgressBar value={done} max={sched.length} color={c.color} height={5}/></div>}
+                <div style={{display:'flex',gap:6}}>
+                  <button onClick={()=>setMSchedule(c.id)} style={{...s.btn,flex:2,padding:'7px 0',fontSize:12,background:'var(--fl-primary)',color:'var(--fl-primary-text)',borderRadius:9}}>Dagsplan</button>
+                  <button onClick={()=>setMEditChild(c.id)} style={{...s.btn,flex:1,padding:'7px 0',fontSize:12,background:'var(--fl-sep)',color:'var(--fl-muted)',borderRadius:9}}>Rediger</button>
+                  <button onClick={()=>{if(window.confirm(`Slet ${c.name}?`))upd(p=>({...p,children:p.children.filter(x=>x.id!==c.id)}));}} style={{...s.btn,padding:'7px 10px',fontSize:12,background:'transparent',color:'var(--fl-faint)',borderRadius:9}} title={`Slet ${c.name}`}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                  </button>
                 </div>
               </div>
             );
@@ -801,8 +813,12 @@ function FlowApp(){
                   <button onClick={()=>move(idx,-1)} disabled={idx===0} style={{...s.btn,padding:'4px 8px',fontSize:14,background:'var(--fl-sep)',color:idx===0?'var(--fl-faint)':'var(--fl-muted)',borderRadius:8}}>↑</button>
                   <button onClick={()=>move(idx,1)} disabled={idx===schedule.length-1} style={{...s.btn,padding:'4px 8px',fontSize:14,background:'var(--fl-sep)',color:idx===schedule.length-1?'var(--fl-faint)':'var(--fl-muted)',borderRadius:8}}>↓</button>
                 </div>
-                <button onClick={()=>setEditing(act)} style={{...s.btn,padding:'4px 10px',fontSize:13,background:'var(--fl-sep)',color:'var(--fl-muted)',borderRadius:8}}>✏</button>
-                <button onClick={()=>updSched(schedule.filter(t=>t.id!==act.id))} style={{...s.btn,padding:'4px 10px',fontSize:13,background:'var(--fl-del-bg)',color:'var(--fl-del-text)',borderRadius:8}}>✕</button>
+                <button onClick={()=>setEditing(act)} style={{...s.btn,padding:'5px 8px',background:'var(--fl-sep)',color:'var(--fl-muted)',borderRadius:8}} title="Rediger">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button onClick={()=>updSched(schedule.filter(t=>t.id!==act.id))} style={{...s.btn,padding:'5px 8px',background:'var(--fl-del-bg)',color:'var(--fl-del-text)',borderRadius:8}} title="Slet">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
               </div>
             ))}
           </div>
