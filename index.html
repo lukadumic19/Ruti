@@ -601,6 +601,13 @@ function FlowApp(){
     const doneCount=schedule.filter(t=>t.done).length;
     const allDone=currentIdx===-1&&schedule.length>0;
     const cc=child.color||'#4A8FE7';
+    const nuRef=React.useRef(null);
+    useEffect(()=>{
+      if(currentIdx>=0){
+        const t=setTimeout(()=>{nuRef.current?.scrollIntoView({behavior:'smooth',block:'center'});},300);
+        return()=>clearTimeout(t);
+      }
+    },[currentIdx]);
     return(
       <div style={{background:'#FFF8F0',minHeight:'100%',padding:'18px 16px 40px',animation:'fl_childIn 0.35s ease-out'}}>
 
@@ -673,7 +680,7 @@ function FlowApp(){
                     <div style={{flex:1,borderTop:'1.5px dashed #E2C9B8'}}/>
                   </div>
                 )}
-              <div style={{background:bg,borderRadius:28,padding:'28px 22px',textAlign:'center',boxShadow:`0 6px 32px ${cc}28`}}>
+              <div ref={nuRef} style={{background:bg,borderRadius:28,padding:'28px 22px',textAlign:'center',boxShadow:`0 6px 32px ${cc}28`}}>
                 <div style={{display:'flex',justifyContent:'center',marginBottom:16}}>
                   <span style={{background:'#F97316',color:'#fff',fontSize:14,fontWeight:800,letterSpacing:2,textTransform:'uppercase',padding:'6px 18px',borderRadius:30}}>NU</span>
                 </div>
