@@ -639,10 +639,12 @@ function FlowApp(){
             const isDone=task.done;
             const isCurrent=idx===currentIdx;
             const bg=cardColor(task.illustration);
+            const lastDoneIdx=currentIdx>0?currentIdx-1:(allDone?schedule.length-1:-1);
+            const isLastDone=isDone&&idx===lastDoneIdx;
 
-            /* Done — with illustration + checkmark overlay */
+            /* Done — illustration + checkmark overlay + optional undo on last */
             if(isDone)return(
-              <div key={task.id} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 16px',background:'#FFFFFF',borderRadius:20,opacity:0.55,boxShadow:'0 1px 4px rgba(0,0,0,0.04)'}}>
+              <div key={task.id} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 16px',background:'#FFFFFF',borderRadius:20,opacity:isLastDone?0.8:0.55,boxShadow:'0 1px 4px rgba(0,0,0,0.04)'}}>
                 <div style={{position:'relative',flexShrink:0,width:52,height:52}}>
                   <div style={{width:52,height:52,borderRadius:16,background:bg,display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden'}}>
                     {ilGet(task.illustration,40)}
@@ -651,8 +653,14 @@ function FlowApp(){
                 </div>
                 <div style={{flex:1}}>
                   <div style={{fontSize:16,fontWeight:700,color:'#9AA3AF',textDecoration:'line-through'}}>{task.text}</div>
-                  {child.showTimes&&task.time&&<div style={{fontSize:12,color:'#B8C2D0',marginTop:2}}>{task.time}</div>}
+                  <div style={{display:'flex',gap:10,marginTop:2,flexWrap:'wrap'}}>
+                    {child.showTimes&&task.time&&<span style={{fontSize:12,color:'#B8C2D0'}}>⏰ {task.time}</span>}
+                    {task.duration&&<span style={{fontSize:12,color:'#B8C2D0'}}>🕐 {task.duration} min</span>}
+                  </div>
                 </div>
+                {isLastDone&&(
+                  <button onClick={()=>toggleTask(child.id,task.id)} style={{flexShrink:0,padding:'6px 11px',fontSize:12,fontWeight:700,background:'#FEE2E2',color:'#DC2626',border:'none',borderRadius:10,cursor:'pointer',touchAction:'manipulation',lineHeight:1.3}}>↩ Tilbage</button>
+                )}
               </div>
             );
 
