@@ -642,20 +642,18 @@ function FlowApp(){
             const lastDoneIdx=currentIdx>0?currentIdx-1:(allDone?schedule.length-1:-1);
             const isLastDone=isDone&&idx===lastDoneIdx;
 
-            /* Done — illustration + checkmark overlay + optional undo on last */
+            /* Done — illustration visible with corner badge, same layout as future */
             if(isDone)return(
-              <div key={task.id} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 16px',background:'#FFFFFF',borderRadius:20,opacity:isLastDone?0.8:0.55,boxShadow:'0 1px 4px rgba(0,0,0,0.04)'}}>
-                <div style={{position:'relative',flexShrink:0,width:52,height:52}}>
-                  <div style={{width:52,height:52,borderRadius:16,background:bg,display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden'}}>
-                    {ilGet(task.illustration,40)}
-                  </div>
-                  <div style={{position:'absolute',inset:0,borderRadius:16,background:'rgba(56,161,105,0.78)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,color:'#fff',fontWeight:800}}>✓</div>
+              <div key={task.id} style={{display:'flex',alignItems:'center',gap:16,padding:'16px 18px',background:'#FFFFFF',borderRadius:20,boxShadow:'0 1px 6px rgba(0,0,0,0.05)',opacity:isLastDone?0.75:0.5}}>
+                <div style={{position:'relative',flexShrink:0,width:60,height:60,borderRadius:18,background:bg,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                  {ilGet(task.illustration,44)}
+                  <div style={{position:'absolute',bottom:-4,right:-4,width:20,height:20,borderRadius:'50%',background:'#38A169',border:'2px solid #fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,color:'#fff',fontWeight:800,lineHeight:1}}>✓</div>
                 </div>
                 <div style={{flex:1}}>
-                  <div style={{fontSize:16,fontWeight:700,color:'#9AA3AF',textDecoration:'line-through'}}>{task.text}</div>
-                  <div style={{display:'flex',gap:10,marginTop:2,flexWrap:'wrap'}}>
-                    {child.showTimes&&task.time&&<span style={{fontSize:12,color:'#B8C2D0'}}>⏰ {task.time}</span>}
-                    {task.duration&&<span style={{fontSize:12,color:'#B8C2D0'}}>🕐 {task.duration} min</span>}
+                  <div style={{fontSize:17,fontWeight:700,color:'#9AA3AF',textDecoration:'line-through'}}>{task.text}</div>
+                  <div style={{display:'flex',gap:10,marginTop:3,flexWrap:'wrap'}}>
+                    {child.showTimes&&task.time&&<span style={{fontSize:13,color:'#B8C2D0'}}>⏰ {task.time}</span>}
+                    {task.duration&&<span style={{fontSize:13,color:'#B8C2D0'}}>🕐 {task.duration} min</span>}
                   </div>
                 </div>
                 {isLastDone&&(
