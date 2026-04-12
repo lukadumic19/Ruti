@@ -729,11 +729,51 @@ function FlowApp(){
         <PinPad mode="verify" storedPin={data.pin} onVerify={()=>setUnlocked(true)}/>
       </div>
     );
+    const importRef=React.useRef();
+    const exportData=()=>{
+      const json=JSON.stringify(data,null,2);
+      const blob=new Blob([json],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      const d=new Date();
+      const ds=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      a.href=url;a.download=`flow-backup-${ds}.json`;a.click();
+      URL.revokeObjectURL(url);
+    };
+    const importData=e=>{
+      const f=e.target.files?.[0];
+      if(!f)return;
+      e.target.value='';
+      const reader=new FileReader();
+      reader.onload=ev=>{
+        try{
+          const parsed=JSON.parse(ev.target.result);
+          if(!parsed.children)throw new Error('Ugyldig fil');
+          if(window.confirm('Dette vil erstatte alle nuværende data. Er du sikker?')){
+            stor.set(parsed);
+            window.location.reload();
+          }
+        }catch{window.alert('Kunne ikke læse filen — er det en gyldig Flow-backup?');}
+      };
+      reader.readAsText(f);
+    };
     return(
       <div style={{padding:20}}>
-        <div style={{display:'flex',justifyContent:'flex-end',gap:8,marginBottom:20}}>
+        <div style={{display:'flex',justifyContent:'flex-end',gap:8,marginBottom:12}}>
           <button onClick={()=>setMChangePin(true)} style={{...s.btn,padding:'8px 14px',fontSize:13,background:'var(--fl-sep)',color:'var(--fl-muted)',borderRadius:10}}>Skift PIN</button>
           <button onClick={()=>setUnlocked(false)} style={{...s.btn,padding:'8px 14px',fontSize:13,background:'var(--fl-sep)',color:'var(--fl-muted)',borderRadius:10}}>Lås</button>
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:20,padding:'10px 12px',background:'var(--fl-sep)',borderRadius:12}}>
+          <span style={{fontSize:12,fontWeight:600,color:'var(--fl-muted)',marginRight:4,flexShrink:0}}>Backup</span>
+          <button onClick={exportData} style={{...s.btn,padding:'7px 12px',fontSize:12,background:'var(--fl-card)',color:'var(--fl-text)',borderRadius:8,gap:6,border:'1px solid var(--fl-input-border)'}}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Eksporter data
+          </button>
+          <button onClick={()=>importRef.current.click()} style={{...s.btn,padding:'7px 12px',fontSize:12,background:'var(--fl-card)',color:'var(--fl-text)',borderRadius:8,gap:6,border:'1px solid var(--fl-input-border)'}}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Importer data
+          </button>
+          <input ref={importRef} type="file" accept=".json,application/json" style={{display:'none'}} onChange={importData}/>
         </div>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
           <h3 style={s.h3}>Børn</h3>
