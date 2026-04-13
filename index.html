@@ -17,6 +17,10 @@ input,textarea{font-family:inherit;outline:none;}
 @keyframes fl_pop{from{opacity:0;transform:scale(0.96) translateY(6px)}to{opacity:1;transform:none}}
 @keyframes fl_glow{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.3)}}
 @keyframes fl_childIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.fl-dur-scroll{display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:2px;}
+.fl-dur-scroll::-webkit-scrollbar{display:none;}
+.fl-dur-scroll{-ms-overflow-style:none;scrollbar-width:none;}
+.fl-dur-scroll>button{scroll-snap-align:start;flex-shrink:0;}
 :root{
   --fl-bg:#F8FAFC;--fl-card:#FFFFFF;--fl-header:#FFFFFF;--fl-primary:#3B6FD4;
   --fl-primary-text:#FFFFFF;--fl-text:#1E2A3B;--fl-muted:#6B7A8D;--fl-faint:#C4CDD8;
@@ -925,13 +929,13 @@ function FlowApp(){
             <input type="time" style={s.input} value={time} onChange={e=>setTime(e.target.value)}/>
           </>)}
           <label style={s.label}>Varighed i minutter (valgfrit)</label>
-          <div style={{display:'flex',alignItems:'center',gap:10}}>
-            <input type="number" min="1" max="240" style={{...s.input,width:100}} value={duration} onChange={e=>setDuration(e.target.value)} placeholder="–"/>
-            <div style={{display:'flex',gap:6}}>
-              {[5,10,15,20,30,45,60].map(v=>(
-                <button key={v} onClick={()=>setDuration(String(v))} style={{...s.btn,padding:'8px 10px',fontSize:13,background:Number(duration)===v?'var(--fl-primary)':'var(--fl-sep)',color:Number(duration)===v?'#fff':'var(--fl-muted)',borderRadius:8}}>{v}</button>
-              ))}
-            </div>
+          <div className="fl-dur-scroll">
+            {['—',5,10,15,20,25,30,45,60].map(v=>{
+              const active=v==='—'?!duration:Number(duration)===v;
+              return(
+                <button key={v} onClick={()=>setDuration(v==='—'?'':String(v))} style={{...s.btn,padding:'8px 14px',fontSize:13,background:active?'var(--fl-primary)':'var(--fl-sep)',color:active?'#fff':'var(--fl-muted)',borderRadius:8,minWidth:48}}>{v}</button>
+              );
+            })}
           </div>
           <label style={s.label}>Voksen (valgfrit)</label>
           <input style={s.input} value={staff} onChange={e=>setStaff(e.target.value)} placeholder="f.eks. Kirsten"/>
