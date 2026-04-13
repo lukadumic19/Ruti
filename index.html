@@ -662,6 +662,7 @@ function FlowApp(){
                   <div style={{display:'flex',gap:10,marginTop:3,flexWrap:'wrap'}}>
                     {child.showTimes&&task.time&&<span style={{fontSize:13,color:'#B8C2D0'}}>⏰ {task.time}</span>}
                     {task.duration&&<span style={{fontSize:13,color:'#B8C2D0'}}>🕐 {task.duration} min</span>}
+                    {task.staff&&<span style={{fontSize:13,color:'#B8C2D0'}}>👤 {task.staff}</span>}
                   </div>
                 </div>
                 {isLastDone&&(
@@ -689,6 +690,7 @@ function FlowApp(){
                 <div style={{display:'flex',justifyContent:'center',gap:14,marginBottom:24,flexWrap:'wrap'}}>
                   {child.showTimes&&task.time&&<span style={{fontSize:16,color:'#6B7A8D',fontWeight:600}}>⏰ {task.time}</span>}
                   {task.duration&&<span style={{fontSize:16,color:'#6B7A8D',fontWeight:600}}>🕐 {task.duration} min</span>}
+                  {task.staff&&<span style={{fontSize:16,color:'#6B7A8D',fontWeight:600}}>👤 {task.staff}</span>}
                 </div>
                 <button onClick={()=>{if(navigator.vibrate)navigator.vibrate(50);toggleTask(child.id,task.id);}} style={{...s.btn,width:'100%',padding:'22px',fontSize:22,fontWeight:800,background:'#38A169',color:'#fff',borderRadius:30,boxShadow:'0 4px 18px rgba(56,161,105,0.35)',gap:10}}>
                   <span style={{fontSize:20}}>✓</span> Færdig
@@ -707,6 +709,7 @@ function FlowApp(){
                   <div style={{display:'flex',gap:10,marginTop:3,flexWrap:'wrap'}}>
                     {child.showTimes&&task.time&&<span style={{fontSize:13,color:'#9AA3AF'}}>⏰ {task.time}</span>}
                     {task.duration&&<span style={{fontSize:13,color:'#9AA3AF'}}>🕐 {task.duration} min</span>}
+                    {task.staff&&<span style={{fontSize:13,color:'#9AA3AF'}}>👤 {task.staff}</span>}
                   </div>
                 </div>
               </div>
@@ -853,7 +856,10 @@ function FlowApp(){
                 {taskIl(act,34)}
                 <div style={{flex:1}}>
                   <div style={{fontSize:14,fontWeight:600,color:'var(--fl-text)'}}>{act.text}</div>
-                  {act.time&&<div style={{fontSize:11,color:'var(--fl-muted)'}}>⏰ {act.time}</div>}
+                  <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+                    {act.time&&<span style={{fontSize:11,color:'var(--fl-muted)'}}>⏰ {act.time}</span>}
+                    {act.staff&&<span style={{fontSize:11,color:'var(--fl-muted)'}}>👤 {act.staff}</span>}
+                  </div>
                 </div>
                 {act.done&&<span style={{fontSize:12,color:'var(--fl-done)',fontWeight:700,flexShrink:0}}>✓</span>}
                 <div style={{display:'flex',gap:4,flexShrink:0}}>
@@ -899,11 +905,12 @@ function FlowApp(){
     const [customImg,setCustomImg]=useState(task?.customImage||task?.photo||null);
     const [time,setTime]=useState(task?.time||'');
     const [duration,setDuration]=useState(task?.duration||'');
+    const [staff,setStaff]=useState(task?.staff||'');
     const fileRef=React.useRef();
     const onFile=e=>{const f=e.target.files?.[0];if(f)compressImage(f,d=>setCustomImg(d));e.target.value='';};
     const save=()=>{
       if(!text.trim())return;
-      const item={id:task?.id||uuid(),text:text.trim(),illustration:illus,customImage:customImg||null,time:time||null,duration:duration?Number(duration):null,done:task?.done||false};
+      const item={id:task?.id||uuid(),text:text.trim(),illustration:illus,customImage:customImg||null,time:time||null,duration:duration?Number(duration):null,staff:staff.trim()||null,done:task?.done||false};
       if(task){updSched(schedule.map(t=>t.id===task.id?item:t));}else{updSched([...schedule,item]);}
       onDone();
     };
@@ -926,6 +933,8 @@ function FlowApp(){
               ))}
             </div>
           </div>
+          <label style={s.label}>Voksen (valgfrit)</label>
+          <input style={s.input} value={staff} onChange={e=>setStaff(e.target.value)} placeholder="f.eks. Kirsten"/>
           <label style={s.label}>Eget billede</label>
           <div style={{display:'flex',alignItems:'center',gap:14}}>
             <div onClick={()=>fileRef.current.click()} style={{width:64,height:64,borderRadius:16,overflow:'hidden',background:'var(--fl-sep)',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',flexShrink:0,border:'2px dashed var(--fl-input-border)',position:'relative'}}>
