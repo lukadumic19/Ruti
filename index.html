@@ -105,13 +105,13 @@ const migrateData=(raw)=>{
     let schedule=c.schedule;
     if(!schedule&&c.routines){
       schedule=[...(c.routines.morning||[]),...(c.routines.afternoon||[]),...(c.routines.evening||[])]
-        .map(t=>({id:t.id||uuid(),text:t.text,illustration:t.illustration||'morgensamling',time:t.time||null,done:t.done||false}));
+        .map(t=>({id:t.id||uuid(),text:t.text,illustration:t.illustration||'morgensamling',time:t.time||null,duration:t.duration||null,done:t.done||false,customImage:t.customImage||t.photo||null,staff:t.staff||null}));
     }
     return{
       id:c.id,name:c.name,avatar:c.avatar||'🦁',photo:c.photo||null,
       color:c.color||CHILD_COLORS[0],showTimes:c.showTimes||false,
       reward:c.reward||{enabled:false,text:''},
-      schedule:(schedule||[]).map(t=>({id:t.id,text:t.text,illustration:t.illustration||'morgensamling',time:t.time||null,done:t.done||false}))
+      schedule:(schedule||[]).map(t=>({id:t.id,text:t.text,illustration:t.illustration||'morgensamling',time:t.time||null,duration:t.duration||null,done:t.done||false,customImage:t.customImage||t.photo||null,staff:t.staff||null}))
     };
   });
   return{pin:raw.pin||'1234',lastReset:raw.lastReset||today(),children};
