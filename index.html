@@ -904,6 +904,7 @@ function FlowApp(){
                   <div style={{fontSize:14,fontWeight:600,color:'var(--fl-text)'}}>{act.text}</div>
                   <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
                     {act.time&&<span style={{fontSize:11,color:'var(--fl-muted)'}}>⏰ {act.time}</span>}
+                    {act.duration&&<span style={{fontSize:11,color:'var(--fl-muted)'}}>🕐 {act.duration} min</span>}
                     {act.staff&&<span style={{fontSize:11,color:'var(--fl-muted)'}}>👤 {act.staff}</span>}
                   </div>
                 </div>
