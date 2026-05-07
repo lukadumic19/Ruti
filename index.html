@@ -664,12 +664,19 @@ function FlowApp(){
     const allDone=currentIdx===-1&&schedule.length>0;
     const cc=child.color||'#4A8FE7';
     const nuRef=React.useRef(null);
+    const celebRef=React.useRef(null);
     useEffect(()=>{
       if(currentIdx>=0){
         const t=setTimeout(()=>{nuRef.current?.scrollIntoView({behavior:'smooth',block:'center'});},300);
         return()=>clearTimeout(t);
       }
     },[currentIdx]);
+    useEffect(()=>{
+      if(allDone){
+        const t=setTimeout(()=>{celebRef.current?.scrollIntoView({behavior:'smooth',block:'center'});},300);
+        return()=>clearTimeout(t);
+      }
+    },[allDone]);
     return(
       <div style={{background:'#FFF8F0',minHeight:'100%',padding:'18px 16px 40px',animation:'fl_childIn 0.35s ease-out'}}>
 
@@ -706,7 +713,7 @@ function FlowApp(){
             shape:i%3===0?'50%':'3px'
           }));
           return(
-          <div style={{position:'relative',background:'#FFFFFF',borderRadius:28,textAlign:'center',padding:'44px 24px 36px',marginBottom:18,boxShadow:`0 4px 32px rgba(0,0,0,0.08)`,overflow:'hidden'}}>
+          <div ref={celebRef} style={{position:'relative',background:'#FFFFFF',borderRadius:28,textAlign:'center',padding:'44px 24px 36px',marginBottom:18,boxShadow:`0 4px 32px rgba(0,0,0,0.08)`,overflow:'hidden'}}>
             {/* Confetti */}
             {confPieces.map(p=>(
               <div key={p.id} style={{position:'absolute',top:-10,left:`${p.left}%`,width:p.size,height:p.size,borderRadius:p.shape,background:p.color,animation:`fl_confFall ${p.dur}s ${p.delay}s ease-in both`,pointerEvents:'none'}}/>
