@@ -116,13 +116,13 @@ const migrateData=(raw)=>{
     let schedule=c.schedule;
     if(!schedule&&c.routines){
       schedule=[...(c.routines.morning||[]),...(c.routines.afternoon||[]),...(c.routines.evening||[])]
-        .map(t=>({id:t.id||uuid(),text:t.text,illustration:t.illustration||'morgensamling',time:t.time||null,duration:t.duration||null,done:t.done||false,customImage:t.customImage||t.photo||null,staff:t.staff||null}));
+        .map(t=>({id:t.id||uuid(),text:t.text,illustration:t.illustration||'morgensamling',time:t.time||null,duration:t.duration||null,done:t.done||false,customImage:t.customImage||t.photo||null,staff:t.staff||null,speech:t.speech||false}));
     }
     return{
       id:c.id,name:c.name,avatar:c.avatar||'🦁',photo:c.photo||null,
       color:c.color||CHILD_COLORS[0],showTimes:c.showTimes||false,
       reward:c.reward||{enabled:false,text:''},
-      schedule:(schedule||[]).map(t=>({id:t.id,text:t.text,illustration:t.illustration||'morgensamling',time:t.time||null,duration:t.duration||null,done:t.done||false,customImage:t.customImage||t.photo||null,staff:t.staff||null}))
+      schedule:(schedule||[]).map(t=>({id:t.id,text:t.text,illustration:t.illustration||'morgensamling',time:t.time||null,duration:t.duration||null,done:t.done||false,customImage:t.customImage||t.photo||null,staff:t.staff||null,speech:t.speech||false}))
     };
   });
   return{pin:raw.pin||'1234',lastReset:raw.lastReset||today(),children};
@@ -546,6 +546,38 @@ function Modal({children,onClose,title,narrow}){
     </div>
   );
 }
+const SpeakerIcon=({size=18,color='currentColor'})=>(
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+    <path d="M15.54 8.46a5 5 0 010 7.07"/>
+    <path d="M19.07 4.93a10 10 0 010 14.14"/>
+  </svg>
+);
+function buildSpeechText(task,nextTask){
+  let parts=[`Nu: ${task.text}`];
+  if(task.staff)parts.push(`med ${task.staff}`);
+  if(task.time)parts.push(`klokken ${task.time.replace(':',':')}`);
+  if(task.duration)parts.push(`det varer ${task.duration} minutter`);
+  if(nextTask)parts.push(`... Bagefter: ${nextTask.text}`);
+  return parts.join(', ');
+}
+function doSpeak(text,onStart,onEnd){
+  if(!window.speechSynthesis)return;
+  window.speechSynthesis.cancel();
+  const go=()=>{
+    const utter=new SpeechSynthesisUtterance(text);
+    utter.lang='da-DK';utter.rate=0.85;
+    const voices=window.speechSynthesis.getVoices();
+    const da=voices.find(v=>v.lang.startsWith('da'));
+    if(da)utter.voice=da;
+    utter.onstart=onStart;
+    utter.onend=onEnd;
+    utter.onerror=onEnd;
+    window.speechSynthesis.speak(utter);
+  };
+  if(window.speechSynthesis.getVoices().length>0){go();}
+  else{window.speechSynthesis.onvoiceschanged=()=>{window.speechSynthesis.onvoiceschanged=null;go();};}
+}
 function TimePicker({value,onChange}){
   const hours=Array.from({length:24},(_,i)=>String(i).padStart(2,'0'));
   const mins=Array.from({length:12},(_,i)=>String(i*5).padStart(2,'0'));
@@ -663,6 +695,20 @@ function FlowApp(){
     const doneCount=schedule.filter(t=>t.done).length;
     const allDone=currentIdx===-1&&schedule.length>0;
     const cc=child.color||'#4A8FE7';
+    const [speaking,setSpeaking]=useState(false);
+    const speakTask=(task,withNext)=>{
+      const nextTask=withNext&&currentIdx>=0?schedule[currentIdx+1]||null:null;
+      doSpeak(buildSpeechText(task,nextTask),()=>setSpeaking(true),()=>setSpeaking(false));
+    };
+    const speakCelebration=()=>{
+      doSpeak(`Flot klaret, ${child.name}! Du er færdig for i dag.`,()=>setSpeaking(true),()=>setSpeaking(false));
+    };
+    const SpeakBtn=({onPress,small=false})=>(
+      <button onMouseDown={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();onPress();}} disabled={speaking}
+        style={{width:small?32:44,height:small?32:44,borderRadius:'50%',border:'none',background:'rgba(255,255,255,0.88)',boxShadow:'0 2px 8px rgba(0,0,0,0.12)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,cursor:speaking?'default':'pointer',opacity:speaking?0.7:1,animation:speaking?'fl_pulse 1.2s ease-in-out infinite':'none','--fl-pulse-c':'rgba(59,111,212,0.35)'}}>
+        <SpeakerIcon size={small?14:18} color={speaking?'#3B6FD4':'#6B7A8D'}/>
+      </button>
+    );
     const nuRef=React.useRef(null);
     const celebRef=React.useRef(null);
     useEffect(()=>{
@@ -746,6 +792,9 @@ function FlowApp(){
                 </div>
               </div>
             )}
+            <div style={{marginTop:20,display:'flex',justifyContent:'center',animation:'fl_fadeUp 0.5s ease-out 1.7s both'}}>
+              <SpeakBtn onPress={speakCelebration}/>
+            </div>
           </div>
           );
         })()}
@@ -790,7 +839,8 @@ function FlowApp(){
                     <div style={{flex:1,borderTop:'1px solid #EBE0D4'}}/>
                   </div>
                 )}
-              <div ref={nuRef} style={{background:bg,borderRadius:32,padding:'34px 26px',textAlign:'center',boxShadow:`0 8px 40px ${cc}38,0 2px 12px rgba(0,0,0,0.04)`}}>
+              <div ref={nuRef} style={{background:bg,borderRadius:32,padding:'34px 26px',textAlign:'center',boxShadow:`0 8px 40px ${cc}38,0 2px 12px rgba(0,0,0,0.04)`,position:'relative'}}>
+                {task.speech&&<div style={{position:'absolute',top:14,right:14}}><SpeakBtn onPress={()=>speakTask(task,true)}/></div>}
                 <div style={{display:'flex',justifyContent:'center',marginBottom:16}}>
                   <span style={{background:'#F97316',color:'#fff',fontSize:14,fontWeight:800,letterSpacing:2,textTransform:'uppercase',padding:'6px 18px',borderRadius:30}}>NU</span>
                 </div>
@@ -821,6 +871,7 @@ function FlowApp(){
                     {task.staff&&<span style={{fontSize:13,color:'#9AA3AF'}}>👤 {task.staff}</span>}
                   </div>
                 </div>
+                {task.speech&&<SpeakBtn onPress={()=>speakTask(task,false)} small/>}
               </div>
             );
           })}
@@ -963,7 +1014,7 @@ function FlowApp(){
                 <div style={{color:'var(--fl-faint)',fontSize:16,flexShrink:0,cursor:'grab'}}>⠿</div>
                 {taskIl(act,34)}
                 <div style={{flex:1}}>
-                  <div style={{fontSize:14,fontWeight:600,color:'var(--fl-text)'}}>{act.text}</div>
+                  <div style={{fontSize:14,fontWeight:600,color:'var(--fl-text)',display:'flex',alignItems:'center',gap:6}}>{act.text}{act.speech&&<SpeakerIcon size={12} color='var(--fl-primary)'/>}</div>
                   <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
                     {act.time&&<span style={{fontSize:11,color:'var(--fl-muted)'}}>⏰ {act.time}</span>}
                     {act.duration&&<span style={{fontSize:11,color:'var(--fl-muted)'}}>🕐 {act.duration} min</span>}
@@ -1015,11 +1066,12 @@ function FlowApp(){
     const [time,setTime]=useState(task?.time||'');
     const [duration,setDuration]=useState(task?.duration||'');
     const [staff,setStaff]=useState(task?.staff||'');
+    const [speech,setSpeech]=useState(task?.speech||false);
     const fileRef=React.useRef();
     const onFile=e=>{const f=e.target.files?.[0];if(f)compressImage(f,d=>setCustomImg(d));e.target.value='';};
     const save=()=>{
       if(!text.trim())return;
-      const item={id:task?.id||uuid(),text:text.trim(),illustration:illus,customImage:customImg||null,time:time||null,duration:duration?Number(duration):null,staff:staff.trim()||null,done:task?.done||false};
+      const item={id:task?.id||uuid(),text:text.trim(),illustration:illus,customImage:customImg||null,time:time||null,duration:duration?Number(duration):null,staff:staff.trim()||null,speech,done:task?.done||false};
       if(task){updSched(schedule.map(t=>t.id===task.id?item:t));}else{updSched([...schedule,item]);}
       onDone();
     };
@@ -1066,6 +1118,16 @@ function FlowApp(){
           <input ref={fileRef} type="file" accept="image/*" style={{display:'none'}} onChange={onFile}/>
           <label style={s.label}>Illustration (bruges hvis intet foto)</label>
           <IllustrationPicker selected={illus} onSelect={setIllus}/>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 16px',background:'var(--fl-sep)',borderRadius:14}}>
+            <div style={{display:'flex',alignItems:'center',gap:10}}>
+              <SpeakerIcon size={16} color='var(--fl-muted)'/>
+              <div>
+                <div style={{fontWeight:600,color:'var(--fl-text)',fontSize:14}}>Højtlæsning</div>
+                <div style={{fontSize:11,color:'var(--fl-muted)',marginTop:1}}>Aktiviteten læses op for barnet</div>
+              </div>
+            </div>
+            <Toggle on={speech} onToggle={()=>setSpeech(p=>!p)}/>
+          </div>
           <button onClick={save} style={{...s.btn,background:'var(--fl-primary)',color:'var(--fl-primary-text)',padding:'13px',marginTop:4,fontSize:16,borderRadius:12}}>{task?'Gem ændringer':'Tilføj aktivitet'}</button>
         </div>
       </Modal>
