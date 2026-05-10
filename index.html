@@ -819,7 +819,7 @@ function FlowApp(){
                   <div style={{fontSize:17,fontWeight:700,color:'#9AA3AF',textDecoration:'line-through'}}>{task.text}</div>
                   <div style={{display:'flex',gap:10,marginTop:3,flexWrap:'wrap'}}>
                     {task.time&&<span style={{fontSize:13,color:'#B8C2D0'}}>⏰ {task.time}</span>}
-                    {task.duration&&<span style={{fontSize:13,color:'#B8C2D0'}}>🕐 {task.duration} min</span>}
+                    {task.duration&&<span style={{fontSize:13,color:'#B8C2D0',display:'inline-flex',alignItems:'center',gap:3}}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#B8C2D0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M10 3h4"/><path d="M12 3v2"/></svg>{task.duration} min</span>}
                     {task.staff&&<span style={{fontSize:13,color:'#B8C2D0'}}>👤 {task.staff}</span>}
                   </div>
                 </div>
@@ -848,7 +848,7 @@ function FlowApp(){
                 <div style={{fontSize:28,fontWeight:800,color:'#2D3142',marginBottom:6,lineHeight:1.2}}>{task.text}</div>
                 <div style={{display:'flex',justifyContent:'center',gap:14,marginBottom:24,flexWrap:'wrap'}}>
                   {task.time&&<span style={{fontSize:16,color:'#6B7A8D',fontWeight:600}}>⏰ {task.time}</span>}
-                  {task.duration&&<span style={{fontSize:16,color:'#6B7A8D',fontWeight:600}}>🕐 {task.duration} min</span>}
+                  {task.duration&&<span style={{fontSize:16,color:'#6B7A8D',fontWeight:600,display:'inline-flex',alignItems:'center',gap:4}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7A8D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M10 3h4"/><path d="M12 3v2"/></svg>{task.duration} min</span>}
                   {task.staff&&<span style={{fontSize:16,color:'#6B7A8D',fontWeight:600}}>👤 {task.staff}</span>}
                 </div>
                 <button onClick={()=>{if(navigator.vibrate)navigator.vibrate(50);toggleTask(child.id,task.id);}} style={{...s.btn,width:'100%',padding:'24px',fontSize:22,fontWeight:800,background:'#38A169',color:'#fff',borderRadius:32,animation:'fl_btnPulse 2.4s ease-in-out infinite',gap:10}}>
@@ -867,7 +867,7 @@ function FlowApp(){
                   <div style={{fontSize:17,fontWeight:700,color:'#2D3142'}}>{task.text}</div>
                   <div style={{display:'flex',gap:10,marginTop:3,flexWrap:'wrap'}}>
                     {task.time&&<span style={{fontSize:13,color:'#9AA3AF'}}>⏰ {task.time}</span>}
-                    {task.duration&&<span style={{fontSize:13,color:'#9AA3AF'}}>🕐 {task.duration} min</span>}
+                    {task.duration&&<span style={{fontSize:13,color:'#9AA3AF',display:'inline-flex',alignItems:'center',gap:3}}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9AA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M10 3h4"/><path d="M12 3v2"/></svg>{task.duration} min</span>}
                     {task.staff&&<span style={{fontSize:13,color:'#9AA3AF'}}>👤 {task.staff}</span>}
                   </div>
                 </div>
@@ -1017,7 +1017,7 @@ function FlowApp(){
                   <div style={{fontSize:14,fontWeight:600,color:'var(--fl-text)',display:'flex',alignItems:'center',gap:6}}>{act.text}{act.speech&&<SpeakerIcon size={12} color='var(--fl-primary)'/>}</div>
                   <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
                     {act.time&&<span style={{fontSize:11,color:'var(--fl-muted)'}}>⏰ {act.time}</span>}
-                    {act.duration&&<span style={{fontSize:11,color:'var(--fl-muted)'}}>🕐 {act.duration} min</span>}
+                    {act.duration&&<span style={{fontSize:11,color:'var(--fl-muted)',display:'inline-flex',alignItems:'center',gap:3}}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--fl-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M10 3h4"/><path d="M12 3v2"/></svg>{act.duration} min</span>}
                     {act.staff&&<span style={{fontSize:11,color:'var(--fl-muted)'}}>👤 {act.staff}</span>}
                   </div>
                 </div>
