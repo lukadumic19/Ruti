@@ -25,6 +25,9 @@ input{transition:border-color 0.15s ease,box-shadow 0.15s ease;}
 @keyframes fl_pulse{0%,100%{box-shadow:0 0 0 0 var(--fl-pulse-c,rgba(56,161,105,0.4))}60%{box-shadow:0 0 0 18px rgba(0,0,0,0)}}
 @keyframes fl_confFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(320px) rotate(720deg);opacity:0}}
 @keyframes fl_btnPulse{0%,100%{box-shadow:0 4px 18px rgba(56,161,105,0.35)}50%{box-shadow:0 4px 28px rgba(56,161,105,0.6),0 0 0 6px rgba(56,161,105,0.12)}}
+@keyframes fl_nuIn{from{opacity:0;transform:scale(0.97) translateY(10px)}to{opacity:1;transform:none}}
+.fl-press{transition:transform 0.15s ease,box-shadow 0.15s ease;}
+.fl-press:active{transform:scale(0.97) translateY(1px);}
 .fl-dur-scroll{display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:2px;}
 .fl-dur-scroll::-webkit-scrollbar{display:none;}
 .fl-dur-scroll{-ms-overflow-style:none;scrollbar-width:none;}
@@ -672,14 +675,18 @@ function FlowApp(){
           {data.children.map(c=>{
             const sched=c.schedule||[];
             const done=sched.filter(t=>t.done).length;
+            const complete=sched.length>0&&done===sched.length;
             return(
-              <div key={c.id} onClick={()=>{setChildId(c.id);setView('child');}} style={{...s.card,cursor:'pointer',textAlign:'center',padding:0,borderRadius:20,animation:'fl_pop 0.3s ease-out',touchAction:'manipulation',userSelect:'none',overflow:'hidden'}}>
-                <div style={{height:8,background:`linear-gradient(90deg,${c.color},${c.color}99)`}}/>
+              <div key={c.id} onClick={()=>{setChildId(c.id);setView('child');}} className="fl-press" style={{...s.card,cursor:'pointer',textAlign:'center',padding:0,borderRadius:20,animation:'fl_pop 0.3s ease-out',touchAction:'manipulation',userSelect:'none',overflow:'hidden',position:'relative',boxShadow:complete?'0 2px 10px rgba(56,161,105,0.18),0 8px 28px rgba(56,161,105,0.14)':'var(--fl-card-shadow)'}}>
+                <div style={{height:8,background:complete?'linear-gradient(90deg,#38A169,#5BBE8A)':`linear-gradient(90deg,${c.color},${c.color}99)`}}/>
+                {complete&&(
+                  <div style={{position:'absolute',top:14,right:12,width:26,height:26,borderRadius:'50%',background:'#F0FAF4',border:'1.5px solid #38A16944',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13}}>⭐</div>
+                )}
                 <div style={{padding:'22px 20px 20px'}}>
-                  <div style={{display:'flex',justifyContent:'center',marginBottom:12}}><Avatar child={c} size={58}/></div>
-                  <div style={{fontSize:16,fontWeight:700,color:'var(--fl-text)',marginBottom:14,letterSpacing:-0.2}}>{c.name}</div>
-                  <ProgressBar value={done} max={sched.length} color={c.color} height={7}/>
-                  <div style={{fontSize:12,color:'var(--fl-muted)',marginTop:8,fontWeight:500}}>{done} / {sched.length} aktiviteter</div>
+                  <div style={{display:'flex',justifyContent:'center',marginBottom:12}}><Avatar child={c} size={64}/></div>
+                  <div style={{fontSize:17,fontWeight:700,color:'var(--fl-text)',marginBottom:14,letterSpacing:-0.2}}>{c.name}</div>
+                  <ProgressBar value={done} max={sched.length} color={complete?'#38A169':c.color} height={7}/>
+                  <div style={{fontSize:12,color:complete?'#38A169':'var(--fl-muted)',marginTop:8,fontWeight:complete?700:500}}>{complete?'Alle klaret! 🎉':`${done} / ${sched.length} aktiviteter`}</div>
                 </div>
               </div>
             );
@@ -706,9 +713,9 @@ function FlowApp(){
       doSpeak(`Flot klaret, ${child.name}! Du er færdig for i dag.`,()=>setSpeaking(true),()=>setSpeaking(false));
     };
     const SpeakBtn=({onPress,small=false})=>(
-      <button onMouseDown={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();onPress();}} disabled={speaking}
-        style={{width:small?32:44,height:small?32:44,borderRadius:'50%',border:'none',background:'rgba(255,255,255,0.88)',boxShadow:'0 2px 8px rgba(0,0,0,0.12)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,cursor:speaking?'default':'pointer',opacity:speaking?0.7:1,animation:speaking?'fl_pulse 1.2s ease-in-out infinite':'none','--fl-pulse-c':'rgba(59,111,212,0.35)'}}>
-        <SpeakerIcon size={small?14:18} color={speaking?'#3B6FD4':'#6B7A8D'}/>
+      <button onMouseDown={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();onPress();}} disabled={speaking} aria-label="Læs højt"
+        style={{width:small?36:44,height:small?36:44,borderRadius:'50%',border:'1px solid rgba(45,49,66,0.08)',background:'rgba(255,255,255,0.65)',backdropFilter:'blur(4px)',WebkitBackdropFilter:'blur(4px)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,cursor:speaking?'default':'pointer',opacity:speaking?0.8:1,animation:speaking?'fl_pulse 1.2s ease-in-out infinite':'none','--fl-pulse-c':'rgba(59,111,212,0.35)',transition:'background 0.15s ease'}}>
+        <SpeakerIcon size={small?15:18} color={speaking?'#3B6FD4':'#5D6B7E'}/>
       </button>
     );
     const nuRef=React.useRef(null);
@@ -841,17 +848,17 @@ function FlowApp(){
                     <div style={{flex:1,borderTop:'1px solid #EBE0D4'}}/>
                   </div>
                 )}
-              <div ref={nuRef} style={{background:bg,borderRadius:32,padding:'34px 26px',textAlign:'center',boxShadow:`0 8px 40px ${cc}38,0 2px 12px rgba(0,0,0,0.04)`,position:'relative'}}>
-                {task.speech&&<div style={{position:'absolute',top:14,right:14}}><SpeakBtn onPress={()=>speakTask(task,true)}/></div>}
-                <div style={{display:'flex',justifyContent:'center',marginBottom:16}}>
-                  <span style={{background:'#F97316',color:'#fff',fontSize:14,fontWeight:800,letterSpacing:2,textTransform:'uppercase',padding:'6px 18px',borderRadius:30}}>NU</span>
+              <div ref={nuRef} style={{background:`linear-gradient(178deg,rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 38%),${bg}`,borderRadius:32,padding:'36px 26px 30px',textAlign:'center',boxShadow:`0 10px 44px ${cc}40,0 2px 12px rgba(0,0,0,0.05)`,position:'relative',animation:'fl_nuIn 0.45s cubic-bezier(0.2,0.7,0.3,1)'}}>
+                {task.speech&&<div style={{position:'absolute',top:16,right:16}}><SpeakBtn onPress={()=>speakTask(task,true)}/></div>}
+                <div style={{display:'flex',justifyContent:'center',marginBottom:18}}>
+                  <span style={{background:'#F97316',color:'#fff',fontSize:14,fontWeight:800,letterSpacing:2,textTransform:'uppercase',padding:'7px 20px',borderRadius:30,boxShadow:'0 2px 10px rgba(249,115,22,0.3)'}}>NU</span>
                 </div>
-                <div style={{display:'flex',justifyContent:'center',marginBottom:20}}>{taskIl(task,120)}</div>
-                <div style={{fontSize:28,fontWeight:800,color:'#2D3142',marginBottom:6,lineHeight:1.2}}>{task.text}</div>
-                <div style={{display:'flex',justifyContent:'center',gap:14,marginBottom:24,flexWrap:'wrap'}}>
-                  {task.time&&<span style={{fontSize:16,color:'#6B7A8D',fontWeight:600}}>⏰ {task.time}</span>}
-                  {task.duration&&<span style={{fontSize:16,color:'#6B7A8D',fontWeight:600,display:'inline-flex',alignItems:'center',gap:4}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7A8D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M10 3h4"/><path d="M12 3v2"/></svg>{task.duration} min</span>}
-                  {task.staff&&<span style={{fontSize:16,color:'#6B7A8D',fontWeight:600}}>👤 {task.staff}</span>}
+                <div style={{display:'flex',justifyContent:'center',marginBottom:20}}>{taskIl(task,124)}</div>
+                <div style={{fontSize:30,fontWeight:800,color:'#2D3142',marginBottom:8,lineHeight:1.2,letterSpacing:-0.3}}>{task.text}</div>
+                <div style={{display:'flex',justifyContent:'center',gap:14,marginBottom:26,flexWrap:'wrap'}}>
+                  {task.time&&<span style={{fontSize:17,color:'#5D6B7E',fontWeight:600}}>⏰ {task.time}</span>}
+                  {task.duration&&<span style={{fontSize:17,color:'#5D6B7E',fontWeight:600,display:'inline-flex',alignItems:'center',gap:4}}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5D6B7E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M10 3h4"/><path d="M12 3v2"/></svg>{task.duration} min</span>}
+                  {task.staff&&<span style={{fontSize:17,color:'#5D6B7E',fontWeight:600}}>👤 {task.staff}</span>}
                 </div>
                 <button onClick={()=>{if(navigator.vibrate)navigator.vibrate(50);toggleTask(child.id,task.id);}} style={{...s.btn,width:'100%',padding:'24px',fontSize:22,fontWeight:800,background:'#38A169',color:'#fff',borderRadius:32,animation:'fl_btnPulse 2.4s ease-in-out infinite',gap:10}}>
                   <span style={{fontSize:22}}>✓</span> Færdig
@@ -863,14 +870,14 @@ function FlowApp(){
             /* Future — soft, numbered */
             return(
               <div key={task.id} style={{display:'flex',alignItems:'center',gap:14,padding:'15px 18px',background:'#FFFFFF',borderRadius:20,boxShadow:'0 2px 10px rgba(30,42,59,0.06)',opacity:0.8}}>
-                <div style={{width:32,height:32,borderRadius:'50%',background:'#F0F4F8',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:800,color:'#9AA3AF',flexShrink:0}}>{idx-currentIdx}</div>
+                <div style={{width:34,height:34,borderRadius:'50%',background:'#F0F4F8',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:800,color:'#8A94A3',flexShrink:0}}>{idx-currentIdx}</div>
                 <div style={{width:60,height:60,borderRadius:18,background:bg,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>{taskIl(task,44)}</div>
                 <div style={{flex:1}}>
-                  <div style={{fontSize:17,fontWeight:700,color:'#2D3142'}}>{task.text}</div>
+                  <div style={{fontSize:18,fontWeight:700,color:'#2D3142',letterSpacing:-0.2}}>{task.text}</div>
                   <div style={{display:'flex',gap:10,marginTop:3,flexWrap:'wrap'}}>
-                    {task.time&&<span style={{fontSize:13,color:'#9AA3AF'}}>⏰ {task.time}</span>}
-                    {task.duration&&<span style={{fontSize:13,color:'#9AA3AF',display:'inline-flex',alignItems:'center',gap:3}}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9AA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M10 3h4"/><path d="M12 3v2"/></svg>{task.duration} min</span>}
-                    {task.staff&&<span style={{fontSize:13,color:'#9AA3AF'}}>👤 {task.staff}</span>}
+                    {task.time&&<span style={{fontSize:14,color:'#8A94A3'}}>⏰ {task.time}</span>}
+                    {task.duration&&<span style={{fontSize:14,color:'#8A94A3',display:'inline-flex',alignItems:'center',gap:3}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A94A3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M10 3h4"/><path d="M12 3v2"/></svg>{task.duration} min</span>}
+                    {task.staff&&<span style={{fontSize:14,color:'#8A94A3'}}>👤 {task.staff}</span>}
                   </div>
                 </div>
                 {task.speech&&<SpeakBtn onPress={()=>speakTask(task,false)} small/>}
