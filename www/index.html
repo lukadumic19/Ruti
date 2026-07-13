@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Flow"/>
+<meta name="theme-color" content="#3B6FD4"/>
+<title>Flow</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body,#root{height:100%;overflow:hidden;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Roboto,sans-serif;background:#F8FAFC;}
+button{font-family:inherit;cursor:pointer;border:none;outline:none;}
+input,textarea{font-family:inherit;outline:none;}
+@keyframes fl_pop{from{opacity:0;transform:scale(0.96) translateY(6px)}to{opacity:1;transform:none}}
+@keyframes fl_glow{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.3)}}
+@keyframes fl_childIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+:root{
+  --fl-bg:#F8FAFC;--fl-card:#FFFFFF;--fl-header:#FFFFFF;--fl-primary:#3B6FD4;
+  --fl-primary-text:#FFFFFF;--fl-text:#1E2A3B;--fl-muted:#6B7A8D;--fl-faint:#C4CDD8;
+  --fl-sep:#EEF1F6;--fl-done:#38A169;
+  --fl-del-bg:#FEF2F2;--fl-del-text:#DC2626;
+  --fl-input-bg:#F8FAFC;--fl-input-border:#DDE3EC;
+  --fl-overlay:rgba(30,42,59,0.45);
+  --fl-card-radius:14px;--fl-card-shadow:0 1px 6px rgba(30,42,59,0.07),0 4px 16px rgba(30,42,59,0.04);
+  --fl-prog-bg:#EEF1F6;
+  --fl-pin-btn:#F8FAFC;--fl-pin-border:#DDE3EC;--fl-pin-dot:#DDE3EC;--fl-pin-fill:#3B6FD4;
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="./bundle.js"></script>
+</body>
+</html>

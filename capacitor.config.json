@@ -1,0 +1,9 @@
+{
+  "appId": "com.lukadumic.ruti",
+  "appName": "Ruti",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#F8FAFC"
+  }
+}

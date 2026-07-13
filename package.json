@@ -1,0 +1,22 @@
+{
+  "name": "ruti",
+  "version": "1.0.0",
+  "description": "Ruti - rutineplanlægning for børn",
+  "private": true,
+  "scripts": {
+    "build": "esbuild src/app.jsx --bundle --minify --loader:.jsx=jsx --outfile=www/bundle.js",
+    "dev": "esbuild src/app.jsx --bundle --loader:.jsx=jsx --outfile=www/bundle.js --watch --servedir=www",
+    "sync": "npm run build && cap sync ios",
+    "open:ios": "cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/ios": "^6.1.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2",
+    "esbuild": "^0.23.1"
+  }
+}

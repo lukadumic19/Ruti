@@ -1,0 +1,8 @@
+node_modules/
+www/bundle.js
+ios/App/Pods/
+ios/App/App/public/
+ios/App/output/
+ios/App/build/
+ios/DerivedData/
+.DS_Store
