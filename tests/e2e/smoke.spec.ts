@@ -8,6 +8,23 @@ test("dashboardet indlæses med app-navn og demo-badge", async ({ page }) => {
   await expect(page.getByText("Demo", { exact: true })).toBeVisible();
 });
 
+test("designsystem-siden viser komponentoversigten", async ({ page }) => {
+  await page.goto("/design-system");
+  await expect(
+    page.getByRole("heading", { name: "Designsystem", level: 1 }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Kontroller", level: 2 }),
+  ).toBeVisible();
+  // Et par centrale komponenter renderer med korrekt semantik
+  await expect(
+    page.getByRole("switch", { name: "Demo-kontakt" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Godnat/ }).first(),
+  ).toBeVisible();
+});
+
 test("navigation til Rum viser tom-tilstand", async ({ page }) => {
   await page.goto("/");
   await page

@@ -67,9 +67,17 @@ Strukturen er oprettet som skelet i repoet (`.gitkeep`-filer). Kode kommer i Fas
 │   ├── app/                  # Next.js App Router
 │   │   ├── (app)/            # Autentificerede app-sider: dashboard, rum/[id], baby, ...
 │   │   └── api/ha/           # BFF Route Handlers (proxy, SSE-stream)
-│   ├── components/           # Genbrugelige UI-komponenter
-│   │   ├── ui/               # Primitiver i shadcn/ui-stil (button, card, badge, …)
+│   ├── components/           # Genbrugelige UI-komponenter (vises på /design-system)
+│   │   ├── ui/               # Primitiver: button, card, badge, switch, slider,
+│   │   │                     #   dialog, bottom-sheet, confirm-dialog, dropdown,
+│   │   │                     #   tabs, tooltip, segmented-control, status-badge,
+│   │   │                     #   color-picker, color-temperature-picker, skeleton
 │   │   ├── layout/           # App-skal: header, navigation, page-header
+│   │   ├── devices/          # Enhedskort, sensorværdier, batteri, hurtighandling
+│   │   ├── rooms/            # Rumkort
+│   │   ├── scenes/           # Scenekort
+│   │   ├── feedback/         # Forbindelsesstatus, offline-banner, advarselskort,
+│   │   │                     #   bekræftelsesfeedback
 │   │   └── states/           # Generisk empty/error/skeleton
 │   ├── features/             # Ét modul pr. domæne (se §6)
 │   │   ├── dashboard/

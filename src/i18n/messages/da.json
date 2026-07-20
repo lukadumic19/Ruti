@@ -48,6 +48,8 @@
     "title": "Mere",
     "statusLink": "Systemstatus",
     "statusDescription": "Forbindelse, tilstand og appversion",
+    "designSystemLink": "Designsystem",
+    "designSystemDescription": "Intern komponentoversigt for udviklere",
     "comingTitle": "Flere funktioner på vej",
     "comingDescription": "Indstillinger, enhedsadministration og familieprofiler kommer i de næste faser."
   },
@@ -80,5 +82,54 @@
   "notFound": {
     "title": "Siden findes ikke",
     "description": "Vi kunne ikke finde den side, du ledte efter. Den kan være flyttet eller fjernet."
+  },
+  "deviceStatus": {
+    "on": "Tændt",
+    "off": "Slukket",
+    "unavailable": "Ikke tilgængelig",
+    "error": "Fejl",
+    "active": "Aktiv",
+    "busy": "Arbejder…",
+    "noData": "Ingen data",
+    "stale": "Muligvis forældet"
+  },
+  "connection": {
+    "connected": "Forbundet",
+    "reconnecting": "Genopretter forbindelse…",
+    "offline": "Ingen forbindelse",
+    "demo": "Demo",
+    "statusLabel": "Forbindelsesstatus",
+    "offlineBannerTitle": "Ingen forbindelse til hjemmet",
+    "offlineBannerDescription": "Du ser de senest kendte værdier. Handlinger er midlertidigt slået fra.",
+    "reconnectingBannerTitle": "Genopretter forbindelse…",
+    "reconnectingBannerDescription": "Appen forbinder til hjemmet igen. Værdierne opdateres om lidt."
+  },
+  "battery": {
+    "label": "Batteri",
+    "level": "Batteri {pct} %",
+    "low": "Lavt batteri",
+    "charging": "Oplader"
+  },
+  "controls": {
+    "close": "Luk",
+    "cancel": "Annuller",
+    "confirm": "Bekræft",
+    "colorLabel": "Farve",
+    "colorTempLabel": "Farvetemperatur",
+    "colorTempValue": "{kelvin} K – {name}",
+    "colorTempWarm": "varmt lys",
+    "colorTempNeutral": "neutralt lys",
+    "colorTempCool": "koldt lys"
+  },
+  "lightColors": {
+    "amber": "Rav",
+    "sunset": "Solnedgang",
+    "rose": "Rosa",
+    "lavender": "Lavendel",
+    "ocean": "Havblå",
+    "forest": "Skovgrøn"
+  },
+  "feedback": {
+    "done": "Udført"
   }
 }

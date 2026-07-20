@@ -62,3 +62,32 @@ Bindende for al UI. Håndhæves i code review og – hvor muligt – i lint/test
 - Sceneaktivering: fuldskærms-let overlay med trinvis ✓-liste (maks. 3 s, kan afvises).
 - Toasts: maks. én ad gangen, 4 s, aldrig til succes af trivielle handlinger
   (lys tændt = lyset ser tændt ud – ingen toast).
+- Inline-bekræftelse (`ConfirmationFeedback`) bruges efter handlinger uden
+  synligt resultat; annonceres via `aria-live="polite"`.
+
+## 8. Komponentbiblioteket (implementeret)
+
+Al UI bygges med komponenterne i `src/components/` – aldrig ad hoc-markup for
+mønstre, der allerede findes. Den levende reference er den interne side
+**`/design-system`** (link under "Mere"), som viser alle komponenter og deres
+tilstande i både lyst og mørkt tema.
+
+| Kategori               | Komponenter                                                                                                                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Primitiver (`ui/`)     | Button, Card, Badge, StatusBadge, Switch, Slider, SegmentedControl, Tabs, Dialog, BottomSheet, ConfirmDialog, DropdownMenu, Tooltip, ColorPicker, ColorTemperaturePicker, Skeleton, Toaster |
+| Enheder (`devices/`)   | DeviceCard, SensorValue, TemperatureDisplay, HumidityDisplay, BatteryStatus, QuickActionButton                                                                                              |
+| Rum/scener             | RoomCard, SceneCard                                                                                                                                                                         |
+| Feedback (`feedback/`) | ConnectionStatus, OfflineBanner, AlertCard, ConfirmationFeedback                                                                                                                            |
+| Tilstande (`states/`)  | EmptyState, ErrorState, PageSkeleton                                                                                                                                                        |
+
+Bindende regler for komponenterne:
+
+1. Enhedstilstande (`on`/`off`/`busy`/`unavailable`/`error`) vises altid med
+   ikon OG tekst via `StatusBadge` – utilgængelige enheder nedtones, skjules aldrig.
+2. Interaktive elementer har ≥ 44 px trykflade (Switch/Slider har usynligt
+   udvidet hit-område); QuickActionButton er ≥ 80 px til vægpanel/natbrug.
+3. Alle overlays (dialog, bottom sheet, bekræftelse, dropdown) bygger på
+   Radix-primitiver: fokusfælde, Escape-luk og korrekte ARIA-roller følger med.
+4. Destruktive/konsekvensfyldte handlinger går altid gennem `ConfirmDialog`.
+5. Farvevalg til lys sker via den kuraterede palette i
+   `src/config/light-colors.ts` – aldrig frie farvehjul.

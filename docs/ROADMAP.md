@@ -15,8 +15,12 @@ teststrategi, og beslutningerne er logget i DECISIONS.md.
 > shadcn-primitiver, app-skal med navigation og temaer, i18n (da), env-validering,
 > demo-tilstands-konfiguration, PWA-grundopsætning (manifest + service worker),
 > loading/empty/error-komponenter, toast-system, systemstatus-side samt
-> Vitest/RTL/Playwright-opsætning med kørende tests. Mangler: `HaClient` +
-> `MockHaClient` med seed/simulator og modulerne dashboard, rum, lys, scener.
+> Vitest/RTL/Playwright-opsætning med kørende tests.
+>
+> Status 2026-07-20 (2): Designsystemet er leveret – komplet komponentbibliotek
+> (DESIGN_PRINCIPLES §8) med intern referenceside på `/design-system` og
+> komponenttests for kernekomponenterne. Mangler: `HaClient` + `MockHaClient`
+> med seed/simulator og modulerne dashboard, rum, lys, scener.
 
 - Next.js-projekt (App Router, TS strict, Tailwind, shadcn/ui, next-intl med da.json).
 - `HaClient`-interface + `MockHaClient` med seed + simulator + `?mockScenario=`.

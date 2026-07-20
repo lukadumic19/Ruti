@@ -69,6 +69,10 @@ Kvalitetsporte før hver aflevering:
 Systemstatus (tilstand, version, prøvenotifikation): `/status` i appen,
 maskinlæsbart på `/api/health`.
 
+**Designsystem:** Den interne komponentoversigt på `/design-system` viser alle
+UI-komponenter og deres tilstande og er den visuelle reference for al ny UI
+(se [docs/DESIGN_PRINCIPLES.md §8](docs/DESIGN_PRINCIPLES.md)).
+
 **Sikkerhed:** Home Assistant-tokens må aldrig ligge i klientkode, `NEXT_PUBLIC_`-
 variabler eller commits. Reglerne står i [docs/SECURITY_MODEL.md](docs/SECURITY_MODEL.md).
 
