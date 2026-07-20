@@ -1,0 +1,19 @@
+# Lokale miljøfiler – må aldrig commites
+.env
+.env.local
+.env.*.local
+
+# Appdata (BFF-persistens)
+data/
+
+# Afhængigheder og build-output (fra Fase 1)
+node_modules/
+.next/
+out/
+playwright-report/
+test-results/
+coverage/
+
+# Diverse
+.DS_Store
+*.log
