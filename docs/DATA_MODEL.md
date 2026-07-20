@@ -4,6 +4,16 @@ Domænemodellen er appens sandhed. HA-entiteter mappes ind i den ved
 integrationsgrænsen (BFF) og forlader den aldrig rå. Typerne her implementeres
 i `src/types/` med tilhørende Zod-skemaer i `src/lib/ha/schemas/`.
 
+> **Implementeringsstatus (F1, 2026-07-20):** Domænetyperne er implementeret i
+> `src/types/` (se `index.ts`). Bemærk to præciseringer i forhold til den
+> oprindelige skitse nedenfor: (1) `Device` (fysisk enhed) og `Entity` (styrbar
+> funktion) er adskilt, jf. Home Assistants device/entity-registry — én enhed
+> kan eksponere flere entiteter. (2) Den diskriminerede union hedder `Entity`
+> (union-nøgle `kind`), og lys/lysgrupper/sensorer/lås osv. er grene af den.
+> `ServiceCall` er kommando-typen (ADR-0012/0013). Zod-skemaer i `lib/ha/schemas/`
+> tilføjes i F3, hvor rigtige HA-payloads skal valideres; mock-data er allerede
+> typesikre ved konstruktion.
+
 ## 1. Kernehierarki
 
 ```

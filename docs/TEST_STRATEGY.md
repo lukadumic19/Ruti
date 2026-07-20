@@ -24,15 +24,19 @@ Kommandoer (fastlægges i Fase 1-scaffold): `pnpm lint`, `pnpm typecheck`,
 
 ## 3. Mock-strategi (fundamentet for al test)
 
-- **Én kilde:** `MockHaClient` + `seed.ts` bruges af dev-server, Playwright og
-  komponenttests (Storybook-agtige fixtures genbruger seedet). Ingen ad hoc-mocks
-  af HA-data i enkelttests – tests bygger scenarier via seed-builderen:
-  `mockHome().withRoom("Stue").withLight({ on: true }).withScenario("ha-offline")`.
-- **Simulator:** deterministisk med seedet RNG og fake clock, så e2e er stabile.
-- **Fejlscenarier** via `?mockScenario=`: `ha-offline`, `ws-drop`, `slow-network`
-  (2 s latenstid), `lock-jammed`, `device-unavailable`, `auth-failed`, `partial-scene-failure`.
+- **Én kilde:** `MockHomeProvider` + `seed.ts` (`src/lib/mock/`) bruges af
+  dev-server, Playwright og enkelttests. `buildMockHome()` konstruerer det
+  typesikre danske mock-hjem; provideren bygger alt state ovenpå. Implementeret
+  i F1 (ADR-0012/0013).
+- **Simulator:** deterministisk med seedet RNG (`rng.ts`, mulberry32) og fake
+  clock (`vi.useFakeTimers()`), så både unit-tests og e2e er stabile.
+- **Fejlscenarier** styres via `MockScenarioController` (mock-kontrolpanelet,
+  `/mock-kontrol`): forbindelsestab (permanent/kortvarigt), enhed offline,
+  lavt batteri, åben dør/vindue, bevægelse, dårlig luftkvalitet, fastklemt lås
+  og kommandolatens. I unit-tests kaldes controlleren direkte. (Den oprindeligt
+  skitserede `?mockScenario=`-URL erstattes af denne rigere, interaktive kontrol.)
 - **Fixtures:** optagne, anonymiserede HA-payloads i `src/lib/ha/__fixtures__/`
-  er kontrakten mellem unit-tests og virkeligheden; opdateres i Fase 3 mod rigtig HA.
+  er kontrakten mellem unit-tests og virkeligheden; oprettes i Fase 3 mod rigtig HA.
 
 ## 4. E2E-kerneflows (Playwright, mod mocktilstand)
 

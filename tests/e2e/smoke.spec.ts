@@ -25,6 +25,40 @@ test("designsystem-siden viser komponentoversigten", async ({ page }) => {
   ).toBeVisible();
 });
 
+test("mock-kontrolpanelet styrer mock-hjemmet i realtid", async ({ page }) => {
+  await page.goto("/mock-kontrol");
+  await expect(
+    page.getByRole("heading", { name: "Mock-kontrolpanel", level: 1 }),
+  ).toBeVisible();
+
+  // Tænd spisebordsgruppen og se status skifte til Tændt
+  const groupSwitch = page.getByRole("switch", { name: "Spisebordslys" });
+  await expect(groupSwitch).toBeVisible();
+  await expect(async () => {
+    await groupSwitch.click();
+    await expect(page.getByText("Tændt", { exact: true }).first()).toBeVisible({
+      timeout: 2000,
+    });
+  }).toPass({ timeout: 15_000 });
+});
+
+test("simuleret forbindelsestab viser offline-banner og kan genoprettes", async ({
+  page,
+}) => {
+  await page.goto("/mock-kontrol");
+  await expect(async () => {
+    await page.getByRole("button", { name: "Gå offline" }).click();
+    await expect(page.getByText("Ingen forbindelse til hjemmet")).toBeVisible({
+      timeout: 2000,
+    });
+  }).toPass({ timeout: 15_000 });
+
+  await page.getByRole("button", { name: "Genopret", exact: true }).click();
+  await expect(page.getByText("Ingen forbindelse til hjemmet")).toBeHidden({
+    timeout: 5000,
+  });
+});
+
 test("navigation til Rum viser tom-tilstand", async ({ page }) => {
   await page.goto("/");
   await page

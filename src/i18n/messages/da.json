@@ -50,6 +50,8 @@
     "statusDescription": "Forbindelse, tilstand og appversion",
     "designSystemLink": "Designsystem",
     "designSystemDescription": "Intern komponentoversigt for udviklere",
+    "mockPanelLink": "Mock-kontrolpanel",
+    "mockPanelDescription": "Simulér tilstande og fejl i demo-hjemmet",
     "comingTitle": "Flere funktioner på vej",
     "comingDescription": "Indstillinger, enhedsadministration og familieprofiler kommer i de næste faser."
   },

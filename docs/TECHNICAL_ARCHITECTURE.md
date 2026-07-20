@@ -96,8 +96,8 @@ Strukturen er oprettet som skelet i repoet (`.gitkeep`-filer). Kode kommer i Fas
 │   │   ├── settings/
 │   │   └── connection/       # forbindelsesstatus + demo-tilstand
 │   ├── lib/
-│   │   ├── ha/               # HaClient-interface, RealHaClient, typer, zod-skemaer
-│   │   ├── mock/             # MockHaClient, seed-data, scenarie-simulator
+│   │   ├── ha/               # HomeProvider-interface (F3: BFF-provider + zod-skemaer)
+│   │   ├── mock/             # MockHomeProvider, seed (dansk mock-hjem), rng, simulator
 │   │   └── utils/
 │   ├── hooks/                # Genbrugelige React-hooks (use-mounted, …)
 │   ├── stores/               # Zustand-stores (kun UI-state)
@@ -117,7 +117,7 @@ Strukturen er oprettet som skelet i repoet (`.gitkeep`-filer). Kode kommer i Fas
 Regler:
 
 - `features/*` må importere fra `lib`, `components`, `stores`, `types` – aldrig fra andre features (undtagen via eksplicit eksporteret public API i featurens `index.ts`).
-- `lib/ha` kender intet til React. `lib/mock` implementerer samme interface som `lib/ha`.
+- `lib/ha` og `lib/mock` kender intet til React. `lib/mock` implementerer `HomeProvider`-interfacet fra `lib/ha`; i F3 gør en BFF-provider det samme. React-limen (context + hooks) ligger i `features/home/` (ADR-0012).
 - `app/` indeholder kun routing/komposition – ingen forretningslogik.
 
 ## 4. Dataflow

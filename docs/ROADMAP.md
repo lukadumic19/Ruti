@@ -19,8 +19,21 @@ teststrategi, og beslutningerne er logget i DECISIONS.md.
 >
 > Status 2026-07-20 (2): Designsystemet er leveret – komplet komponentbibliotek
 > (DESIGN_PRINCIPLES §8) med intern referenceside på `/design-system` og
-> komponenttests for kernekomponenterne. Mangler: `HaClient` + `MockHaClient`
-> med seed/simulator og modulerne dashboard, rum, lys, scener.
+> komponenttests for kernekomponenterne.
+>
+> Status 2026-07-20 (3): Domænemodel + mock smart home er leveret. Stærkt typede
+> domænetyper i `src/types/` (diskriminerede unions, ADR-0013),
+> `HomeProvider`-adapter (ADR-0012), `MockHomeProvider` med realistisk dansk
+> mock-hjem (7 rum, 14 lys, grupper, tilbehør, lås/døre/vinduer, termostater,
+> sensorer, CO₂/luftkvalitet, robotstøvsuger, energimåler), deterministisk
+> simulator og fuld scenariestyring (offline, lavt batteri, åbne døre,
+> bevægelse, dårlig luft, forbindelsestab, latens). Intern mock-kontrolside på
+> `/mock-kontrol`. Mangler nu i F1: modulerne dashboard, rum, lys, scener bygget
+> ovenpå provideren, samt CI-workflow.
+>
+> Navnenote: den oprindelige skitse kaldte adapteren `HaClient`/`MockHaClient`;
+> den implementeres som `HomeProvider`/`MockHomeProvider` (ADR-0012).
+> Fejlscenarier styres via mock-kontrolpanelet frem for `?mockScenario=`-URL.
 
 - Next.js-projekt (App Router, TS strict, Tailwind, shadcn/ui, next-intl med da.json).
 - `HaClient`-interface + `MockHaClient` med seed + simulator + `?mockScenario=`.

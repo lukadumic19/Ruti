@@ -17,6 +17,8 @@ i `docs/adr/` efter skabelonen `docs/adr/ADR-TEMPLATE.md` og indekseres nedenfor
 | 0009 | JSON-fil-persistens i BFF i v1 (ingen database)                 | Accepteret               | 2026-07-20 |
 | 0010 | next-intl uden locale-routing i URL'er                          | Accepteret               | 2026-07-20 |
 | 0011 | CSP-detaljer: 'unsafe-inline' for script/style, eval kun i dev  | Accepteret               | 2026-07-20 |
+| 0012 | HomeProvider-adapter mellem UI og datakilde (mock/HA)           | Accepteret               | 2026-07-20 |
+| 0013 | Diskriminerede unions på entiteter, ikke én stor Device-type    | Accepteret               | 2026-07-20 |
 
 ---
 
@@ -85,3 +87,16 @@ i `docs/adr/` efter skabelonen `docs/adr/ADR-TEMPLATE.md` og indekseres nedenfor
 **Kontekst:** SECURITY_MODEL §4 kræver stram CSP uden tredjepartskilder.
 **Beslutning:** CSP sættes i `next.config.ts`: `default-src 'self'`, ingen eksterne kilder. `script-src`/`style-src` tillader `'unsafe-inline'`, som Next' bootstrap-inlines og inline-styles kræver uden nonce-opsætning. `'unsafe-eval'` tillades KUN i udvikling (react-refresh/source maps) og er aldrig med i produktion.
 **Konsekvens:** Stadig ingen tredjeparts-scripts/CDN'er. Nonce-baseret CSP (fjerner 'unsafe-inline' for scripts) kan indføres senere via middleware; genbesøges i F4 (PWA/polish).
+
+## ADR-0012: HomeProvider-adapter mellem UI og datakilde
+
+**Kontekst:** Kravet er, at brugerfladen ikke må kunne se forskel på mock-data og rigtige Home Assistant-data. Datalaget skal kunne udskiftes uden at røre UI.
+**Alternativer:** (a) UI kalder direkte mod BFF-endpoints — kobler UI til transport og gør demotilstand svær. (b) Ét stort provider-objekt med HA-specifikke detaljer — lækker HA-begreber til UI.
+**Beslutning:** Ét adapter-interface `HomeProvider` (`src/lib/ha/provider.ts`) med et lille ansvar: `connect`/`disconnect`, `getSnapshot`/`getEntities`/`getEntity`, `callService`, `executeScene`, `getConnectionStatus`, `subscribe`. `MockHomeProvider` implementerer det i hukommelsen (demo). I F3 implementerer en tynd BFF-provider samme interface. Provideren er React-fri; en context (`HomeDataProvider`) og hooks (`useLiveHome`, `useConnectionStatus`) udgør limlaget.
+**Konsekvens:** UI afhænger kun af domænetyper og interfacet. Kommandoer er typede (whitelist, SECURITY_MODEL §4) og kaster aldrig — fejl returneres som `ProviderErrorCode`. Events streames til UI som `HomeEvent`; `resync` udløser fuld genindlæsning efter genforbindelse.
+
+## ADR-0013: Diskriminerede unions på entiteter, ikke én stor Device-type
+
+**Kontekst:** DATA_MODEL §3 kræver, at vi undgår én `Device` med mange valgfrie felter.
+**Beslutning:** `Entity` er en diskrimineret union på `kind` (`light`, `lightGroup`, `sensor`, `doorWindow`, `motion`, `airQuality`, `thermostat`, `lock`, `vacuum`, `energyMeter`). Hver gren har sin egen `state`- og `capabilities`-form. Fysisk enhed (`Device`) og styrbar funktion (`Entity`) er adskilt, så én enhed kan eksponere flere entiteter (fx Hue Motion Sensor → bevægelse + temperatur + lux). `capabilitiesOf()` udleder en flad `DeviceCapability[]` til UI.
+**Konsekvens:** Nye enhedstyper tilføjes som en ny union-gren + evt. ny `ServiceCall`-gren — aldrig via `any` eller løse attribut-poser. `switch` på `kind` er udtømmende (TypeScript-tjekket).

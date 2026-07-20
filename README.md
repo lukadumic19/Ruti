@@ -73,6 +73,14 @@ maskinlæsbart på `/api/health`.
 UI-komponenter og deres tilstande og er den visuelle reference for al ny UI
 (se [docs/DESIGN_PRINCIPLES.md §8](docs/DESIGN_PRINCIPLES.md)).
 
+**Mock smart home:** I demo-tilstand leveres alle data af `MockHomeProvider`
+(`src/lib/mock/`) bag `HomeProvider`-adapteren – UI'et kan ikke se forskel på
+mock og rigtig Home Assistant (ADR-0012). Et realistisk dansk hjem (7 rum, lys,
+grupper, lås, døre/vinduer, termostater, sensorer, luftkvalitet, robotstøvsuger,
+energimåler) simuleres i realtid. Den interne side `/mock-kontrol` kan
+fremprovokere tilstande: offline, lavt batteri, åbne døre, bevægelse, dårlig
+luftkvalitet, fastklemt lås, forbindelsestab og kommandolatens.
+
 **Sikkerhed:** Home Assistant-tokens må aldrig ligge i klientkode, `NEXT_PUBLIC_`-
 variabler eller commits. Reglerne står i [docs/SECURITY_MODEL.md](docs/SECURITY_MODEL.md).
 
