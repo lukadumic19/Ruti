@@ -9,6 +9,10 @@ data/
 # Afhængigheder og build-output (fra Fase 1)
 node_modules/
 .next/
+public/sw.js
+public/sw.js.map
+public/swe-worker-*.js
+*.tsbuildinfo
 out/
 playwright-report/
 test-results/

@@ -19,11 +19,11 @@ Bindende for al UI. Håndhæves i code review og – hvor muligt – i lint/test
 
 ## 2. Responsivitet og enhedsklasser
 
-| Breakpoint | Enhed | Layout |
-|---|---|---|
-| < 640 px | Telefon | Én kolonne, bundnavigation (5 punkter: Hjem, Rum, Scener, Baby, Mere), tommelfinger-zone nederst |
-| 640–1024 px | Tablet/iPad | 2-kolonne grid, sidenavigation venstre |
-| ≥ 1024 px | Desktop/vægpanel liggende | 3–4-kolonne grid, sidenavigation |
+| Breakpoint  | Enhed                     | Layout                                                                                           |
+| ----------- | ------------------------- | ------------------------------------------------------------------------------------------------ |
+| < 640 px    | Telefon                   | Én kolonne, bundnavigation (5 punkter: Hjem, Rum, Scener, Baby, Mere), tommelfinger-zone nederst |
+| 640–1024 px | Tablet/iPad               | 2-kolonne grid, sidenavigation venstre                                                           |
+| ≥ 1024 px   | Desktop/vægpanel liggende | 3–4-kolonne grid, sidenavigation                                                                 |
 
 - Touch-mål min. 44×44 px (Apple HIG). Ingen hover-afhængig funktionalitet.
 - Safe-area-insets (notch/home-indicator) respekteres fra dag ét (PWA + Capacitor).

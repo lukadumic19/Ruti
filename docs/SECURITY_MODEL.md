@@ -4,15 +4,15 @@
 
 Appen kører lokal-først på et privat hjemmenetværk. Vi beskytter mod:
 
-| Trussel | Relevans | Modforanstaltning |
-|---|---|---|
-| HA-token lækket via frontend-bundle, git eller browserdevtools | **Høj** (mest sandsynlige reelle fejl) | Token findes kun i BFF-processens env (§2); automatiseret leak-test (§3) |
-| Børn/gæster udfører farlige handlinger (oplåsning, ferietilstand fra) | Høj | Rollemodel + PIN (§6–7) |
-| Andre enheder på LAN kalder BFF'ens API | Mellem | BFF kræver session-cookie udstedt ved enhedsopsætning (§5) |
-| Eksponering mod internettet (bruger port-forwarder selv) | Mellem | Dokumenteret anbefaling: kun adgang via VPN/Tailscale; appen antager ikke selv HTTPS-terminering men kræver `secure`-cookies når den serveres over HTTPS |
-| XSS → kommandoudførelse | Mellem | Ingen `dangerouslySetInnerHTML`, CSP-headers (§4), al eksterntekst (HA friendly names) renderes som tekst |
-| Aflytning af LAN-trafik | Lav (privat net) | Anbefaling om HTTPS til HA og til appen dokumenteres i README-opsætning |
-| Cloud-læk | Ikke relevant | Ingen cloud i v1; ingen telemetri |
+| Trussel                                                               | Relevans                               | Modforanstaltning                                                                                                                                        |
+| --------------------------------------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| HA-token lækket via frontend-bundle, git eller browserdevtools        | **Høj** (mest sandsynlige reelle fejl) | Token findes kun i BFF-processens env (§2); automatiseret leak-test (§3)                                                                                 |
+| Børn/gæster udfører farlige handlinger (oplåsning, ferietilstand fra) | Høj                                    | Rollemodel + PIN (§6–7)                                                                                                                                  |
+| Andre enheder på LAN kalder BFF'ens API                               | Mellem                                 | BFF kræver session-cookie udstedt ved enhedsopsætning (§5)                                                                                               |
+| Eksponering mod internettet (bruger port-forwarder selv)              | Mellem                                 | Dokumenteret anbefaling: kun adgang via VPN/Tailscale; appen antager ikke selv HTTPS-terminering men kræver `secure`-cookies når den serveres over HTTPS |
+| XSS → kommandoudførelse                                               | Mellem                                 | Ingen `dangerouslySetInnerHTML`, CSP-headers (§4), al eksterntekst (HA friendly names) renderes som tekst                                                |
+| Aflytning af LAN-trafik                                               | Lav (privat net)                       | Anbefaling om HTTPS til HA og til appen dokumenteres i README-opsætning                                                                                  |
+| Cloud-læk                                                             | Ikke relevant                          | Ingen cloud i v1; ingen telemetri                                                                                                                        |
 
 Uden for scope i v1: beskyttelse mod en angriber med fysisk adgang til serveren,
 og mod kompromitteret Home Assistant selv.
@@ -57,16 +57,16 @@ og mod kompromitteret Home Assistant selv.
 
 ## 6. Roller og rettigheder
 
-| Handling | Voksen | Barn | Gæst | Vægpanel |
-|---|---|---|---|---|
-| Se dashboard/sensorer | ✓ | ✓ (tildelte rum) | ✓ (begrænset) | ✓ |
-| Styre lys | ✓ | ✓ (tildelte rum) | ✓ (fællesrum) | ✓ |
-| Aktivere scener | ✓ | Natlys/Godnat | ✗ | ✓ (undtagen Ferietilstand) |
-| Låse dør | ✓ | ✗ | ✗ | ✓ |
-| **Oplåse dør** | ✓ + PIN | ✗ | ✗ | ✗ |
-| Varme, ferietilstand, automatiseringer | ✓ | ✗ | ✗ | ✗ |
-| Indstillinger/enhedsadministration/demo-toggle | ✓ + PIN | ✗ | ✗ | ✗ |
-| Babytilstand + hændelsesregistrering | ✓ | ✗ | ✗ | ✓ |
+| Handling                                       | Voksen  | Barn             | Gæst          | Vægpanel                   |
+| ---------------------------------------------- | ------- | ---------------- | ------------- | -------------------------- |
+| Se dashboard/sensorer                          | ✓       | ✓ (tildelte rum) | ✓ (begrænset) | ✓                          |
+| Styre lys                                      | ✓       | ✓ (tildelte rum) | ✓ (fællesrum) | ✓                          |
+| Aktivere scener                                | ✓       | Natlys/Godnat    | ✗             | ✓ (undtagen Ferietilstand) |
+| Låse dør                                       | ✓       | ✗                | ✗             | ✓                          |
+| **Oplåse dør**                                 | ✓ + PIN | ✗                | ✗             | ✗                          |
+| Varme, ferietilstand, automatiseringer         | ✓       | ✗                | ✗             | ✗                          |
+| Indstillinger/enhedsadministration/demo-toggle | ✓ + PIN | ✗                | ✗             | ✗                          |
+| Babytilstand + hændelsesregistrering           | ✓       | ✗                | ✗             | ✓                          |
 
 Håndhævelse sker i **BFF'en** (rollen ligger i session-cookien) – UI-skjulning
 er kun en høflighed, aldrig sikkerhedsgrænsen.

@@ -9,7 +9,14 @@ Leverance: dokumentsættet i `docs/`, README, `.env.example`, mappeskelet, ADR-f
 Exit: dokumenterne dækker domænemodel, integrationsgrænser, sikkerhed, mock- og
 teststrategi, og beslutningerne er logget i DECISIONS.md.
 
-## F1 – Scaffold + mocktilstand + kerne-UI
+## F1 – Scaffold + mocktilstand + kerne-UI 🔨 (scaffold leveret)
+
+> Status 2026-07-20: Grundstrukturen er på plads – Next.js/TS strict/Tailwind/
+> shadcn-primitiver, app-skal med navigation og temaer, i18n (da), env-validering,
+> demo-tilstands-konfiguration, PWA-grundopsætning (manifest + service worker),
+> loading/empty/error-komponenter, toast-system, systemstatus-side samt
+> Vitest/RTL/Playwright-opsætning med kørende tests. Mangler: `HaClient` +
+> `MockHaClient` med seed/simulator og modulerne dashboard, rum, lys, scener.
 
 - Next.js-projekt (App Router, TS strict, Tailwind, shadcn/ui, next-intl med da.json).
 - `HaClient`-interface + `MockHaClient` med seed + simulator + `?mockScenario=`.
@@ -49,13 +56,13 @@ teststrategi, og beslutningerne er logget i DECISIONS.md.
 
 ## Tværgående milepæle
 
-| Milepæl | Kriterium |
-|---|---|
-| M1 "Demo-klar" | F1 exit – kan vises frem på enhver laptop |
-| M2 "Funktionskomplet web (mock)" | F2 exit |
-| M3 "Virker mod huset" | F3 exit |
-| **M4 "v1 web"** | Definition of Done nedenfor |
-| M5 "I lommen" | F5 exit |
+| Milepæl                          | Kriterium                                 |
+| -------------------------------- | ----------------------------------------- |
+| M1 "Demo-klar"                   | F1 exit – kan vises frem på enhver laptop |
+| M2 "Funktionskomplet web (mock)" | F2 exit                                   |
+| M3 "Virker mod huset"            | F3 exit                                   |
+| **M4 "v1 web"**                  | Definition of Done nedenfor               |
+| M5 "I lommen"                    | F5 exit                                   |
 
 ## 4. Definition of Done – første webversion (M4)
 

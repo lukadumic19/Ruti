@@ -1,0 +1,84 @@
+{
+  "nav": {
+    "home": "Hjem",
+    "rooms": "Rum",
+    "scenes": "Scener",
+    "baby": "Baby",
+    "more": "Mere",
+    "status": "Systemstatus",
+    "mainNavLabel": "Hovedmenu"
+  },
+  "header": {
+    "demoBadge": "Demo",
+    "demoBadgeHint": "Appen kører med eksempeldata – ingen forbindelse til et rigtigt hjem",
+    "themeToggle": "Skift tema",
+    "themeLight": "Lyst tema",
+    "themeDark": "Mørkt tema",
+    "themeSystem": "Følg systemet"
+  },
+  "dashboard": {
+    "title": "Overblik",
+    "subtitle": "Dit hjem – samlet ét sted",
+    "scenesCard": "Scener",
+    "scenesEmptyTitle": "Scener er på vej",
+    "scenesEmptyDescription": "Godmorgen, Godnat og de andre hverdagsscener bygges i næste fase.",
+    "climateCard": "Indeklima",
+    "climateEmptyTitle": "Indeklima er på vej",
+    "climateEmptyDescription": "Temperatur og luftfugtighed pr. rum vises her, når rum-modulet er klar.",
+    "securityCard": "Sikkerhed",
+    "securityEmptyTitle": "Sikkerhed er på vej",
+    "securityEmptyDescription": "Status for dørlås samt døre og vinduer samles her."
+  },
+  "rooms": {
+    "title": "Rum",
+    "emptyTitle": "Ingen rum endnu",
+    "emptyDescription": "Rum-modulet bygges i denne fase af projektet. Her får hvert rum sin egen side med lys, varme og sensorer."
+  },
+  "scenes": {
+    "title": "Scener",
+    "emptyTitle": "Ingen scener endnu",
+    "emptyDescription": "Her kommer hverdagsscenerne – Godmorgen, Godnat, Filmaften og resten – med aktivering på ét tryk."
+  },
+  "baby": {
+    "title": "Baby",
+    "emptyTitle": "Babytilstand er på vej",
+    "emptyDescription": "Nattetema, temperatur i babyværelset, måltider og bleskift samles her i en senere fase."
+  },
+  "more": {
+    "title": "Mere",
+    "statusLink": "Systemstatus",
+    "statusDescription": "Forbindelse, tilstand og appversion",
+    "comingTitle": "Flere funktioner på vej",
+    "comingDescription": "Indstillinger, enhedsadministration og familieprofiler kommer i de næste faser."
+  },
+  "health": {
+    "title": "Systemstatus",
+    "subtitle": "Teknisk tilstand for appen",
+    "appCard": "App",
+    "version": "Version",
+    "environment": "Miljø",
+    "modeCard": "Tilstand",
+    "modeDemo": "Demo – eksempeldata",
+    "modeDemoDescription": "Appen er ikke forbundet til et rigtigt hjem. Alt du ser, er realistiske eksempeldata.",
+    "modeLive": "Forbundet tilstand",
+    "modeLiveDescription": "Appen er konfigureret til at forbinde til Home Assistant.",
+    "envCard": "Konfiguration",
+    "envOk": "Miljøvariabler er gyldige",
+    "toastCard": "Notifikationer",
+    "toastDescription": "Send en prøvenotifikation for at se, hvordan beskeder vises.",
+    "toastButton": "Vis prøvenotifikation",
+    "toastExampleTitle": "Prøvenotifikation",
+    "toastExampleBody": "Sådan ser en besked fra hjemmet ud."
+  },
+  "states": {
+    "loading": "Indlæser…",
+    "errorTitle": "Noget gik galt",
+    "errorDescription": "Det lykkedes ikke at vise indholdet. Prøv igen om et øjeblik.",
+    "retry": "Prøv igen",
+    "goHome": "Til forsiden"
+  },
+  "notFound": {
+    "title": "Siden findes ikke",
+    "description": "Vi kunne ikke finde den side, du ledte efter. Den kan være flyttet eller fjernet."
+  }
+}

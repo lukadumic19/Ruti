@@ -38,8 +38,8 @@ Roller: **Voksen** (fuld adgang), **Barn** (begrænset), **Gæst** (minimal),
   domænescener: en navngiven liste af typede kommandoer + evt. HA-scene-reference.
 - Skal: aktivering med resultatvisning pr. handling (✓/✗ + retry på fejlede).
 - Skal: redigering (Voksen): tilføj/fjern handlinger fra kuraterede enheder.
-- Ferietilstand og Babytilstand er *tilstande* (vedvarende, med badge i UI), de
-  øvrige er *engangs-scener*. Tilstande kan deaktiveres eksplicit.
+- Ferietilstand og Babytilstand er _tilstande_ (vedvarende, med badge i UI), de
+  øvrige er _engangs-scener_. Tilstande kan deaktiveres eksplicit.
 - Senere: tidsstyret automatisk aktivering (via automatiseringsmodulet).
 
 ## 5. Sensorer (fælles)
@@ -104,6 +104,7 @@ Roller: **Voksen** (fuld adgang), **Barn** (begrænset), **Gæst** (minimal),
 ## 14. Babytilstand (både scene/tilstand og egen side)
 
 Egen side (`/baby`) – skal i v1:
+
 - Aktivér/deaktivér Babytilstand (tilstand med badge): dæmper lys til varm hvid
   lav styrke i valgte rum, deaktiverer appens egne kraftige lysautomatiseringer
   og lyde, aktiverer dæmpet mørkt UI-tema.

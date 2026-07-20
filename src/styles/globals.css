@@ -1,0 +1,158 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Semantiske design-tokens (DESIGN_PRINCIPLES §4).
+ * Komponenter bruger ALDRIG rå farveværdier – kun disse tokens.
+ * Paletten er rolig og varm: off-white/varm mørk grund, dæmpet blågrå primær,
+ * varmt rav til lysstyring, afdæmpet grøn/rød til sikkerhed og status.
+ */
+:root {
+  /* Flader */
+  --background: oklch(0.977 0.005 85);
+  --foreground: oklch(0.26 0.012 60);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.26 0.012 60);
+  --muted: oklch(0.945 0.006 85);
+  --muted-foreground: oklch(0.51 0.014 60);
+  --border: oklch(0.9 0.008 85);
+  --ring: oklch(0.55 0.09 255);
+
+  /* Primær handling */
+  --primary: oklch(0.45 0.07 255);
+  --primary-foreground: oklch(0.985 0.003 85);
+
+  /* Status */
+  --success: oklch(0.55 0.11 150);
+  --success-soft: oklch(0.93 0.035 150);
+  --warning: oklch(0.6 0.12 70);
+  --warning-soft: oklch(0.95 0.05 85);
+  --destructive: oklch(0.53 0.17 27);
+  --destructive-soft: oklch(0.94 0.035 27);
+  --info: oklch(0.52 0.09 245);
+  --info-soft: oklch(0.94 0.03 245);
+
+  /* Domæne: lysstyring (varmt rav-skær for tændt lys) */
+  --light-on: oklch(0.78 0.13 85);
+  --light-on-soft: oklch(0.95 0.06 90);
+
+  /* Domæne: sikkerhed (lås, døre/vinduer) */
+  --security-safe: oklch(0.55 0.11 150);
+  --security-alert: oklch(0.53 0.17 27);
+
+  --radius: 0.875rem;
+}
+
+.dark {
+  --background: oklch(0.195 0.012 60);
+  --foreground: oklch(0.93 0.006 85);
+  --card: oklch(0.24 0.013 60);
+  --card-foreground: oklch(0.93 0.006 85);
+  --muted: oklch(0.28 0.013 60);
+  --muted-foreground: oklch(0.66 0.012 70);
+  --border: oklch(0.32 0.014 60);
+  --ring: oklch(0.7 0.08 255);
+
+  --primary: oklch(0.72 0.08 255);
+  --primary-foreground: oklch(0.18 0.012 60);
+
+  --success: oklch(0.68 0.11 150);
+  --success-soft: oklch(0.3 0.04 150);
+  --warning: oklch(0.72 0.12 75);
+  --warning-soft: oklch(0.31 0.05 80);
+  --destructive: oklch(0.66 0.16 27);
+  --destructive-soft: oklch(0.3 0.05 27);
+  --info: oklch(0.7 0.08 245);
+  --info-soft: oklch(0.29 0.04 245);
+
+  --light-on: oklch(0.8 0.13 85);
+  --light-on-soft: oklch(0.32 0.06 85);
+
+  --security-safe: oklch(0.68 0.11 150);
+  --security-alert: oklch(0.66 0.16 27);
+}
+
+/* Høj kontrast: skarpere tekst og borders, uanset tema */
+@media (prefers-contrast: more) {
+  :root {
+    --foreground: oklch(0.12 0.01 60);
+    --muted-foreground: oklch(0.3 0.012 60);
+    --border: oklch(0.6 0.01 85);
+  }
+  .dark {
+    --foreground: oklch(0.99 0 0);
+    --muted-foreground: oklch(0.85 0.008 85);
+    --border: oklch(0.62 0.012 60);
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-destructive: var(--destructive);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-light-on: var(--light-on);
+  --color-light-on-soft: var(--light-on-soft);
+  --color-security-safe: var(--security-safe);
+  --color-security-alert: var(--security-alert);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-sm: calc(var(--radius) - 8px);
+
+  /* Systemfonte – ingen eksterne fonts (SECURITY_MODEL: ingen CDN'er) */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    height: 100%;
+  }
+
+  body {
+    min-height: 100%;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  /* Reduceret bevægelse: animationer er additive, aldrig bærende */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

@@ -1,0 +1,9 @@
+node_modules/
+.next/
+out/
+public/sw.js
+playwright-report/
+test-results/
+coverage/
+pnpm-lock.yaml
+index.html

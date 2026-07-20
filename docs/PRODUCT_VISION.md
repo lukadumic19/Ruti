@@ -18,22 +18,24 @@ sprog og tryghed for at "det bare virker".
 
 ## 3. Målgruppe og primære personaer
 
-| Persona | Enhed | Behov |
-|---|---|---|
-| Forælder (primær administrator) | iPhone | Hurtige scener ("Godnat"), status ved udgang (lås/vinduer), babytilstand om natten |
-| Partner (dagligbruger) | iPhone/iPad | Lys og varme uden opsætning, notifikationer der giver mening |
-| Barn (begrænset bruger) | iPad/vægtablet | Få, sikre handlinger: eget lys, natlys – ingen adgang til lås og indstillinger |
-| Vægtablet (fælles kontrolpanel) | iPad/Android-tablet monteret på væg | Altid tændt dashboard, store trykflader, ingen login-friktion, kiosk-agtig |
-| Gæst/bedsteforælder | Egen telefon | Midlertidig, stærkt begrænset adgang |
+| Persona                         | Enhed                               | Behov                                                                              |
+| ------------------------------- | ----------------------------------- | ---------------------------------------------------------------------------------- |
+| Forælder (primær administrator) | iPhone                              | Hurtige scener ("Godnat"), status ved udgang (lås/vinduer), babytilstand om natten |
+| Partner (dagligbruger)          | iPhone/iPad                         | Lys og varme uden opsætning, notifikationer der giver mening                       |
+| Barn (begrænset bruger)         | iPad/vægtablet                      | Få, sikre handlinger: eget lys, natlys – ingen adgang til lås og indstillinger     |
+| Vægtablet (fælles kontrolpanel) | iPad/Android-tablet monteret på væg | Altid tændt dashboard, store trykflader, ingen login-friktion, kiosk-agtig         |
+| Gæst/bedsteforælder             | Egen telefon                        | Midlertidig, stærkt begrænset adgang                                               |
 
 ## 4. Hvad appen ER og IKKE er
 
 **ER:**
+
 - Familiens daglige betjeningsflade: scener, lys, varme, lås, støvsuger, baby.
 - Lokal-først: fungerer på hjemmenetværket uden cloud-afhængighed.
 - Et kurateret lag oven på Home Assistant.
 
 **IKKE:**
+
 - En erstatning for Home Assistants konfigurationsflade. Opsætning af integrationer,
   Zigbee-parring, YAML m.m. sker fortsat i Home Assistant.
 - En generisk "vis alle entiteter"-app. Kun kuraterede, navngivne enheder vises.
@@ -78,10 +80,10 @@ sprog og tryghed for at "det bare virker".
 
 ## 8. Bevidste fravalg i v1
 
-| Fravalg | Begrundelse | Genbesøges |
-|---|---|---|
-| Kamerastreams | Kompleksitet (WebRTC/HLS), ikke kritisk for daglig brug | Fase 4+ |
-| Talestyring | Dækkes af HomeKit/Assist udenom appen | Senere |
-| Historik-grafer ud over energi/klima | Kuratering frem for data-dump | Fase 3 |
-| Multi-hjem | Én familie, ét hjem er kernen | Ved behov |
+| Fravalg                                                    | Begrundelse                                                                            | Genbesøges                    |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------- |
+| Kamerastreams                                              | Kompleksitet (WebRTC/HLS), ikke kritisk for daglig brug                                | Fase 4+                       |
+| Talestyring                                                | Dækkes af HomeKit/Assist udenom appen                                                  | Senere                        |
+| Historik-grafer ud over energi/klima                       | Kuratering frem for data-dump                                                          | Fase 3                        |
+| Multi-hjem                                                 | Én familie, ét hjem er kernen                                                          | Ved behov                     |
 | Brugeroprettelse med individuelle logins pr. familiemedlem | v1 bruger rolleprofiler uden adgangskode på lokalnettet, PIN til beskyttede handlinger | Fase 4 (se SECURITY_MODEL §6) |

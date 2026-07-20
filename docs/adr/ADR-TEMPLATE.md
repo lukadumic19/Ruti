@@ -27,6 +27,7 @@ Vi vælger [X], fordi [den afgørende begrundelse – ikke en gentagelse af ford
 - Genbesøges når/hvis: [konkret trigger, fx "Fase 3-integrationsstart"]
 
 ---
-*Nye ADR'er: kopiér denne fil til `docs/adr/NNNN-kebab-titel.md` (fortløbende
+
+_Nye ADR'er: kopiér denne fil til `docs/adr/NNNN-kebab-titel.md` (fortløbende
 nummer), udfyld, og tilføj én linje i `docs/DECISIONS.md`-indekset. En accepteret
-ADR ændres aldrig indholdsmæssigt – den erstattes af en ny.*
+ADR ændres aldrig indholdsmæssigt – den erstattes af en ny._

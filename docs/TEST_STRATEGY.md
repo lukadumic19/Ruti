@@ -2,13 +2,13 @@
 
 ## 1. Pyramide og værktøjer
 
-| Lag | Værktøj | Omfang | Kører |
-|---|---|---|---|
-| Unit | Vitest | Mapping-funktioner (HA→domæne), Zod-skemaer, sceneudførelse, regel-evaluering, stores, utils | Hver commit (hurtig, < 30 s) |
-| Komponent | Vitest + React Testing Library | Kort, dialoger, states (loading/empty/error), rollebaseret rendering | Hver commit |
-| E2E | Playwright | Kerneflows mod appen i mocktilstand | PR + main |
-| Kontrakt | Vitest mod HA i Docker | `RealHaClient` mod rigtig HA (demo-platform) | Fase 3+, natligt + PR der rører `lib/ha` |
-| Statisk | ESLint, `tsc --noEmit`, gitleaks, token-leak-scan | Hele repoet | Hver commit |
+| Lag       | Værktøj                                           | Omfang                                                                                       | Kører                                    |
+| --------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| Unit      | Vitest                                            | Mapping-funktioner (HA→domæne), Zod-skemaer, sceneudførelse, regel-evaluering, stores, utils | Hver commit (hurtig, < 30 s)             |
+| Komponent | Vitest + React Testing Library                    | Kort, dialoger, states (loading/empty/error), rollebaseret rendering                         | Hver commit                              |
+| E2E       | Playwright                                        | Kerneflows mod appen i mocktilstand                                                          | PR + main                                |
+| Kontrakt  | Vitest mod HA i Docker                            | `RealHaClient` mod rigtig HA (demo-platform)                                                 | Fase 3+, natligt + PR der rører `lib/ha` |
+| Statisk   | ESLint, `tsc --noEmit`, gitleaks, token-leak-scan | Hele repoet                                                                                  | Hver commit                              |
 
 Kommandoer (fastlægges i Fase 1-scaffold): `pnpm lint`, `pnpm typecheck`,
 `pnpm test`, `pnpm test:e2e`, `pnpm build`. CI kører alle på PR.
