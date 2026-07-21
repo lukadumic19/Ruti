@@ -1,11 +1,27 @@
 import { expect, test } from "@playwright/test";
 
-test("dashboardet indlæses med app-navn og demo-badge", async ({ page }) => {
+test("dashboardet indlæses med hilsen, status og hurtighandlinger", async ({
+  page,
+}) => {
   await page.goto("/");
+  // Topområdet viser en situationsafhængig hilsen som h1
   await expect(
-    page.getByRole("heading", { name: "Overblik", level: 1 }),
+    page.getByRole("heading", { level: 1 }).filter({ hasText: /God/ }),
   ).toBeVisible();
+  // Hjemmestatus fra mock-data
+  await expect(page.getByText("Hjemmet er låst")).toBeVisible();
+  // Hurtighandlinger virker mod mock-provideren
+  await expect(page.getByRole("button", { name: "Godnat" })).toBeVisible();
   await expect(page.getByText("Demo", { exact: true })).toBeVisible();
+});
+
+test("dashboardets hurtighandling Godnat slukker alt lys", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByText("Én lampe er tændt")).toBeVisible();
+  await page.getByRole("button", { name: "Godnat" }).click();
+  await expect(
+    page.getByText("Intet lys er tændt", { exact: true }),
+  ).toBeVisible({ timeout: 10_000 });
 });
 
 test("designsystem-siden viser komponentoversigten", async ({ page }) => {
@@ -95,7 +111,7 @@ test("ukendt side viser dansk 404", async ({ page }) => {
   await expect(page.getByText("Siden findes ikke")).toBeVisible();
   await page.getByRole("link", { name: "Til forsiden" }).click();
   await expect(
-    page.getByRole("heading", { name: "Overblik", level: 1 }),
+    page.getByRole("heading", { level: 1 }).filter({ hasText: /God/ }),
   ).toBeVisible();
 });
 

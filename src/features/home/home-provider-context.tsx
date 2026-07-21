@@ -12,6 +12,25 @@ import { MockHomeProvider } from "@/lib/mock/mock-provider";
  */
 const HomeProviderContext = React.createContext<HomeProvider | null>(null);
 
+/**
+ * Lav-niveau context-udbyder: stiller en konkret provider til rådighed uden at
+ * styre dens livscyklus. Bruges af HomeDataProvider og af tests, der selv
+ * kontrollerer en provider-instans.
+ */
+export function HomeProviderScope({
+  provider,
+  children,
+}: {
+  provider: HomeProvider | null;
+  children: React.ReactNode;
+}) {
+  return (
+    <HomeProviderContext.Provider value={provider}>
+      {children}
+    </HomeProviderContext.Provider>
+  );
+}
+
 export function HomeDataProvider({
   demo,
   children,
@@ -31,11 +50,7 @@ export function HomeDataProvider({
     };
   }, [provider]);
 
-  return (
-    <HomeProviderContext.Provider value={provider}>
-      {children}
-    </HomeProviderContext.Provider>
-  );
+  return <HomeProviderScope provider={provider}>{children}</HomeProviderScope>;
 }
 
 /** null når ingen datakilde er konfigureret (live-tilstand før Fase 3). */

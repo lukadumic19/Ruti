@@ -19,6 +19,7 @@ i `docs/adr/` efter skabelonen `docs/adr/ADR-TEMPLATE.md` og indekseres nedenfor
 | 0011 | CSP-detaljer: 'unsafe-inline' for script/style, eval kun i dev  | Accepteret               | 2026-07-20 |
 | 0012 | HomeProvider-adapter mellem UI og datakilde (mock/HA)           | Accepteret               | 2026-07-20 |
 | 0013 | Diskriminerede unions på entiteter, ikke én stor Device-type    | Accepteret               | 2026-07-20 |
+| 0014 | Dashboard: ren afledningskerne + kort-datamodel                 | Accepteret               | 2026-07-20 |
 
 ---
 
@@ -100,3 +101,9 @@ i `docs/adr/` efter skabelonen `docs/adr/ADR-TEMPLATE.md` og indekseres nedenfor
 **Kontekst:** DATA_MODEL §3 kræver, at vi undgår én `Device` med mange valgfrie felter.
 **Beslutning:** `Entity` er en diskrimineret union på `kind` (`light`, `lightGroup`, `sensor`, `doorWindow`, `motion`, `airQuality`, `thermostat`, `lock`, `vacuum`, `energyMeter`). Hver gren har sin egen `state`- og `capabilities`-form. Fysisk enhed (`Device`) og styrbar funktion (`Entity`) er adskilt, så én enhed kan eksponere flere entiteter (fx Hue Motion Sensor → bevægelse + temperatur + lux). `capabilitiesOf()` udleder en flad `DeviceCapability[]` til UI.
 **Konsekvens:** Nye enhedstyper tilføjes som en ny union-gren + evt. ny `ServiceCall`-gren — aldrig via `any` eller løse attribut-poser. `switch` på `kind` er udtømmende (TypeScript-tjekket).
+
+## ADR-0014: Dashboard – ren afledningskerne + kort-datamodel
+
+**Kontekst:** Dashboardet skal hurtigt besvare "er hjemmet sikkert / åbent / offline / hvordan er klima og luft / hvad er tændt / hvad er næste handling" og senere kunne skjule/omarrangere kort.
+**Beslutning:** Al afledning af hjemmets tilstand lægges i rene funktioner (`features/dashboard/derive.ts`: `buildHomeSummary`, `buildStatusItems`, `lightsOnCountByRoom`) uden React/i18n, så de er unit-testbare. Præsentationslaget (statuslinjer, sektioner) oversætter struktureret data via next-intl. Kortenes rækkefølge/synlighed beskrives i en foreløbig datamodel (`cards.ts`) — ingen fuld editor endnu. Hilsen og anbefalet næste scene er ligeledes rene funktioner (`greeting.ts`). Kommandoer (scener, sluk lys) sendes kun når `ConnectionStatus` er `connected`.
+**Konsekvens:** Kernen kan testes uden DOM; UI kan skiftes uden at røre logikken. Kort-editoren (skjul/omarrangér, persistens i UI-store) bygges senere oven på `cards.ts` uden ændringer i selve kortene.

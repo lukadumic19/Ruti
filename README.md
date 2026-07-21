@@ -73,6 +73,15 @@ maskinlæsbart på `/api/health`.
 UI-komponenter og deres tilstande og er den visuelle reference for al ny UI
 (se [docs/DESIGN_PRINCIPLES.md §8](docs/DESIGN_PRINCIPLES.md)).
 
+**Dashboard:** Forsiden (`/`) er appens primære dashboard bygget mod
+`HomeProvider`. Topområdet giver et hurtigt svar på "er hjemmet sikkert, er
+noget åbent/offline, hvordan er klima og luft, hvad er tændt, og hvad er næste
+handling". Otte hurtighandlinger (scener) virker direkte mod mock-provideren med
+bekræftelse og fejlvisning, og statussektioner viser favoritrum, klima,
+sikkerhed, energi, hændelser, advarsler m.m. Dashboardets afledningslogik ligger
+rent og testet i `src/features/dashboard/derive.ts`; en foreløbig kort-datamodel
+(`cards.ts`) forbereder skjul/omarrangér senere.
+
 **Mock smart home:** I demo-tilstand leveres alle data af `MockHomeProvider`
 (`src/lib/mock/`) bag `HomeProvider`-adapteren – UI'et kan ikke se forskel på
 mock og rigtig Home Assistant (ADR-0012). Et realistisk dansk hjem (7 rum, lys,

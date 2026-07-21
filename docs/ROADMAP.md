@@ -28,8 +28,17 @@ teststrategi, og beslutningerne er logget i DECISIONS.md.
 > sensorer, CO₂/luftkvalitet, robotstøvsuger, energimåler), deterministisk
 > simulator og fuld scenariestyring (offline, lavt batteri, åbne døre,
 > bevægelse, dårlig luft, forbindelsestab, latens). Intern mock-kontrolside på
-> `/mock-kontrol`. Mangler nu i F1: modulerne dashboard, rum, lys, scener bygget
-> ovenpå provideren, samt CI-workflow.
+> `/mock-kontrol`.
+>
+> Status 2026-07-20 (4): Det primære **dashboard** er bygget mod mock-provideren.
+> Situationsafhængig hilsen + hjemmestatus (låst? åbent? offline? klima? luft?
+> hvad er tændt?), 8 hurtighandlinger (scener) med optimistisk/bekræftende
+> feedback og fejlvisning, samt statussektioner (favoritrum, aktive lamper,
+> klima, luftkvalitet, sikkerhed, døre/vinduer, robotstøvsuger, energi, seneste
+> hændelser, advarsler, babyoversigt når babytilstand er aktiv). Ren, testet
+> afledningskerne (`features/dashboard/derive.ts`) + foreløbig kort-datamodel
+> (`cards.ts`) til senere skjul/omarrangér. Mangler nu i F1: modulerne rum, lys
+> og scener som selvstændige sider, samt CI-workflow.
 >
 > Navnenote: den oprindelige skitse kaldte adapteren `HaClient`/`MockHaClient`;
 > den implementeres som `HomeProvider`/`MockHomeProvider` (ADR-0012).

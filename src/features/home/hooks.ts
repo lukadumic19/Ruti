@@ -10,6 +10,8 @@ import type {
   EntityId,
   HomeSnapshot,
   Notification,
+  Scene,
+  SceneId,
 } from "@/types";
 
 import { useHomeProviderOrNull } from "./home-provider-context";
@@ -39,6 +41,7 @@ export interface LiveHomeState {
   snapshot: HomeSnapshot | null;
   entities: ReadonlyMap<EntityId, Entity>;
   devices: ReadonlyMap<DeviceId, Device>;
+  scenes: ReadonlyMap<SceneId, Scene>;
   notifications: readonly Notification[];
   retry: () => void;
 }
@@ -56,6 +59,9 @@ export function useLiveHome(): LiveHomeState {
     new Map(),
   );
   const [devices, setDevices] = React.useState<ReadonlyMap<DeviceId, Device>>(
+    new Map(),
+  );
+  const [scenes, setScenes] = React.useState<ReadonlyMap<SceneId, Scene>>(
     new Map(),
   );
   const [notifications, setNotifications] = React.useState<
@@ -79,6 +85,7 @@ export function useLiveHome(): LiveHomeState {
         setSnapshot(snap);
         setEntities(new Map(snap.entities.map((e) => [e.id, e])));
         setDevices(new Map(snap.devices.map((d) => [d.id, d])));
+        setScenes(new Map(snap.scenes.map((s) => [s.id, s])));
         setLoading(false);
       } catch {
         if (!cancelled) {
@@ -107,6 +114,13 @@ export function useLiveHome(): LiveHomeState {
             return next;
           });
           break;
+        case "scene":
+          setScenes((prev) => {
+            const next = new Map(prev);
+            next.set(event.scene.id, event.scene);
+            return next;
+          });
+          break;
         case "notification":
           setNotifications((prev) =>
             [event.notification, ...prev].slice(0, 20),
@@ -128,7 +142,16 @@ export function useLiveHome(): LiveHomeState {
 
   const retry = React.useCallback(() => setReloadKey((k) => k + 1), []);
 
-  return { loading, error, snapshot, entities, devices, notifications, retry };
+  return {
+    loading,
+    error,
+    snapshot,
+    entities,
+    devices,
+    scenes,
+    notifications,
+    retry,
+  };
 }
 
 /** Én entitet, typet efter kind, live-opdateret. */

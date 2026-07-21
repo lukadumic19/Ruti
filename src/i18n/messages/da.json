@@ -19,15 +19,115 @@
   "dashboard": {
     "title": "Overblik",
     "subtitle": "Dit hjem – samlet ét sted",
-    "scenesCard": "Scener",
-    "scenesEmptyTitle": "Scener er på vej",
-    "scenesEmptyDescription": "Godmorgen, Godnat og de andre hverdagsscener bygges i næste fase.",
-    "climateCard": "Indeklima",
-    "climateEmptyTitle": "Indeklima er på vej",
-    "climateEmptyDescription": "Temperatur og luftfugtighed pr. rum vises her, når rum-modulet er klar.",
-    "securityCard": "Sikkerhed",
-    "securityEmptyTitle": "Sikkerhed er på vej",
-    "securityEmptyDescription": "Status for dørlås samt døre og vinduer samles her."
+    "greetingMorning": "Godmorgen",
+    "greetingAfternoon": "God eftermiddag",
+    "greetingEvening": "God aften",
+    "greetingNight": "Godnat",
+    "loading": "Indlæser dit hjem…",
+    "errorTitle": "Kunne ikke indlæse hjemmet",
+    "errorDescription": "Der opstod en fejl under indlæsning af dine enheder. Prøv igen.",
+    "recommendedAction": "Foreslået nu",
+    "status": {
+      "locked": "Hjemmet er låst",
+      "unlocked": "Hjemmet er ikke låst",
+      "lockJammed": "Låsen svarer ikke",
+      "allClosed": "Alle døre og vinduer er lukkede",
+      "openOne": "Et vindue eller en dør står åben",
+      "openMany": "{count} døre og vinduer står åbne",
+      "lightsNone": "Intet lys er tændt",
+      "lightsOne": "Én lampe er tændt",
+      "lightsMany": "{count} lamper er tændt",
+      "offlineOne": "En enhed er offline",
+      "offlineMany": "{count} enheder er offline",
+      "airGood": "Luftkvaliteten er god",
+      "airModerate": "Luft ud snart",
+      "airPoor": "Luftkvaliteten er dårlig – luft ud nu",
+      "vacuumCleaning": "Robotstøvsugeren gør rent",
+      "vacuumReturning": "Robotstøvsugeren kører hjem",
+      "vacuumPaused": "Robotstøvsugeren er på pause",
+      "vacuumStuck": "Robotstøvsugeren sidder fast"
+    },
+    "quickActions": "Hurtighandlinger",
+    "sceneActivated": "{name} er aktiveret",
+    "sceneFailed": "Kunne ikke aktivere {name}",
+    "scenePartial": "{name} blev delvist aktiveret",
+    "sections": {
+      "favoriteRooms": "Favoritrum",
+      "activeLights": "Aktive lamper",
+      "climate": "Klima",
+      "airQuality": "Luftkvalitet",
+      "security": "Sikkerhed",
+      "openings": "Døre og vinduer",
+      "vacuum": "Robotstøvsuger",
+      "recentEvents": "Seneste hændelser",
+      "warnings": "Advarsler",
+      "energy": "Energi",
+      "baby": "Babyoversigt"
+    },
+    "security": {
+      "locked": "Låst",
+      "unlocked": "Låst op",
+      "jammed": "Sidder fast",
+      "openings": "{open} af {total} åbne"
+    },
+    "openings": {
+      "allClosed": "Alt er lukket",
+      "openSince": "Åben"
+    },
+    "activeLights": {
+      "empty": "Intet lys er tændt lige nu",
+      "turnOff": "Sluk"
+    },
+    "roomLights": {
+      "none": "Intet lys tændt",
+      "count": "{count} lys tændt"
+    },
+    "climate": {
+      "average": "Gennemsnit {temp} °C",
+      "empty": "Ingen klimadata endnu"
+    },
+    "airQuality": {
+      "good": "God",
+      "moderate": "Luft ud snart",
+      "poor": "Luft ud nu",
+      "empty": "Ingen luftkvalitetsdata",
+      "co2": "CO₂ {value} ppm",
+      "pm25": "PM2,5 {value}"
+    },
+    "vacuum": {
+      "docked": "I dock",
+      "cleaning": "Gør rent",
+      "returning": "På vej hjem",
+      "paused": "På pause",
+      "stuck": "Sidder fast",
+      "error": "Fejl",
+      "battery": "Batteri {pct} %"
+    },
+    "energy": {
+      "now": "Lige nu",
+      "today": "I dag",
+      "watt": "{value} W",
+      "kwh": "{value} kWh",
+      "empty": "Ingen energidata"
+    },
+    "warnings": {
+      "empty": "Ingen advarsler – alt ser fint ud",
+      "lockJammed": "{name} sidder fast – tjek døren",
+      "offlineDevice": "{name} er offline",
+      "airQualityPoor": "Dårlig luftkvalitet i {name}",
+      "lowBattery": "Lavt batteri: {name} ({pct} %)",
+      "vacuumStuck": "{name} sidder fast"
+    },
+    "recentEvents": {
+      "empty": "Ingen hændelser endnu"
+    },
+    "baby": {
+      "active": "Babytilstand er aktiv",
+      "lastFeeding": "Seneste måltid",
+      "lastDiaper": "Seneste bleskift",
+      "none": "Ingen registreringer endnu",
+      "openPage": "Åbn babytilstand"
+    }
   },
   "rooms": {
     "title": "Rum",

@@ -35,6 +35,8 @@ function QuickActionButton({
   return (
     <button
       type="button"
+      // Stabilt navn til skærmlæsere, uanset om knappen viser "Arbejder…".
+      aria-label={label}
       aria-pressed={active}
       aria-busy={busy || undefined}
       disabled={disabled || busy}
