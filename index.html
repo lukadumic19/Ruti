@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Opgaver</title>
+<meta name="theme-color" content="#EEF1EE">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Opgaver">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{
+  min-height:100%;
+  font-family:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  background:#EEF1EE;
+  color:#1B1F1D;
+  -webkit-font-smoothing:antialiased;
+  text-size-adjust:100%;
+  -webkit-text-size-adjust:100%;
+}
+:root{
+  --bg:#EEF1EE;
+  --card:#FFFFFF;
+  --text:#1B1F1D;
+  --muted:#6B726E;
+  --accent:#1F4E5A;
+  --line:#DDE3DF;
+  --danger:#9B4A40;
+  --radius:10px;
+  --nav-h:60px;
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;text-align:left}
+input,textarea,select{font:inherit;color:inherit}
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+#root{min-height:100vh}
+.screen{
+  max-width:560px;
+  margin:0 auto;
+  padding:calc(12px + env(safe-area-inset-top)) 16px calc(var(--nav-h) + env(safe-area-inset-bottom) + 24px);
+}
+.screen.has-fab{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 92px)}
+
+/* ---------- Header ---------- */
+.hdr{display:flex;align-items:center;gap:8px;min-height:48px;margin-bottom:8px}
+.hdr h1{font-size:22px;font-weight:600;letter-spacing:-0.01em;flex:1}
+.hdr .sub{font-size:13px;color:var(--muted);margin-top:2px;font-weight:400}
+.iconbtn{
+  width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  color:var(--muted);border-radius:10px;flex:none;
+}
+.iconbtn:active{background:rgba(27,31,29,0.06)}
+.backbtn{margin-left:-12px;color:var(--accent)}
+
+/* ---------- Category front page ---------- */
+.catrow{
+  display:flex;align-items:center;gap:12px;width:100%;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px;margin-bottom:8px;min-height:56px;
+}
+.catrow:active{background:#FAFBFA}
+.catdot{width:10px;height:10px;border-radius:50%;flex:none}
+.catname{flex:1;font-size:16px;font-weight:500}
+.catcount{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.catcount.zero{color:#B8BFBA}
+.chev{color:#B8BFBA;flex:none}
+
+/* ---------- Tabs (category page) ---------- */
+.tabs{display:flex;border-bottom:1px solid var(--line);margin:4px 0 14px}
+.tab{
+  flex:1;text-align:center;padding:12px 4px;min-height:44px;
+  font-size:14px;font-weight:500;color:var(--muted);
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab .n{font-variant-numeric:tabular-nums}
+
+/* ---------- Task cards ---------- */
+.task-card{
+  position:relative;overflow:hidden;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:12px 8px 12px 16px;margin-bottom:8px;
+  display:flex;align-items:flex-start;gap:4px;
+  transition:transform .28s ease,opacity .28s ease;
+}
+.task-card.leaving{transform:translateX(110%);opacity:0}
+@media (prefers-reduced-motion: reduce){
+  .task-card{transition:none}
+}
+.stripe{position:absolute;left:0;top:0;bottom:0;width:4px}
+.checkwrap{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex:none;margin:-8px 0 -8px -8px}
+.checkbox{
+  width:26px;height:26px;border-radius:50%;border:1.5px solid #A9B1AB;
+  display:flex;align-items:center;justify-content:center;color:transparent;flex:none;
+  background:var(--card);
+}
+.checkbox.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.task-body{flex:1;min-width:0;padding-top:2px}
+.task-title{font-size:16px;font-weight:500;line-height:1.35;overflow-wrap:break-word}
+.task-title.done{color:var(--muted)}
+.task-note{font-size:14px;color:var(--muted);line-height:1.4;margin-top:3px;white-space:pre-wrap;overflow-wrap:break-word}
+.task-meta{font-size:12px;color:var(--muted);margin-top:6px;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.task-meta .decided{color:var(--accent);font-weight:500}
+.menubtn{width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#A9B1AB;flex:none;margin:-8px 0}
+.convertbtn{
+  display:inline-flex;align-items:center;gap:6px;margin-top:10px;
+  border:1px solid var(--accent);color:var(--accent);border-radius:8px;
+  padding:10px 14px;font-size:14px;font-weight:500;min-height:40px;
+}
+.convertbtn:active{background:rgba(31,78,90,0.08)}
+.ideatag{
+  display:inline-block;font-size:11px;font-weight:500;color:var(--muted);
+  border:1px solid var(--line);border-radius:5px;padding:1px 6px;
+  vertical-align:2px;margin-left:8px;
+}
+
+/* ---------- Empty states ---------- */
+.empty{padding:56px 24px;text-align:center;color:var(--muted);font-size:15px;line-height:1.5}
+
+/* ---------- Overview ---------- */
+.summaryline{font-size:14px;color:var(--muted);margin:0 0 16px;font-variant-numeric:tabular-nums}
+.grouphdr{
+  display:flex;align-items:center;gap:8px;margin:18px 0 8px;
+  font-size:13px;font-weight:600;color:var(--muted);
+  text-transform:uppercase;letter-spacing:0.04em;
+}
+.grouphdr .catdot{width:8px;height:8px}
+
+/* ---------- Decisions ---------- */
+.chiprow{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.chiprow::-webkit-scrollbar{display:none}
+.chip{
+  flex:none;border:1px solid var(--line);background:var(--card);border-radius:999px;
+  padding:8px 14px;font-size:13px;font-weight:500;color:var(--muted);min-height:36px;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip .catdot{width:8px;height:8px}
+.dec-card{
+  position:relative;overflow:hidden;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:12px 14px 12px 16px;margin-bottom:8px;width:100%;display:block;
+}
+.dec-top{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-bottom:4px}
+.dec-title{font-size:15px;font-weight:500;line-height:1.35}
+.dec-note{font-size:14px;color:var(--text);line-height:1.45;margin-top:4px}
+.dec-note:before{content:"”";color:#A9B1AB;margin-right:2px}
+.dec-note:after{content:"”";color:#A9B1AB;margin-left:2px}
+
+/* ---------- Fab / primary button ---------- */
+.fabwrap{
+  position:fixed;left:0;right:0;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom));
+  padding:12px 16px;max-width:560px;margin:0 auto;
+  background:linear-gradient(to top, var(--bg) 65%, rgba(238,241,238,0));
+  pointer-events:none;
+}
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  min-height:48px;padding:12px 18px;border-radius:var(--radius);
+  font-size:16px;font-weight:500;width:100%;
+}
+.btn-primary{background:var(--accent);color:#fff;pointer-events:auto}
+.btn-primary:active{background:#183F49}
+.btn-primary:disabled{opacity:0.4}
+.btn-secondary{background:var(--card);border:1px solid var(--line);color:var(--text)}
+.btn-ghost{color:var(--accent);background:none}
+.btn-danger{background:var(--danger);color:#fff}
+
+/* ---------- Bottom nav ---------- */
+.nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:20;
+  background:var(--card);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.nav-inner{max-width:560px;margin:0 auto;display:flex;height:var(--nav-h)}
+.nav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  color:var(--muted);font-size:11px;font-weight:500;text-align:center;
+}
+.nav-item.active{color:var(--accent)}
+
+/* ---------- Sheets ---------- */
+.overlay{position:fixed;inset:0;background:rgba(27,31,29,0.4);z-index:30;display:flex;align-items:flex-end}
+.sheet{
+  background:var(--card);width:100%;max-width:560px;margin:0 auto;
+  border-radius:var(--radius) var(--radius) 0 0;
+  padding:20px 16px calc(16px + env(safe-area-inset-bottom));
+}
+.sheet h2{font-size:17px;font-weight:600;margin-bottom:14px}
+.sheet .hint{font-size:13px;color:var(--muted);margin:-8px 0 14px;line-height:1.4}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:6px}
+.input{
+  width:100%;border:1px solid var(--line);border-radius:var(--radius);
+  padding:12px;font-size:16px;background:#FAFBFA;color:var(--text);
+}
+.input:focus{border-color:var(--accent);outline:none}
+textarea.input{resize:none;min-height:88px;line-height:1.4}
+.sheet-actions{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.menu-item{
+  display:flex;align-items:center;gap:12px;width:100%;
+  padding:14px 4px;min-height:48px;font-size:16px;
+  border-bottom:1px solid var(--line);
+}
+.menu-item:last-of-type{border-bottom:none}
+.menu-item.danger{color:var(--danger)}
+.menu-item svg{color:var(--muted);flex:none}
+.menu-item.danger svg{color:var(--danger)}
+.sheet .taskref{font-size:14px;color:var(--muted);margin:-6px 0 14px;line-height:1.4}
+
+/* ---------- Settings ---------- */
+.settings-section{margin-bottom:28px}
+.settings-section > h2{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px}
+.setcat{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:8px 12px;margin-bottom:8px;
+}
+.setcat-row{display:flex;align-items:center;gap:10px}
+.swatchbtn{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex:none;margin-left:-8px}
+.swatch{width:22px;height:22px;border-radius:50%;border:1px solid rgba(27,31,29,0.12)}
+.setcat input{border:none;background:none;flex:1;font-size:16px;padding:10px 0;min-width:0}
+.setcat .del{color:var(--danger);font-size:14px;font-weight:500;padding:10px 4px;min-height:44px;flex:none}
+.palette{display:flex;gap:10px;flex-wrap:wrap;padding:6px 0 10px 2px}
+.palette button{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(27,31,29,0.12)}
+.palette button.sel{outline:2px solid var(--accent);outline-offset:2px}
+.settings-note{font-size:13px;color:var(--muted);line-height:1.5;margin-top:8px}
+.filelabel{cursor:pointer;position:relative}
+.filelabel input{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/htm@3.1.1/dist/htm.js"></script>
+<script>
+'use strict';
+const {useState,useEffect,useMemo,useRef} = React;
+const html = htm.bind(React.createElement);
+
+/* ================= Data ================= */
+
+const STORAGE_KEY = 'lukas-todo-v1';
+
+const PALETTE = ['#5B7C99','#6E9075','#A8865C','#8A6E8F','#5E8D87','#A56A5A','#8A8B5F','#8B9089'];
+
+const DEFAULT_CATEGORY_NAMES = [
+  'Personale','Børn & pædagogik','Dokumentation','Møder',
+  'Personalemøder','Ledelse','Standarder','Andet'
+];
+
+function defaultData(){
+  return {
+    categories: DEFAULT_CATEGORY_NAMES.map((name,i)=>({id:'c'+(i+1), name, color:PALETTE[i], order:i})),
+    tasks: []
+  };
+}
+
+function uid(){
+  return (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+    : 'id-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
+}
+
+function isValidData(d){
+  return d && Array.isArray(d.categories) && Array.isArray(d.tasks)
+    && d.categories.every(c=>c && typeof c.id==='string' && typeof c.name==='string')
+    && d.tasks.every(t=>t && typeof t.id==='string' && typeof t.title==='string' && typeof t.categoryId==='string');
+}
+
+function loadData(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const d = JSON.parse(raw);
+      if(isValidData(d)) return d;
+    }
+  }catch(e){ /* falder tilbage til standard */ }
+  return defaultData();
+}
+
+function persist(data){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+  catch(e){ /* fx fuld lagerplads — appen kører videre i hukommelsen */ }
+}
+
+function fmtDate(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  if(isNaN(d)) return '';
+  return d.toLocaleDateString('da-DK',{day:'numeric',month:'short',year:'numeric'});
+}
+
+function reducedMotion(){
+  return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/* ================= Ikoner ================= */
+
+const Icon = {
+  grid: () => html`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>`,
+  rows: () => html`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="14" y2="18"/></svg>`,
+  clock: () => html`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><polyline points="12 7.5 12 12 15.5 14"/></svg>`,
+  gear: () => html`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.56-1.11 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.08A1.7 1.7 0 0 0 10 4.09V4a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.08a1.7 1.7 0 0 0 1.56 1.03H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1.03z"/></svg>`,
+  back: () => html`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="14.5 5.5 8 12 14.5 18.5"/></svg>`,
+  chevron: () => html`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9.5 5.5 16 12 9.5 18.5"/></svg>`,
+  check: () => html`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="4.5 12.5 9.5 17.5 19.5 6.5"/></svg>`,
+  dots: () => html`<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5.5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="18.5" r="1.7"/></svg>`,
+  arrow: () => html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>`,
+  pen: () => html`<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M17 3a2.8 2.8 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>`,
+  stamp: () => html`<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 21h14"/><path d="M5 17h14v-3.5a1.5 1.5 0 0 0-1.5-1.5h-2.6c-.9 0-1.5-.9-1.2-1.7l.8-3A2.7 2.7 0 1 0 9.4 7l.9 3.3c.2.8-.4 1.7-1.2 1.7H6.5A1.5 1.5 0 0 0 5 13.5z"/></svg>`,
+  trash: () => html`<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="3 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><line x1="10" y1="10.5" x2="10" y2="17.5"/><line x1="14" y1="10.5" x2="14" y2="17.5"/></svg>`,
+  plus: () => html`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`
+};
+
+/* ================= Genbrugte dele ================= */
+
+function CatDot({color, size}){
+  return html`<span className="catdot" style=${{background:color, width:size, height:size}} aria-hidden="true"></span>`;
+}
+
+function TaskCard({task, category, mode, onToggleDone, onConvert, onMenu, onOpen}){
+  // mode: 'open' | 'idea' | 'done' | 'overview'
+  const [leaving,setLeaving] = useState(false);
+
+  const complete = () => {
+    if(leaving) return;
+    if(reducedMotion()){ onToggleDone(task); return; }
+    setLeaving(true);
+    setTimeout(()=>onToggleDone(task), 290);
+  };
+
+  const isDone = task.status==='done';
+  const isIdea = task.status==='idea';
+  const showCheck = !isIdea;
+
+  const body = html`
+    <div className="task-body">
+      <div className=${'task-title'+(isDone?' done':'')}>
+        ${task.title}
+        ${mode==='overview' && isIdea ? html`<span className="ideatag">Idé</span>` : null}
+      </div>
+      ${task.note ? html`<div className="task-note">${task.note}</div>` : null}
+      ${isDone && task.completedAt ? html`<div className="task-meta">Færdig ${fmtDate(task.completedAt)}</div>` : null}
+      ${!isDone && task.decidedAt ? html`
+        <div className="task-meta"><span className="decided">Besluttet ${fmtDate(task.decidedAt)}</span>${task.decisionNote ? html`<span>${task.decisionNote}</span>` : null}</div>
+      ` : null}
+      ${mode==='idea' ? html`
+        <button className="convertbtn" onClick=${(e)=>{e.stopPropagation(); onConvert(task);}}>
+          <${Icon.arrow}/> Gør til opgave
+        </button>
+      ` : null}
+    </div>`;
+
+  return html`
+    <div className=${'task-card'+(leaving?' leaving':'')}
+         onClick=${mode==='overview' && onOpen ? ()=>onOpen(task) : undefined}
+         role=${mode==='overview' ? 'button' : undefined}
+         tabIndex=${mode==='overview' ? 0 : undefined}
+         onKeyDown=${mode==='overview' && onOpen ? (e)=>{if(e.key==='Enter') onOpen(task);} : undefined}>
+      <span className="stripe" style=${{background:category ? category.color : 'transparent'}}></span>
+      ${showCheck ? html`
+        <button className="checkwrap"
+                aria-label=${isDone ? 'Fortryd afkrydsning' : 'Markér som færdig'}
+                onClick=${(e)=>{e.stopPropagation(); isDone ? onToggleDone(task) : complete();}}>
+          <span className=${'checkbox'+(isDone?' on':'')}><${Icon.check}/></span>
+        </button>
+      ` : html`<span style=${{width:'8px'}}></span>`}
+      ${body}
+      ${onMenu ? html`
+        <button className="menubtn" aria-label="Menu for opgaven" onClick=${(e)=>{e.stopPropagation(); onMenu(task);}}>
+          <${Icon.dots}/>
+        </button>
+      ` : null}
+    </div>`;
+}
+
+function Sheet({onClose, children, label}){
+  return html`
+    <div className="overlay" onClick=${(e)=>{ if(e.target===e.currentTarget) onClose(); }}>
+      <div className="sheet" role="dialog" aria-modal="true" aria-label=${label}>
+        ${children}
+      </div>
+    </div>`;
+}
+
+/* ================= Skærme ================= */
+
+function CategoriesScreen({data, openCounts, onOpenCategory, onOpenSettings}){
+  const cats = [...data.categories].sort((a,b)=>a.order-b.order);
+  return html`
+    <div className="screen">
+      <div className="hdr">
+        <h1>Kategorier</h1>
+        <button className="iconbtn" aria-label="Indstillinger" onClick=${onOpenSettings}><${Icon.gear}/></button>
+      </div>
+      ${cats.map(c=>{
+        const n = openCounts[c.id]||0;
+        return html`
+          <button key=${c.id} className="catrow" onClick=${()=>onOpenCategory(c.id)}>
+            <${CatDot} color=${c.color}/>
+            <span className="catname">${c.name}</span>
+            <span className=${'catcount'+(n===0?' zero':'')}>${n}</span>
+            <span className="chev"><${Icon.chevron}/></span>
+          </button>`;
+      })}
+    </div>`;
+}
+
+const TAB_LABELS = {open:'Ikke færdig', idea:'Idé', done:'Færdig'};
+
+function CategoryScreen({data, categoryId, tab, onTab, onBack, actions}){
+  const cat = data.categories.find(c=>c.id===categoryId);
+  if(!cat) return null;
+  const all = data.tasks.filter(t=>t.categoryId===categoryId);
+  const byTab = {
+    open: all.filter(t=>t.status==='open').sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')),
+    idea: all.filter(t=>t.status==='idea').sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')),
+    done: all.filter(t=>t.status==='done').sort((a,b)=>(b.completedAt||'').localeCompare(a.completedAt||''))
+  };
+  const tasks = byTab[tab];
+  const emptyText = {
+    open:'Ingenting udestår her.',
+    idea:'Skriv en tanke ned, inden den forsvinder.',
+    done:'Ingen opgaver er færdige endnu.'
+  }[tab];
+
+  return html`
+    <div className="screen has-fab">
+      <div className="hdr">
+        <button className="iconbtn backbtn" aria-label="Tilbage" onClick=${onBack}><${Icon.back}/></button>
+        <h1><${CatDot} color=${cat.color} size="10px"/> ${' '}${cat.name}</h1>
+      </div>
+      <div className="tabs" role="tablist">
+        ${['open','idea','done'].map(k=>html`
+          <button key=${k} role="tab" aria-selected=${tab===k}
+                  className=${'tab'+(tab===k?' active':'')}
+                  onClick=${()=>onTab(k)}>
+            ${TAB_LABELS[k]} <span className="n">· ${byTab[k].length}</span>
+          </button>`)}
+      </div>
+      ${tasks.length===0
+        ? html`<div className="empty">${emptyText}</div>`
+        : tasks.map(t=>html`
+            <${TaskCard} key=${t.id} task=${t} category=${cat} mode=${tab}
+              onToggleDone=${actions.toggleDone}
+              onConvert=${actions.startConvert}
+              onMenu=${actions.openMenu}/>`)}
+      <div className="fabwrap">
+        <button className="btn btn-primary" onClick=${()=>actions.startCreate(categoryId, tab==='idea'?'idea':'open')}>
+          <${Icon.plus}/> Ny opgave
+        </button>
+      </div>
+    </div>`;
+}
+
+function OverviewScreen({data, onOpenTask, actions}){
+  const cats = [...data.categories].sort((a,b)=>a.order-b.order);
+  const open = data.tasks.filter(t=>t.status==='open');
+  const ideas = data.tasks.filter(t=>t.status==='idea');
+  const hasAnything = open.length>0 || ideas.length>0;
+  return html`
+    <div className="screen">
+      <div className="hdr"><h1>Overblik</h1></div>
+      <p className="summaryline">${open.length} ${open.length===1?'udestående':'udestående'} · ${ideas.length} ${ideas.length===1?'idé':'idéer'}</p>
+      ${!hasAnything ? html`<div className="empty">Ingenting i gang lige nu.</div>` : cats.map(c=>{
+        const co = open.filter(t=>t.categoryId===c.id).sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+        const ci = ideas.filter(t=>t.categoryId===c.id).sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+        if(co.length===0 && ci.length===0) return null;
+        return html`
+          <div key=${c.id}>
+            <div className="grouphdr"><${CatDot} color=${c.color} size="8px"/> ${c.name}</div>
+            ${[...co,...ci].map(t=>html`
+              <${TaskCard} key=${t.id} task=${t} category=${c} mode="overview"
+                onToggleDone=${actions.toggleDone}
+                onOpen=${onOpenTask}/>`)}
+          </div>`;
+      })}
+    </div>`;
+}
+
+function DecisionsScreen({data, filter, onFilter, onOpenTask}){
+  const cats = [...data.categories].sort((a,b)=>a.order-b.order);
+  const catById = Object.fromEntries(cats.map(c=>[c.id,c]));
+  const decided = data.tasks
+    .filter(t=>t.decidedAt || t.decisionNote)
+    .filter(t=>!filter || t.categoryId===filter)
+    .sort((a,b)=>(b.decidedAt||b.createdAt||'').localeCompare(a.decidedAt||a.createdAt||''));
+  return html`
+    <div className="screen">
+      <div className="hdr"><h1>Beslutninger</h1></div>
+      <div className="chiprow">
+        <button className=${'chip'+(!filter?' active':'')} onClick=${()=>onFilter(null)}>Alle</button>
+        ${cats.map(c=>html`
+          <button key=${c.id} className=${'chip'+(filter===c.id?' active':'')} onClick=${()=>onFilter(c.id)}>
+            <${CatDot} color=${c.color} size="8px"/> ${c.name}
+          </button>`)}
+      </div>
+      ${decided.length===0
+        ? html`<div className="empty">Ingen beslutninger endnu.</div>`
+        : decided.map(t=>{
+            const c = catById[t.categoryId];
+            return html`
+              <button key=${t.id} className="dec-card" onClick=${()=>onOpenTask(t)}>
+                <span className="stripe" style=${{background:c?c.color:'transparent'}}></span>
+                <div className="dec-top">
+                  <span>${fmtDate(t.decidedAt || t.createdAt)}</span>
+                  <span>·</span>
+                  ${c ? html`<${CatDot} color=${c.color} size="8px"/><span>${c.name}</span>` : null}
+                </div>
+                <div className="dec-title">${t.title}</div>
+                ${t.decisionNote ? html`<div className="dec-note">${t.decisionNote}</div>` : null}
+              </button>`;
+          })}
+    </div>`;
+}
+
+function SettingsScreen({data, onBack, actions}){
+  const cats = [...data.categories].sort((a,b)=>a.order-b.order);
+  const [colorFor,setColorFor] = useState(null);
+  const fileRef = useRef(null);
+  const taskCount = (id)=>data.tasks.filter(t=>t.categoryId===id).length;
+
+  const onPickFile = (e)=>{
+    const f = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if(!f) return;
+    const reader = new FileReader();
+    reader.onload = ()=>actions.startImport(String(reader.result));
+    reader.readAsText(f);
+  };
+
+  return html`
+    <div className="screen">
+      <div className="hdr">
+        <button className="iconbtn backbtn" aria-label="Tilbage" onClick=${onBack}><${Icon.back}/></button>
+        <h1>Indstillinger</h1>
+      </div>
+
+      <div className="settings-section">
+        <h2>Kategorier</h2>
+        ${cats.map(c=>html`
+          <div key=${c.id} className="setcat">
+            <div className="setcat-row">
+              <button className="swatchbtn" aria-label=${'Vælg farve til '+c.name}
+                      onClick=${()=>setColorFor(colorFor===c.id?null:c.id)}>
+                <span className="swatch" style=${{background:c.color}}></span>
+              </button>
+              <input defaultValue=${c.name} aria-label="Kategoriens navn"
+                     onBlur=${(e)=>actions.renameCategory(c.id, e.target.value)}/>
+              ${taskCount(c.id)===0 ? html`
+                <button className="del" onClick=${()=>actions.confirmDeleteCategory(c)}>Slet</button>
+              ` : null}
+            </div>
+            ${colorFor===c.id ? html`
+              <div className="palette">
+                ${PALETTE.map(p=>html`
+                  <button key=${p} style=${{background:p}} className=${c.color===p?'sel':''}
+                          aria-label=${'Farve '+p}
+                          onClick=${()=>{actions.recolorCategory(c.id,p); setColorFor(null);}}></button>`)}
+              </div>
+            ` : null}
+          </div>`)}
+        <button className="btn btn-secondary" onClick=${actions.addCategory}><${Icon.plus}/> Tilføj kategori</button>
+        <p className="settings-note">En kategori kan kun slettes, når den er tom.</p>
+      </div>
+
+      <div className="settings-section">
+        <h2>Backup</h2>
+        <div className="sheet-actions" style=${{marginTop:0}}>
+          <button className="btn btn-secondary" onClick=${actions.exportData}>Eksportér data</button>
+          <label className="btn btn-secondary filelabel">
+            Importér data
+            <input ref=${fileRef} type="file" accept="application/json,.json" onChange=${onPickFile}/>
+          </label>
+        </div>
+        <p className="settings-note">Eksport gemmer alt som en JSON-fil. Import erstatter alle nuværende data med filens indhold.</p>
+      </div>
+
+      <p className="settings-note">Version 1 · Al data ligger kun på denne telefon.</p>
+    </div>`;
+}
+
+/* ================= Ark (sheets) ================= */
+
+function TaskSheet({initial, onSave, onClose}){
+  const [title,setTitle] = useState(initial.title||'');
+  const [note,setNote] = useState(initial.note||'');
+  const isNew = !initial.id;
+  return html`
+    <${Sheet} onClose=${onClose} label=${isNew?'Ny opgave':'Rediger opgave'}>
+      <h2>${isNew?'Ny opgave':'Rediger opgave'}</h2>
+      <div className="field">
+        <label htmlFor="f-title">Titel</label>
+        <input id="f-title" className="input" value=${title} autoFocus
+               onInput=${(e)=>setTitle(e.target.value)}
+               onKeyDown=${(e)=>{if(e.key==='Enter' && title.trim()){e.preventDefault(); onSave(title.trim(), note.trim());}}}/>
+      </div>
+      <div className="field">
+        <label htmlFor="f-note">Note</label>
+        <textarea id="f-note" className="input" value=${note} rows="3"
+                  onInput=${(e)=>setNote(e.target.value)}></textarea>
+      </div>
+      <div className="sheet-actions">
+        <button className="btn btn-primary" disabled=${!title.trim()}
+                onClick=${()=>onSave(title.trim(), note.trim())}>Gem</button>
+        <button className="btn btn-ghost" onClick=${onClose}>Annuller</button>
+      </div>
+    <//>`;
+}
+
+function DecisionSheet({task, allowSkip, onSave, onSkip, onClose}){
+  const [note,setNote] = useState(task.decisionNote||'');
+  return html`
+    <${Sheet} onClose=${onClose} label="Hvad blev besluttet?">
+      <h2>Hvad blev besluttet?</h2>
+      <p className="taskref">${task.title}</p>
+      <div className="field">
+        <input className="input" value=${note} autoFocus placeholder="Én linje — må gerne stå tom"
+               onInput=${(e)=>setNote(e.target.value)}
+               onKeyDown=${(e)=>{if(e.key==='Enter'){e.preventDefault(); onSave(note.trim());}}}/>
+      </div>
+      <p className="hint">Datoen stemples automatisk, og opgaven kommer med i Beslutninger.</p>
+      <div className="sheet-actions">
+        <button className="btn btn-primary" onClick=${()=>onSave(note.trim())}>Gem</button>
+        ${allowSkip
+          ? html`<button className="btn btn-ghost" onClick=${onSkip}>Spring over</button>`
+          : html`<button className="btn btn-ghost" onClick=${onClose}>Annuller</button>`}
+      </div>
+    <//>`;
+}
+
+function MenuSheet({task, onEdit, onDecide, onDelete, onClose}){
+  return html`
+    <${Sheet} onClose=${onClose} label="Menu for opgaven">
+      <h2>${task.title}</h2>
+      <button className="menu-item" onClick=${onEdit}><${Icon.pen}/> Rediger</button>
+      ${!task.decidedAt ? html`
+        <button className="menu-item" onClick=${onDecide}><${Icon.stamp}/> Marker som besluttet</button>
+      ` : null}
+      <button className="menu-item danger" onClick=${onDelete}><${Icon.trash}/> Slet</button>
+      <div className="sheet-actions">
+        <button className="btn btn-ghost" onClick=${onClose}>Annuller</button>
+      </div>
+    <//>`;
+}
+
+function ConfirmSheet({title, body, confirmLabel, onConfirm, onClose}){
+  return html`
+    <${Sheet} onClose=${onClose} label=${title}>
+      <h2>${title}</h2>
+      ${body ? html`<p className="taskref">${body}</p>` : null}
+      <div className="sheet-actions">
+        <button className="btn btn-danger" onClick=${onConfirm}>${confirmLabel}</button>
+        <button className="btn btn-ghost" onClick=${onClose}>Annuller</button>
+      </div>
+    <//>`;
+}
+
+/* ================= App ================= */
+
+function App(){
+  const [data,setData] = useState(loadData);
+  const [view,setView] = useState({name:'categories'});
+  const [catTab,setCatTab] = useState('open');
+  const [decFilter,setDecFilter] = useState(null);
+  const [sheet,setSheet] = useState(null);
+
+  useEffect(()=>persist(data),[data]);
+
+  const now = ()=>new Date().toISOString();
+
+  const patchTask = (id,patch)=>setData(d=>({...d, tasks:d.tasks.map(t=>t.id===id?{...t,...patch}:t)}));
+
+  const openCounts = useMemo(()=>{
+    const m = {};
+    for(const t of data.tasks) if(t.status==='open') m[t.categoryId]=(m[t.categoryId]||0)+1;
+    return m;
+  },[data.tasks]);
+
+  /* --- Navigation --- */
+  const goCategory = (id, tab)=>{ setCatTab(tab||'open'); setView({name:'category', id}); };
+  const goTask = (t)=>{
+    const tab = t.status==='done'?'done':(t.status==='idea'?'idea':'open');
+    goCategory(t.categoryId, tab);
+  };
+
+  /* --- Opgavehandlinger --- */
+  const actions = {
+    startCreate: (categoryId, status)=>setSheet({type:'task', categoryId, status, task:null}),
+
+    toggleDone: (t)=>{
+      if(t.status==='done') patchTask(t.id,{status:'open', completedAt:null});
+      else patchTask(t.id,{status:'done', completedAt:now()});
+    },
+
+    startConvert: (t)=>setSheet({type:'decision', taskId:t.id, mode:'convert'}),
+
+    openMenu: (t)=>setSheet({type:'menu', taskId:t.id}),
+  };
+
+  const sheetTask = sheet && sheet.taskId ? data.tasks.find(t=>t.id===sheet.taskId) : null;
+
+  const saveTask = (title,note)=>{
+    if(sheet.task){
+      patchTask(sheet.task.id,{title,note});
+    }else{
+      setData(d=>({...d, tasks:[...d.tasks, {
+        id:uid(), categoryId:sheet.categoryId, title, note,
+        status:sheet.status, createdAt:now(),
+        decidedAt:null, decisionNote:'', completedAt:null
+      }]}));
+    }
+    setSheet(null);
+  };
+
+  const saveDecision = (note)=>{
+    const patch = {decidedAt:now(), decisionNote:note};
+    if(sheet.mode==='convert') patch.status='open';
+    patchTask(sheet.taskId, patch);
+    setSheet(null);
+  };
+  const skipDecision = ()=>{
+    patchTask(sheet.taskId,{decidedAt:now(), status:'open'});
+    setSheet(null);
+  };
+
+  /* --- Kategorihandlinger --- */
+  const catActions = {
+    renameCategory: (id,name)=>setData(d=>({...d, categories:d.categories.map(c=>c.id===id?{...c,name:name.trim()||c.name}:c)})),
+    recolorCategory: (id,color)=>setData(d=>({...d, categories:d.categories.map(c=>c.id===id?{...c,color}:c)})),
+    addCategory: ()=>setData(d=>{
+      const order = d.categories.length ? Math.max(...d.categories.map(c=>c.order))+1 : 0;
+      const color = PALETTE[order % PALETTE.length];
+      return {...d, categories:[...d.categories, {id:uid(), name:'Ny kategori', color, order}]};
+    }),
+    confirmDeleteCategory: (c)=>setSheet({type:'confirmCat', categoryId:c.id, name:c.name}),
+    exportData: ()=>{
+      const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'opgaver-backup-'+new Date().toISOString().slice(0,10)+'.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+    },
+    startImport: (text)=>{
+      let parsed = null;
+      try{ parsed = JSON.parse(text); }catch(e){}
+      if(!isValidData(parsed)){
+        setSheet({type:'importError'});
+        return;
+      }
+      setSheet({type:'confirmImport', payload:parsed});
+    }
+  };
+
+  /* --- Skærmvalg --- */
+  let screen = null;
+  if(view.name==='category'){
+    screen = html`<${CategoryScreen} data=${data} categoryId=${view.id} tab=${catTab}
+      onTab=${setCatTab} onBack=${()=>setView({name:'categories'})} actions=${actions}/>`;
+  }else if(view.name==='overview'){
+    screen = html`<${OverviewScreen} data=${data} onOpenTask=${goTask} actions=${actions}/>`;
+  }else if(view.name==='decisions'){
+    screen = html`<${DecisionsScreen} data=${data} filter=${decFilter} onFilter=${setDecFilter} onOpenTask=${goTask}/>`;
+  }else if(view.name==='settings'){
+    screen = html`<${SettingsScreen} data=${data} onBack=${()=>setView({name:'categories'})} actions=${catActions}/>`;
+  }else{
+    screen = html`<${CategoriesScreen} data=${data} openCounts=${openCounts}
+      onOpenCategory=${goCategory} onOpenSettings=${()=>setView({name:'settings'})}/>`;
+  }
+
+  /* --- Ark --- */
+  let sheetEl = null;
+  if(sheet){
+    if(sheet.type==='task'){
+      sheetEl = html`<${TaskSheet} initial=${sheet.task || {}} onSave=${saveTask} onClose=${()=>setSheet(null)}/>`;
+    }else if(sheet.type==='decision' && sheetTask){
+      sheetEl = html`<${DecisionSheet} task=${sheetTask}
+        allowSkip=${sheet.mode==='convert'}
+        onSave=${saveDecision} onSkip=${skipDecision} onClose=${()=>setSheet(null)}/>`;
+    }else if(sheet.type==='menu' && sheetTask){
+      sheetEl = html`<${MenuSheet} task=${sheetTask}
+        onEdit=${()=>setSheet({type:'task', task:sheetTask})}
+        onDecide=${()=>setSheet({type:'decision', taskId:sheetTask.id, mode:'mark'})}
+        onDelete=${()=>setSheet({type:'confirmDel', taskId:sheetTask.id})}
+        onClose=${()=>setSheet(null)}/>`;
+    }else if(sheet.type==='confirmDel' && sheetTask){
+      sheetEl = html`<${ConfirmSheet} title="Slet opgaven?" body=${sheetTask.title} confirmLabel="Slet"
+        onConfirm=${()=>{ setData(d=>({...d, tasks:d.tasks.filter(t=>t.id!==sheet.taskId)})); setSheet(null); }}
+        onClose=${()=>setSheet(null)}/>`;
+    }else if(sheet.type==='confirmCat'){
+      sheetEl = html`<${ConfirmSheet} title="Slet kategorien?" body=${sheet.name} confirmLabel="Slet"
+        onConfirm=${()=>{ setData(d=>({...d, categories:d.categories.filter(c=>c.id!==sheet.categoryId)})); setSheet(null); }}
+        onClose=${()=>setSheet(null)}/>`;
+    }else if(sheet.type==='confirmImport'){
+      const p = sheet.payload;
+      sheetEl = html`<${ConfirmSheet} title="Importér backup?"
+        body=${'Filen indeholder '+p.tasks.length+' opgaver i '+p.categories.length+' kategorier. Import erstatter alle nuværende data.'}
+        confirmLabel="Importér"
+        onConfirm=${()=>{ setData(p); setSheet(null); setView({name:'categories'}); }}
+        onClose=${()=>setSheet(null)}/>`;
+    }else if(sheet.type==='importError'){
+      sheetEl = html`<${Sheet} onClose=${()=>setSheet(null)} label="Filen kunne ikke læses">
+        <h2>Filen kunne ikke læses</h2>
+        <p className="taskref">Vælg en JSON-fil, der er eksporteret fra denne app.</p>
+        <div className="sheet-actions">
+          <button className="btn btn-ghost" onClick=${()=>setSheet(null)}>Luk</button>
+        </div>
+      <//>`;
+    }
+  }
+
+  /* --- Bundnavigation --- */
+  const navFor = view.name==='category' || view.name==='settings' ? 'categories' : view.name;
+  const nav = html`
+    <nav className="nav" aria-label="Hovednavigation">
+      <div className="nav-inner">
+        <button className=${'nav-item'+(navFor==='categories'?' active':'')} onClick=${()=>setView({name:'categories'})}>
+          <${Icon.grid}/> Kategorier
+        </button>
+        <button className=${'nav-item'+(navFor==='overview'?' active':'')} onClick=${()=>setView({name:'overview'})}>
+          <${Icon.rows}/> Overblik
+        </button>
+        <button className=${'nav-item'+(navFor==='decisions'?' active':'')} onClick=${()=>setView({name:'decisions'})}>
+          <${Icon.clock}/> Beslutninger
+        </button>
+      </div>
+    </nav>`;
+
+  return html`<div>${screen}${nav}${sheetEl}</div>`;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(html`<${App}/>`);
+
+/* ================= Service worker ================= */
+if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost')){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
